@@ -1,12 +1,651 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="light">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banana Empire Ultimate</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary: #FFC107;
+            --primary-dark: #FFA000;
+            --primary-light: #FFECB3;
+            --secondary: #4CAF50;
+            --secondary-dark: #388E3C;
+            --dark: #2D3436;
+            --light: #F5F5F5;
+            --accent: #FF5722;
+            --golden: #FFD700;
+            --prestige: #9C27B0;
+            --background: #FFFDE7;
+            --card-bg: #FFFFFF;
+            --text: #333333;
+            --text-light: #666666;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] {
+            --background: #121212;
+            --card-bg: #1E1E1E;
+            --text: #E0E0E0;
+            --text-light: #B0B0B0;
+            --light: #2D2D2D;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            transition: var(--transition);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .theme-toggle:hover {
+            color: var(--primary);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+        
+        .prestige-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--prestige);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+        
+        .prestige-info i {
+            font-size: 1.2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card h2 {
+            font-size: 1rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .stat-card p {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .golden {
+            color: var(--golden);
+        }
+        
+        .prestige {
+            color: var(--prestige);
+        }
+        
+        #banana-container {
+            text-align: center;
+            margin: 2.5rem 0;
+            position: relative;
+        }
+        
+        #banana {
+            width: 220px;
+            height: 220px;
+            cursor: pointer;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23FFC107" d="M85 25c-5-15-25-15-30 0-5-15-25-15-30 0-5 15 0 35 15 50 15 15 35 20 50 15 15-5 20-25 15-40-5-15-15-20-20-25z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            transition: transform 0.1s;
+            filter: drop-shadow(0 10px 20px rgba(255,160,0,0.4));
+            margin: 0 auto;
+        }
+        
+        #banana:active {
+            transform: scale(0.92);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .click-effect {
+            position: absolute;
+            font-size: 1.8rem;
+            animation: floatAway 1.5s forwards;
+            z-index: 100;
+            pointer-events: none;
+            font-weight: 700;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .click-effect.special {
+            animation: floatAway 1.5s forwards, pulse 0.5s infinite alternate;
+            z-index: 101;
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-shadow: 0 0 10px gold;
+        }
+        
+        @keyframes floatAway {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(20deg); opacity: 0; }
+        }
+        
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
+        }
+        
+        .game-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .section-title {
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-title i {
+            font-size: 1.2rem;
+        }
+        
+        .upgrade-category {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px dashed var(--primary-light);
+        }
+        
+        .upgrade-category h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .upgrades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .upgrade {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .upgrade:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .upgrade h3 {
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .upgrade p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .upgrade-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .upgrade-cost {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        .upgrade-owned {
+            font-style: italic;
+            color: var(--secondary);
+        }
+        
+        .upgrade-cooldown {
+            font-style: italic;
+            color: var(--accent);
+        }
+        
+        .upgrade-bps {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+        
+        .upgrade-progress {
+            height: 5px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .upgrade-progress .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(255,160,0,0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255,160,0,0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn:disabled {
+            background: #CCCCCC;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .btn-golden {
+            background: linear-gradient(to right, var(--golden), #FFC000);
+        }
+        
+        .btn-prestige {
+            background: linear-gradient(to right, var(--prestige), #7B1FA2);
+        }
+        
+        .tab-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            border-bottom: 2px solid var(--light);
+            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+        }
+        
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            position: relative;
+            transition: var(--transition);
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .tab-btn:hover {
+            color: var(--primary-dark);
+            background: rgba(255, 193, 7, 0.1);
+        }
+        
+        .tab-btn.active {
+            color: var(--primary-dark);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--secondary);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transform: translateX(200%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            max-width: 350px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: #dc3545;
+        }
+        
+        .notification i {
+            font-size: 1.5rem;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+            height: 10px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--prestige), #BA68C8);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .locked-upgrade {
+            position: relative;
+            opacity: 0.7;
+            filter: grayscale(50%);
+        }
+        
+        .locked-upgrade::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1;
+            border-radius: 8px;
+        }
+        
+        .locked-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 2;
+            text-align: center;
+            width: 80%;
+        }
+        
+        /* Nouveau design pour les succès */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .achievement {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-left: 4px solid var(--primary-light);
+        }
+        
+        .achievement.unlocked {
+            border-left: 4px solid var(--golden);
+            background: linear-gradient(to right, rgba(255, 215, 0, 0.1), var(--light));
+        }
+        
+        .achievement-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+            flex-shrink: 0;
+        }
+        
+        .achievement.unlocked .achievement-icon {
+            background: var(--golden);
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .achievement-text {
+            flex: 1;
+        }
+        
+        .achievement h4 {
+            color: var(--primary-dark);
+            margin-bottom: 0.3rem;
+            font-size: 1.1rem;
+        }
+        
+        .achievement p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .achievement-reward {
+            font-size: 0.8rem;
+            color: var(--golden);
+            font-weight: 600;
+        }
+        
+        .achievement-progress {
+            height: 5px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 5px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .achievement-progress-bar {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .achievement.unlocked .achievement-progress-bar {
+            background: var(--golden);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .upgrades-grid, .achievements-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            #banana {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .tab-buttons {
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+            
+            .tab-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            #banana {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .prestige-info {
+                font-size: 0.9rem;
+                padding: 0.4rem 1rem;
+            }
+            
+            .achievement {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .achievement-icon {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -44,17 +683,20 @@
         
         <div id="banana-container">
             <div id="banana" title="Cliquez pour gagner des bananes!"></div>
+            <div class="tooltip">
+                <span class="tooltiptext">Chaque clic rapporte 1 banane + bonus de prestige</span>
+            </div>
         </div>
         
         <div class="tab-container">
             <div class="tab-buttons">
-                <button class="tab-btn active" data-tab="upgrades">
+                <button class="tab-btn active" onclick="openTab(event, 'upgrades')">
                     <i class="fas fa-arrow-up"></i> Améliorations
                 </button>
-                <button class="tab-btn" data-tab="achievements">
+                <button class="tab-btn" onclick="openTab(event, 'achievements')">
                     <i class="fas fa-trophy"></i> Succès
                 </button>
-                <button class="tab-btn" data-tab="prestige">
+                <button class="tab-btn" onclick="openTab(event, 'prestige')">
                     <i class="fas fa-redo"></i> Prestige
                 </button>
             </div>
@@ -63,6 +705,7 @@
                 <div class="game-section">
                     <h3 class="section-title"><i class="fas fa-arrow-up"></i> Améliorations</h3>
                     
+                    <!-- Catégorie : Boosters Temporaires -->
                     <div class="upgrade-category">
                         <h4><i class="fas fa-bolt"></i> Boosters Temporaires</h4>
                         <div class="upgrades-grid">
@@ -73,7 +716,7 @@
                                     <span class="upgrade-cost">Coût: <span id="golden-minute-cost">500</span> bananes</span>
                                     <span class="upgrade-cooldown">Disponible dans: <span id="golden-minute-cooldown">0</span>s</span>
                                 </div>
-                                <button class="btn btn-golden" id="golden-minute-btn">
+                                <button class="btn btn-golden" onclick="activateGoldenMinute()" id="golden-minute-btn">
                                     <i class="fas fa-play"></i> Activer
                                 </button>
                             </div>
@@ -85,20 +728,22 @@
                                     <span class="upgrade-cost">Coût: <span id="banana-blast-cost">50</span> Bananes Dorées</span>
                                     <span class="upgrade-cooldown">Disponible dans: <span id="banana-blast-cooldown">0</span>s</span>
                                 </div>
-                                <button class="btn btn-prestige" id="banana-blast-btn">
+                                <button class="btn btn-prestige" onclick="activateBananaBlast()" id="banana-blast-btn">
                                     <i class="fas fa-bolt"></i> Activer
                                 </button>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Catégorie : Productions Automatiques -->
                     <div class="upgrade-category">
                         <h4><i class="fas fa-industry"></i> Productions Automatiques</h4>
                         <div class="upgrades-grid" id="production-upgrades">
-                            <!-- Généré dynamiquement par JavaScript -->
+                            <!-- Généré dynamiquement -->
                         </div>
                     </div>
                     
+                    <!-- Catégorie : Améliorations Spéciales -->
                     <div class="upgrade-category">
                         <h4><i class="fas fa-star"></i> Améliorations Spéciales</h4>
                         <div class="upgrades-grid">
@@ -112,7 +757,7 @@
                                 <div class="upgrade-progress">
                                     <div class="progress-bar" style="width: 0%"></div>
                                 </div>
-                                <button class="btn" id="random-multiplier-btn">
+                                <button class="btn" onclick="buyRandomMultiplier()" id="random-multiplier-btn">
                                     <i class="fas fa-shopping-cart"></i> Améliorer
                                 </button>
                             </div>
@@ -124,13 +769,14 @@
                                     <span class="upgrade-cost">Coût: <span id="recycling-cost">25,000</span> bananes</span>
                                     <span class="upgrade-owned">Niveau: <span id="recycling-level">0</span>/3</span>
                                 </div>
-                                <button class="btn" id="recycling-btn">
+                                <button class="btn" onclick="buyRecycling()" id="recycling-btn">
                                     <i class="fas fa-shopping-cart"></i> Améliorer
                                 </button>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Catégorie : Pouvoirs de Prestige -->
                     <div class="upgrade-category" id="prestige-upgrades-container">
                         <h4><i class="fas fa-trophy"></i> Pouvoirs de Prestige</h4>
                         <div class="upgrades-grid">
@@ -141,7 +787,7 @@
                                     <span class="upgrade-cost">Coût: <span id="interest-cost">5</span> Bananes Dorées</span>
                                     <span class="upgrade-owned">Niveau: <span id="interest-level">0</span>/10</span>
                                 </div>
-                                <button class="btn btn-golden" id="interest-btn">
+                                <button class="btn btn-golden" onclick="buyInterest()" id="interest-btn">
                                     <i class="fas fa-shopping-cart"></i> Améliorer
                                 </button>
                             </div>
@@ -153,7 +799,7 @@
                                     <span class="upgrade-cost">Coût: <span id="prestige-mult-cost">10</span> Bananes Dorées</span>
                                     <span class="upgrade-owned">Niveau: <span id="prestige-mult-level">0</span>/20</span>
                                 </div>
-                                <button class="btn btn-prestige" id="prestige-mult-btn">
+                                <button class="btn btn-prestige" onclick="buyPrestigeMultiplier()" id="prestige-mult-btn">
                                     <i class="fas fa-shopping-cart"></i> Améliorer
                                 </button>
                             </div>
@@ -166,7 +812,7 @@
                 <div class="game-section">
                     <h3 class="section-title"><i class="fas fa-trophy"></i> Succès</h3>
                     <div class="achievements-grid" id="achievements-container">
-                        <!-- Généré dynamiquement par JavaScript -->
+                        <!-- Généré dynamiquement -->
                     </div>
                 </div>
             </div>
@@ -197,7 +843,7 @@
                         <div class="progress-bar" id="prestige-progress-bar"></div>
                     </div>
                     
-                    <button class="btn btn-prestige" id="prestige-btn" disabled>
+                    <button class="btn btn-prestige" id="prestige-btn" onclick="prestige()" disabled>
                         <i class="fas fa-redo"></i> Prestige (Obtenez <span id="prestige-reward">0</span> Bananes Dorées)
                     </button>
                 </div>
@@ -216,6 +862,1019 @@
     <audio id="prestigeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
     <audio id="specialSound" src="https://assets.mixkit.co/sfx/preview/mixkit-extra-bonus-in-a-video-game-2045.mp3"></audio>
 
-    <script src="game.js"></script>
+    <script>
+        // Variables du jeu
+        let gameState = {
+            bananas: 0,
+            bananasPerSecond: 0,
+            totalClicks: 0,
+            upgrades: {},
+            achievements: {},
+            temporaryBoosts: {
+                goldenMinute: { active: false, endTime: 0, cooldown: 0 },
+                bananaBlast: { cooldown: 0 }
+            },
+            specialUpgrades: {
+                randomMultiplier: { level: 0 },
+                recycling: { level: 0, lastCollection: 0 }
+            },
+            prestigePowers: {
+                interest: { level: 0 },
+                prestigeMultiplier: { level: 0 },
+                lastInterest: 0
+            },
+            prestige: 0,
+            goldenBananas: 0,
+            lastUpdate: Date.now(),
+            version: "1.3.0"
+        };
+        
+        // Données des améliorations de production
+        const productionUpgrades = [
+            { 
+                id: 'monkey', 
+                name: 'Singe Assistant', 
+                desc: 'Un petit singe qui travaille pour vous', 
+                baseCost: 15, 
+                bps: 0.2,
+                icon: 'fas fa-monkey',
+                unlockAt: 0
+            },
+            { 
+                id: 'grandma', 
+                name: 'Grand-mère Bananière', 
+                desc: 'Elle a des recettes secrètes pour faire pousser les bananes', 
+                baseCost: 100, 
+                bps: 1,
+                icon: 'fas fa-grandma',
+                unlockAt: 50
+            },
+            { 
+                id: 'farm', 
+                name: 'Ferme Tropicale', 
+                desc: 'Une plantation dédiée à vos bananes', 
+                baseCost: 500, 
+                bps: 4,
+                icon: 'fas fa-tractor',
+                unlockAt: 200
+            },
+            { 
+                id: 'factory', 
+                name: 'Usine de Transformation', 
+                desc: 'Transformez vos bananes en produits dérivés', 
+                baseCost: 3000, 
+                bps: 10,
+                icon: 'fas fa-industry',
+                unlockAt: 1000
+            },
+            { 
+                id: 'plantation', 
+                name: 'Plantation Géante', 
+                desc: 'Dominez le marché mondial de la banane', 
+                baseCost: 10000, 
+                bps: 25,
+                icon: 'fas fa-globe-americas',
+                unlockAt: 5000
+            },
+            { 
+                id: 'research', 
+                name: 'Laboratoire de Recherche', 
+                desc: 'Bananes génétiquement modifiées pour plus de rendement', 
+                baseCost: 50000, 
+                bps: 100,
+                icon: 'fas fa-flask',
+                unlockAt: 20000
+            },
+            { 
+                id: 'portal', 
+                name: 'Portail Bananier', 
+                desc: 'Importez des bananes d\'autres dimensions', 
+                baseCost: 250000, 
+                bps: 500,
+                icon: 'fas fa-portal-enter',
+                unlockAt: 100000
+            },
+            { 
+                id: 'timeMachine', 
+                name: 'Machine Temporelle', 
+                desc: 'Récupérez des bananes du futur', 
+                baseCost: 1000000, 
+                bps: 2000,
+                icon: 'fas fa-clock',
+                unlockAt: 500000
+            },
+            { 
+                id: 'bananaGod', 
+                name: 'Temple du Dieu Banane', 
+                desc: 'Vénérez le dieu suprême de la banane', 
+                baseCost: 5000000, 
+                bps: 10000,
+                icon: 'fas fa-place-of-worship',
+                unlockAt: 2000000
+            },
+            { 
+                id: 'quantumFarm', 
+                name: 'Ferme Quantique', 
+                desc: 'Cultivez des bananes dans des univers parallèles', 
+                baseCost: 25000000, 
+                bps: 50000,
+                icon: 'fas fa-atom',
+                unlockAt: 10000000
+            }
+        ];
+        
+        // Données des succès
+        const achievementsData = [
+            { 
+                id: 'ach-10', 
+                name: 'Premières Bananes', 
+                desc: 'Atteignez 10 bananes', 
+                threshold: 10, 
+                reward: 5,
+                icon: 'fas fa-seedling'
+            },
+            { 
+                id: 'ach-100', 
+                name: 'Banane Affamé', 
+                desc: 'Atteignez 100 bananes', 
+                threshold: 100, 
+                reward: 20,
+                icon: 'fas fa-utensils'
+            },
+            { 
+                id: 'ach-1000', 
+                name: 'Roi des Bananes', 
+                desc: 'Atteignez 1,000 bananes', 
+                threshold: 1000, 
+                reward: 100,
+                icon: 'fas fa-crown'
+            },
+            { 
+                id: 'ach-10000', 
+                name: 'Empereur Banane', 
+                desc: 'Atteignez 10,000 bananes', 
+                threshold: 10000, 
+                reward: 500,
+                icon: 'fas fa-chess-king'
+            },
+            { 
+                id: 'ach-100000', 
+                name: 'Dieu de la Banane', 
+                desc: 'Atteignez 100,000 bananes', 
+                threshold: 100000, 
+                reward: 5000,
+                icon: 'fas fa-god'
+            },
+            { 
+                id: 'ach-1M', 
+                name: 'Légende Bananière', 
+                desc: 'Atteignez 1,000,000 bananes', 
+                threshold: 1000000, 
+                reward: 0,
+                icon: 'fas fa-monument'
+            }
+        ];
+
+        // Initialiser les structures de données du jeu
+        function initializeGameData() {
+            // Initialiser les améliorations de production
+            productionUpgrades.forEach(upgrade => {
+                if (!gameState.upgrades[upgrade.id]) {
+                    gameState.upgrades[upgrade.id] = { owned: 0 };
+                }
+            });
+            
+            // Initialiser les succès
+            achievementsData.forEach(ach => {
+                if (gameState.achievements[ach.id] === undefined) {
+                    gameState.achievements[ach.id] = false;
+                }
+            });
+            
+            // Charger depuis le localStorage si disponible
+            const save = localStorage.getItem('bananaEmpireSave');
+            if (save) {
+                try {
+                    const parsed = JSON.parse(save);
+                    
+                    // Migration des versions si nécessaire
+                    if (!parsed.version || parsed.version !== gameState.version) {
+                        // Ajouter ici toute logique de migration si la structure change
+                        parsed.version = gameState.version;
+                    }
+                    
+                    // Fusionner avec l'état actuel
+                    gameState = {
+                        ...gameState,
+                        ...parsed,
+                        // Conserver les nouvelles propriétés si elles n'existaient pas dans la sauvegarde
+                        temporaryBoosts: {
+                            ...gameState.temporaryBoosts,
+                            ...(parsed.temporaryBoosts || {})
+                        },
+                        specialUpgrades: {
+                            ...gameState.specialUpgrades,
+                            ...(parsed.specialUpgrades || {})
+                        },
+                        prestigePowers: {
+                            ...gameState.prestigePowers,
+                            ...(parsed.prestigePowers || {})
+                        }
+                    };
+                    
+                    showNotification('Partie chargée avec succès!');
+                    
+                    // Calculer les gains hors ligne
+                    if (gameState.lastUpdate) {
+                        const offlineTime = Date.now() - gameState.lastUpdate;
+                        const offlineSeconds = offlineTime / 1000;
+                        
+                        // Gains automatiques
+                        if (gameState.bananasPerSecond > 0) {
+                            const offlineBananas = gameState.bananasPerSecond * offlineSeconds;
+                            gameState.bananas += offlineBananas;
+                            
+                            if (offlineSeconds > 5) {
+                                showNotification(`Bienvenue de retour! Vous avez gagné ${formatNumber(offlineBananas)} bananes pendant votre absence.`);
+                            }
+                        }
+                        
+                        // Recyclage bananier
+                        if (gameState.specialUpgrades.recycling.level > 0) {
+                            const recyclingInterval = 60; // 1 minute
+                            const recyclingTimes = Math.floor(offlineSeconds / recyclingInterval);
+                            
+                            if (recyclingTimes > 0) {
+                                const recycled = gameState.bananasPerSecond * 0.01 * gameState.specialUpgrades.recycling.level * recyclingTimes;
+                                gameState.bananas += recycled;
+                                showNotification(`Recyclage: +${formatNumber(recycled)} bananes recyclées`);
+                            }
+                        }
+                        
+                        // Intérêts bananiers
+                        if (gameState.prestigePowers.interest.level > 0) {
+                            const interestInterval = 3600; // 1 heure
+                            const interestTimes = Math.floor(offlineSeconds / interestInterval);
+                            
+                            if (interestTimes > 0) {
+                                const interest = gameState.bananas * 0.01 * gameState.prestigePowers.interest.level * interestTimes;
+                                gameState.bananas += interest;
+                                showNotification(`Intérêts: +${formatNumber(interest)} bananes accumulées`);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Erreur lors du chargement de la sauvegarde:", e);
+                    showNotification("Erreur lors du chargement de la sauvegarde", true);
+                }
+            }
+        }
+        
+        // Éléments du DOM
+        const banana = document.getElementById('banana');
+        const bananaContainer = document.getElementById('banana-container');
+        const counter = document.getElementById('counter');
+        const bpsCounter = document.getElementById('bananas-per-second');
+        const clickCounter = document.getElementById('total-clicks');
+        const multiplierDisplay = document.getElementById('multiplier');
+        const prestigeCounter = document.getElementById('prestige-counter');
+        const goldenBananasCounter = document.getElementById('golden-bananas-counter');
+        const productionUpgradesContainer = document.getElementById('production-upgrades');
+        const achievementsContainer = document.getElementById('achievements-container');
+        const prestigeBtn = document.getElementById('prestige-btn');
+        const themeToggleBtn = document.getElementById('themeToggle');
+        
+        // Sons
+        const clickSound = document.getElementById('clickSound');
+        const upgradeSound = document.getElementById('upgradeSound');
+        const achievementSound = document.getElementById('achievementSound');
+        const prestigeSound = document.getElementById('prestigeSound');
+        const specialSound = document.getElementById('specialSound');
+        
+        // Initialiser le jeu
+        function initGame() {
+            initializeGameData();
+            
+            // Générer les améliorations de production
+            renderProductionUpgrades();
+            
+            // Générer les succès
+            renderAchievements();
+            
+            // Mettre à jour l'affichage
+            updateDisplay();
+            
+            // Démarrer la boucle de jeu
+            gameLoop();
+            
+            // Configurer les écouteurs d'événements
+            setupEventListeners();
+        }
+        
+        // Configurer les écouteurs d'événements
+        function setupEventListeners() {
+            banana.addEventListener('click', handleClick);
+            
+            // Thème sombre/clair
+            themeToggleBtn.addEventListener('click', toggleTheme);
+            
+            // Sauvegarde quand l'onglet est fermé
+            window.addEventListener('beforeunload', function() {
+                saveGame();
+            });
+        }
+        
+        // Rendre les améliorations de production
+        function renderProductionUpgrades() {
+            productionUpgradesContainer.innerHTML = '';
+            
+            productionUpgrades.forEach(upgrade => {
+                const owned = gameState.upgrades[upgrade.id]?.owned || 0;
+                const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, owned));
+                const isLocked = gameState.bananas < upgrade.unlockAt;
+                
+                const upgradeEl = document.createElement('div');
+                upgradeEl.className = `upgrade ${isLocked ? 'locked-upgrade' : ''}`;
+                upgradeEl.innerHTML = `
+                    <h3><i class="${upgrade.icon}"></i> ${upgrade.name}</h3>
+                    <p>${upgrade.desc}</p>
+                    <div class="upgrade-info">
+                        <span class="upgrade-cost">Coût: <span id="${upgrade.id}-cost">${formatNumber(cost)}</span> bananes</span>
+                        <span class="upgrade-owned">Possédés: <span id="${upgrade.id}-owned">${owned}</span></span>
+                    </div>
+                    <p class="upgrade-bps">Production: +${formatNumber(upgrade.bps)} bananes/sec</p>
+                    ${isLocked ? `
+                        <div class="locked-label">Débloqué à ${formatNumber(upgrade.unlockAt)} bananes</div>
+                        <button class="btn" disabled>
+                            <i class="fas fa-lock"></i> Verrouillé
+                        </button>
+                    ` : `
+                        <button class="btn" onclick="buyProductionUpgrade('${upgrade.id}')" id="${upgrade.id}-btn">
+                            <i class="fas fa-shopping-cart"></i> Acheter
+                        </button>
+                    `}
+                `;
+                
+                productionUpgradesContainer.appendChild(upgradeEl);
+            });
+        }
+        
+        // Rendre les succès
+        function renderAchievements() {
+            achievementsContainer.innerHTML = '';
+            
+            achievementsData.forEach(ach => {
+                const achieved = gameState.bananas >= ach.threshold;
+                const progress = Math.min(100, (gameState.bananas / ach.threshold) * 100);
+                
+                const achEl = document.createElement('div');
+                achEl.className = `achievement ${achieved ? 'unlocked' : ''}`;
+                achEl.id = ach.id;
+                achEl.innerHTML = `
+                    <div class="achievement-icon">
+                        <i class="${ach.icon}"></i>
+                    </div>
+                    <div class="achievement-text">
+                        <h4>${ach.name}</h4>
+                        <p>${ach.desc}</p>
+                        ${ach.reward > 0 ? `<p class="achievement-reward">Récompense: +${formatNumber(ach.reward)} bananes</p>` : ''}
+                        ${!achieved ? `
+                            <div class="achievement-progress">
+                                <div class="achievement-progress-bar" style="width: ${progress}%"></div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                achievementsContainer.appendChild(achEl);
+            });
+        }
+        
+        // Mise à jour de l'affichage
+        function updateDisplay() {
+            // Bananes
+            counter.textContent = formatNumber(Math.floor(gameState.bananas));
+            
+            // Bananes par seconde
+            updateBPS();
+            bpsCounter.textContent = formatNumber(gameState.bananasPerSecond);
+            
+            // Clics
+            clickCounter.textContent = formatNumber(gameState.totalClicks);
+            
+            // Multiplicateur
+            const multiplier = 1 + (gameState.prestige * 0.1) + (gameState.prestigePowers.prestigeMultiplier.level * 0.001);
+            multiplierDisplay.textContent = multiplier.toFixed(3) + 'x';
+            
+            // Prestige
+            prestigeCounter.textContent = gameState.prestige;
+            goldenBananasCounter.textContent = formatNumber(gameState.goldenBananas);
+            
+            // Mettre à jour les améliorations de production
+            updateProductionUpgrades();
+            
+            // Mettre à jour les succès
+            updateAchievements();
+            
+            // Mettre à jour les boosters temporaires
+            updateTemporaryBoosts();
+            
+            // Mettre à jour les améliorations spéciales
+            updateSpecialUpgrades();
+            
+            // Mettre à jour les pouvoirs de prestige
+            updatePrestigePowers();
+            
+            // Mettre à jour la section prestige
+            updatePrestigeSection();
+        }
+        
+        // Mettre à jour les améliorations de production
+        function updateProductionUpgrades() {
+            productionUpgrades.forEach(upgrade => {
+                const owned = gameState.upgrades[upgrade.id]?.owned || 0;
+                const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, owned));
+                const isLocked = gameState.bananas < upgrade.unlockAt;
+                
+                // Mettre à jour seulement si débloqué
+                if (!isLocked) {
+                    const btn = document.getElementById(`${upgrade.id}-btn`);
+                    if (btn) {
+                        btn.disabled = gameState.bananas < cost;
+                    }
+                    
+                    const costEl = document.getElementById(`${upgrade.id}-cost`);
+                    if (costEl) costEl.textContent = formatNumber(cost);
+                    
+                    const ownedEl = document.getElementById(`${upgrade.id}-owned`);
+                    if (ownedEl) ownedEl.textContent = owned;
+                }
+            });
+        }
+        
+        // Mettre à jour les succès
+        function updateAchievements() {
+            achievementsData.forEach(ach => {
+                const achieved = gameState.bananas >= ach.threshold;
+                const achEl = document.getElementById(ach.id);
+                
+                if (achEl) {
+                    const wasAchieved = achEl.classList.contains('unlocked');
+                    const progressBar = achEl.querySelector('.achievement-progress-bar');
+                    
+                    if (!achieved && progressBar) {
+                        const progress = Math.min(100, (gameState.bananas / ach.threshold) * 100);
+                        progressBar.style.width = `${progress}%`;
+                    }
+                    
+                    if (achieved && !wasAchieved) {
+                        achEl.classList.add('unlocked');
+                        const icon = achEl.querySelector('.achievement-icon');
+                        if (icon) {
+                            icon.style.background = 'var(--golden)';
+                            icon.style.color = 'white';
+                            icon.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.5)';
+                        }
+                        
+                        if (!gameState.achievements[ach.id]) {
+                            gameState.achievements[ach.id] = true;
+                            gameState.bananas += ach.reward;
+                            showNotification(`Succès débloqué: ${ach.name}${ach.reward > 0 ? ` (+${formatNumber(ach.reward)} bananes)` : ''}`);
+                            playSound(achievementSound);
+                            
+                            // Supprimer la barre de progression une fois débloqué
+                            const progressContainer = achEl.querySelector('.achievement-progress');
+                            if (progressContainer) progressContainer.remove();
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Mettre à jour les boosters temporaires
+        function updateTemporaryBoosts() {
+            // Minute Dorée
+            const goldenMinute = gameState.temporaryBoosts.goldenMinute;
+            const goldenMinuteBtn = document.getElementById('golden-minute-btn');
+            const goldenMinuteCost = document.getElementById('golden-minute-cost');
+            const goldenMinuteCooldown = document.getElementById('golden-minute-cooldown');
+            
+            goldenMinuteCost.textContent = '500';
+            
+            if (goldenMinute.active) {
+                goldenMinuteBtn.disabled = true;
+                goldenMinuteBtn.innerHTML = '<i class="fas fa-hourglass-end"></i> Actif';
+                goldenMinuteCooldown.textContent = '0';
+            } else {
+                goldenMinuteBtn.disabled = gameState.bananas < 500 || goldenMinute.cooldown > 0;
+                goldenMinuteBtn.innerHTML = '<i class="fas fa-play"></i> Activer';
+                goldenMinuteCooldown.textContent = Math.ceil(goldenMinute.cooldown / 1000);
+            }
+            
+            // Explosion Bananière
+            const bananaBlast = gameState.temporaryBoosts.bananaBlast;
+            const bananaBlastBtn = document.getElementById('banana-blast-btn');
+            const bananaBlastCost = document.getElementById('banana-blast-cost');
+            const bananaBlastCooldown = document.getElementById('banana-blast-cooldown');
+            
+            bananaBlastCost.textContent = '50';
+            bananaBlastBtn.disabled = gameState.goldenBananas < 50 || bananaBlast.cooldown > 0;
+            bananaBlastCooldown.textContent = Math.ceil(bananaBlast.cooldown / 1000);
+        }
+        
+        // Mettre à jour les améliorations spéciales
+        function updateSpecialUpgrades() {
+            // Multiplicateur Aléatoire
+            const randomMultiplier = gameState.specialUpgrades.randomMultiplier;
+            const randomMultiplierCost = document.getElementById('random-multiplier-cost');
+            const randomMultiplierLevel = document.getElementById('random-multiplier-level');
+            const randomMultiplierBtn = document.getElementById('random-multiplier-btn');
+            const randomMultiplierProgress = document.querySelector('#random-multiplier-btn').previousElementSibling.querySelector('.progress-bar');
+            
+            const randomMultiplierNextCost = 10000 * Math.pow(2, randomMultiplier.level);
+            randomMultiplierCost.textContent = formatNumber(randomMultiplierNextCost);
+            randomMultiplierLevel.textContent = randomMultiplier.level;
+            randomMultiplierBtn.disabled = gameState.bananas < randomMultiplierNextCost || randomMultiplier.level >= 5;
+            
+            if (randomMultiplier.level > 0) {
+                randomMultiplierProgress.style.width = `${randomMultiplier.level * 20}%`;
+            }
+            
+            // Recyclage Bananier
+            const recycling = gameState.specialUpgrades.recycling;
+            const recyclingCost = document.getElementById('recycling-cost');
+            const recyclingLevel = document.getElementById('recycling-level');
+            const recyclingBtn = document.getElementById('recycling-btn');
+            
+            const recyclingNextCost = 25000 * Math.pow(3, recycling.level);
+            recyclingCost.textContent = formatNumber(recyclingNextCost);
+            recyclingLevel.textContent = recycling.level;
+            recyclingBtn.disabled = gameState.bananas < recyclingNextCost || recycling.level >= 3;
+        }
+        
+        // Mettre à jour les pouvoirs de prestige
+        function updatePrestigePowers() {
+            // Intérêts Bananiers
+            const interest = gameState.prestigePowers.interest;
+            const interestCost = document.getElementById('interest-cost');
+            const interestLevel = document.getElementById('interest-level');
+            const interestBtn = document.getElementById('interest-btn');
+            
+            const interestNextCost = 5 * Math.pow(2, interest.level);
+            interestCost.textContent = formatNumber(interestNextCost);
+            interestLevel.textContent = interest.level;
+            interestBtn.disabled = gameState.goldenBananas < interestNextCost || interest.level >= 10;
+            
+            // Multiplicateur de Prestige
+            const prestigeMult = gameState.prestigePowers.prestigeMultiplier;
+            const prestigeMultCost = document.getElementById('prestige-mult-cost');
+            const prestigeMultLevel = document.getElementById('prestige-mult-level');
+            const prestigeMultBtn = document.getElementById('prestige-mult-btn');
+            
+            const prestigeMultNextCost = 10 * Math.pow(2, prestigeMult.level);
+            prestigeMultCost.textContent = formatNumber(prestigeMultNextCost);
+            prestigeMultLevel.textContent = prestigeMult.level;
+            prestigeMultBtn.disabled = gameState.goldenBananas < prestigeMultNextCost || prestigeMult.level >= 20;
+        }
+        
+        // Mettre à jour la section prestige
+        function updatePrestigeSection() {
+            const canPrestige = gameState.bananas >= 1000000;
+            const goldenBananasEarned = Math.floor(gameState.bananas / 1000000);
+            
+            document.getElementById('golden-bananas-counter').textContent = formatNumber(gameState.goldenBananas);
+            document.getElementById('prestige-level').textContent = gameState.prestige;
+            
+            const baseMultiplier = 1 + (gameState.prestige * 0.1);
+            const bonusMultiplier = gameState.prestigePowers.prestigeMultiplier.level * 0.001;
+            document.getElementById('current-multiplier').textContent = (baseMultiplier + bonusMultiplier).toFixed(3) + 'x';
+            
+            if (canPrestige) {
+                document.getElementById('prestige-requirement').innerHTML = `<span class="prestige">Vous pouvez effectuer un prestige!</span>`;
+                prestigeBtn.disabled = false;
+            } else {
+                document.getElementById('prestige-requirement').textContent = 'Vous avez besoin d\'au moins 1,000,000 bananes pour effectuer un prestige.';
+                prestigeBtn.disabled = true;
+            }
+            
+            const progress = Math.min(100, gameState.bananas / 1000000 * 100);
+            document.getElementById('prestige-progress').innerHTML = `Progression: <span>${progress.toFixed(2)}</span>%`;
+            document.getElementById('prestige-progress-bar').style.width = `${progress}%`;
+            document.getElementById('prestige-reward').textContent = formatNumber(goldenBananasEarned);
+        }
+        
+        // Calculer les bananes par seconde
+        function updateBPS() {
+            let bps = 0;
+            
+            productionUpgrades.forEach(upgrade => {
+                const owned = gameState.upgrades[upgrade.id]?.owned || 0;
+                bps += upgrade.bps * owned;
+            });
+            
+            // Appliquer le bonus de Minute Dorée
+            if (gameState.temporaryBoosts.goldenMinute.active) {
+                bps *= 2;
+            }
+            
+            gameState.bananasPerSecond = bps;
+        }
+        
+        // Gestion du clic sur la banane
+        function handleClick() {
+            // Calcul du gain avec multiplicateur de prestige
+            let gain = 1 + (gameState.prestige * 0.1) + (gameState.prestigePowers.prestigeMultiplier.level * 0.001);
+            
+            // Appliquer le multiplicateur aléatoire
+            if (gameState.specialUpgrades.randomMultiplier.level > 0) {
+                const chance = Math.random();
+                if (chance < 0.1 * gameState.specialUpgrades.randomMultiplier.level) {
+                    const multiplier = 2 + Math.floor(Math.random() * 9); // Entre 2 et 10
+                    gain *= multiplier;
+                    
+                    // Effet visuel spécial
+                    createSpecialClickEffect(gain, multiplier);
+                    playSound(specialSound);
+                }
+            }
+            
+            gameState.bananas += gain;
+            gameState.totalClicks++;
+            
+            createClickEffect(gain);
+            playSound(clickSound);
+            updateDisplay();
+        }
+        
+        // Achat d'amélioration de production
+        function buyProductionUpgrade(id) {
+            const upgrade = productionUpgrades.find(u => u.id === id);
+            if (!upgrade) return;
+            
+            const owned = gameState.upgrades[id]?.owned || 0;
+            const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, owned));
+            
+            if (gameState.bananas >= cost) {
+                gameState.bananas -= cost;
+                gameState.upgrades[id].owned = owned + 1;
+                
+                // Mettre à jour les BPS
+                updateBPS();
+                
+                // Son
+                playSound(upgradeSound);
+                
+                // Notification
+                showNotification(`Amélioration achetée: ${upgrade.name}`);
+                
+                // Mettre à jour l'affichage
+                updateDisplay();
+                
+                // Sauvegarder
+                saveGame();
+            } else {
+                showNotification("Pas assez de bananes!", true);
+            }
+        }
+        
+        // Activer la Minute Dorée
+        function activateGoldenMinute() {
+            if (gameState.bananas >= 500 && gameState.temporaryBoosts.goldenMinute.cooldown <= 0) {
+                gameState.bananas -= 500;
+                gameState.temporaryBoosts.goldenMinute.active = true;
+                gameState.temporaryBoosts.goldenMinute.endTime = Date.now() + 60000; // 1 minute
+                gameState.temporaryBoosts.goldenMinute.cooldown = 300000; // 5 minutes de cooldown
+                
+                // Mettre à jour les BPS
+                updateBPS();
+                
+                showNotification("Minute Dorée activée! Production doublée pendant 1 minute");
+                playSound(specialSound);
+                updateDisplay();
+                saveGame();
+            }
+        }
+        
+        // Activer l'Explosion Bananière
+        function activateBananaBlast() {
+            if (gameState.goldenBananas >= 50 && gameState.temporaryBoosts.bananaBlast.cooldown <= 0) {
+                gameState.goldenBananas -= 50;
+                gameState.bananas += 1000;
+                gameState.temporaryBoosts.bananaBlast.cooldown = 86400000; // 24 heures de cooldown
+                
+                showNotification("Explosion Bananière! +1000 bananes obtenues");
+                playSound(specialSound);
+                updateDisplay();
+                saveGame();
+            }
+        }
+        
+        // Acheter le Multiplicateur Aléatoire
+        function buyRandomMultiplier() {
+            const cost = 10000 * Math.pow(2, gameState.specialUpgrades.randomMultiplier.level);
+            if (gameState.bananas >= cost && gameState.specialUpgrades.randomMultiplier.level < 5) {
+                gameState.bananas -= cost;
+                gameState.specialUpgrades.randomMultiplier.level++;
+                
+                showNotification(`Multiplicateur Aléatoire niveau ${gameState.specialUpgrades.randomMultiplier.level} acheté!`);
+                playSound(upgradeSound);
+                updateDisplay();
+                saveGame();
+            }
+        }
+        
+        // Acheter le Recyclage Bananier
+        function buyRecycling() {
+            const cost = 25000 * Math.pow(3, gameState.specialUpgrades.recycling.level);
+            if (gameState.bananas >= cost && gameState.specialUpgrades.recycling.level < 3) {
+                gameState.bananas -= cost;
+                gameState.specialUpgrades.recycling.level++;
+                gameState.specialUpgrades.recycling.lastCollection = Date.now();
+                
+                showNotification(`Recyclage Bananier niveau ${gameState.specialUpgrades.recycling.level} acheté!`);
+                playSound(upgradeSound);
+                updateDisplay();
+                saveGame();
+            }
+        }
+        
+        // Acheter les Intérêts Bananiers
+        function buyInterest() {
+            const cost = 5 * Math.pow(2, gameState.prestigePowers.interest.level);
+            if (gameState.goldenBananas >= cost && gameState.prestigePowers.interest.level < 10) {
+                gameState.goldenBananas -= cost;
+                gameState.prestigePowers.interest.level++;
+                gameState.prestigePowers.lastInterest = Date.now();
+                
+                showNotification(`Intérêts Bananiers niveau ${gameState.prestigePowers.interest.level} acheté!`);
+                playSound(upgradeSound);
+                updateDisplay();
+                saveGame();
+            }
+        }
+        
+        // Acheter le Multiplicateur de Prestige
+        function buyPrestigeMultiplier() {
+            const cost = 10 * Math.pow(2, gameState.prestigePowers.prestigeMultiplier.level);
+            if (gameState.goldenBananas >= cost && gameState.prestigePowers.prestigeMultiplier.level < 20) {
+                gameState.goldenBananas -= cost;
+                gameState.prestigePowers.prestigeMultiplier.level++;
+                
+                showNotification(`Multiplicateur de Prestige niveau ${gameState.prestigePowers.prestigeMultiplier.level} acheté!`);
+                playSound(upgradeSound);
+                updateDisplay();
+                saveGame();
+            }
+        }
+        
+        // Prestige
+        function prestige() {
+            if (gameState.bananas >= 1000000) {
+                if (confirm(`Voulez-vous vraiment effectuer un prestige? Vous obtiendrez ${formatNumber(Math.floor(gameState.bananas / 1000000))} Bananes Dorées mais perdrez toute votre progression actuelle.`)) {
+                    const goldenBananasEarned = Math.floor(gameState.bananas / 1000000);
+                    gameState.prestige++;
+                    gameState.goldenBananas += goldenBananasEarned;
+                    
+                    // Réinitialiser la progression
+                    gameState.bananas = 0;
+                    gameState.bananasPerSecond = 0;
+                    gameState.totalClicks = 0;
+                    
+                    // Réinitialiser les améliorations
+                    Object.keys(gameState.upgrades).forEach(key => {
+                        gameState.upgrades[key].owned = 0;
+                    });
+                    
+                    // Réinitialiser les succès
+                    Object.keys(gameState.achievements).forEach(key => {
+                        gameState.achievements[key] = false;
+                    });
+                    
+                    // Réinitialiser les boosters
+                    gameState.temporaryBoosts = {
+                        goldenMinute: { active: false, endTime: 0, cooldown: 0 },
+                        bananaBlast: { cooldown: 0 }
+                    };
+                    
+                    // Réinitialiser les améliorations spéciales
+                    gameState.specialUpgrades = {
+                        randomMultiplier: { level: 0 },
+                        recycling: { level: 0, lastCollection: 0 }
+                    };
+                    
+                    // Son
+                    playSound(prestigeSound);
+                    
+                    // Notification
+                    showNotification(`Prestige effectué! +${formatNumber(goldenBananasEarned)} Bananes Dorées. Nouveau multiplicateur: ${(1 + (gameState.prestige * 0.1) + (gameState.prestigePowers.prestigeMultiplier.level * 0.001)).toFixed(3)}x`);
+                    
+                    // Re-rendre les améliorations et succès
+                    renderProductionUpgrades();
+                    renderAchievements();
+                    
+                    // Mettre à jour l'affichage
+                    updateDisplay();
+                    
+                    // Sauvegarder
+                    saveGame();
+                }
+            }
+        }
+        
+        // Effets visuels
+        function createClickEffect(gain) {
+            const clickEffect = document.createElement('div');
+            clickEffect.className = 'click-effect';
+            clickEffect.textContent = `+${gain.toFixed(1)}`;
+            clickEffect.style.left = `${Math.random() * 100 + 50}px`;
+            clickEffect.style.color = `hsl(${Math.random() * 60 + 30}, 100%, 50%)`;
+            bananaContainer.appendChild(clickEffect);
+            
+            setTimeout(() => {
+                clickEffect.remove();
+            }, 1500);
+        }
+        
+        // Effet visuel spécial pour les multiplicateurs
+        function createSpecialClickEffect(gain, multiplier) {
+            const effect = document.createElement('div');
+            effect.className = 'click-effect special';
+            effect.textContent = `x${multiplier}! +${gain.toFixed(1)}`;
+            effect.style.left = `${Math.random() * 100 + 50}px`;
+            effect.style.color = `hsl(${Math.random() * 60 + 30}, 100%, 50%)`;
+            bananaContainer.appendChild(effect);
+            
+            setTimeout(() => {
+                effect.remove();
+            }, 2000);
+        }
+        
+        // Gestion des onglets
+        function openTab(event, tabId) {
+            // Masquer tous les onglets
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Désactiver tous les boutons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Activer l'onglet sélectionné
+            document.getElementById(tabId).classList.add('active');
+            
+            // Activer le bouton correspondant
+            event.currentTarget.classList.add('active');
+        }
+        
+        // Basculer entre thème clair/sombre
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        }
+        
+        // Notification
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            const content = notification.querySelector('.notification-content');
+            
+            notification.className = isError ? 'notification error' : 'notification';
+            content.textContent = message;
+            
+            // Changer l'icône
+            const icon = notification.querySelector('i');
+            if (isError) {
+                icon.className = 'fas fa-exclamation-circle';
+            } else {
+                icon.className = 'fas fa-check-circle';
+            }
+            
+            // Afficher
+            notification.classList.add('show');
+            
+            // Masquer après 3 secondes
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Jouer un son
+        function playSound(sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Le son n'a pas pu être joué:", e));
+        }
+        
+        // Formater les nombres
+        function formatNumber(num) {
+            if (num >= 1000000000) {
+                return (num / 1000000000).toFixed(2) + 'B';
+            } else if (num >= 1000000) {
+                return (num / 1000000).toFixed(2) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toLocaleString();
+        }
+        
+        // Sauvegarder le jeu
+        function saveGame() {
+            gameState.lastUpdate = Date.now();
+            localStorage.setItem('bananaEmpireSave', JSON.stringify(gameState));
+        }
+        
+        // Boucle de jeu
+        function gameLoop() {
+            const now = Date.now();
+            const delta = (now - gameState.lastUpdate) / 1000; // en secondes
+            gameState.lastUpdate = now;
+            
+            // Mettre à jour les cooldowns
+            updateCooldowns(delta * 1000);
+            
+            // Production automatique
+            if (gameState.bananasPerSecond > 0) {
+                gameState.bananas += gameState.bananasPerSecond * delta;
+            }
+            
+            // Recyclage bananier
+            if (gameState.specialUpgrades.recycling.level > 0) {
+                const recyclingInterval = 60; // 1 minute en secondes
+                const timeSinceLastRecycling = now - gameState.specialUpgrades.recycling.lastCollection;
+                
+                if (timeSinceLastRecycling >= recyclingInterval * 1000) {
+                    const recycled = gameState.bananasPerSecond * 0.01 * gameState.specialUpgrades.recycling.level;
+                    gameState.bananas += recycled;
+                    gameState.specialUpgrades.recycling.lastCollection = now;
+                    
+                    if (recycled >= 1) {
+                        showNotification(`Recyclage: +${formatNumber(recycled)} bananes recyclées`);
+                    }
+                }
+            }
+            
+            // Intérêts bananiers
+            if (gameState.prestigePowers.interest.level > 0) {
+                const interestInterval = 3600; // 1 heure en secondes
+                const timeSinceLastInterest = now - gameState.prestigePowers.lastInterest;
+                
+                if (timeSinceLastInterest >= interestInterval * 1000) {
+                    const interest = gameState.bananas * 0.01 * gameState.prestigePowers.interest.level;
+                    gameState.bananas += interest;
+                    gameState.prestigePowers.lastInterest = now;
+                    
+                    if (interest >= 1) {
+                        showNotification(`Intérêts: +${formatNumber(interest)} bananes accumulées`);
+                    }
+                }
+            }
+            
+            // Mettre à jour l'affichage
+            updateDisplay();
+            
+            // Sauvegarder périodiquement
+            if (now % 30000 < 100) { // Toutes les 30 secondes
+                saveGame();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Mettre à jour les cooldowns
+        function updateCooldowns(delta) {
+            // Minute Dorée
+            if (gameState.temporaryBoosts.goldenMinute.active && Date.now() > gameState.temporaryBoosts.goldenMinute.endTime) {
+                gameState.temporaryBoosts.goldenMinute.active = false;
+                updateBPS(); // Retirer le bonus de production
+                showNotification("La Minute Dorée est terminée");
+            }
+            
+            // Cooldowns
+            if (gameState.temporaryBoosts.goldenMinute.cooldown > 0) {
+                gameState.temporaryBoosts.goldenMinute.cooldown -= delta;
+                if (gameState.temporaryBoosts.goldenMinute.cooldown < 0) {
+                    gameState.temporaryBoosts.goldenMinute.cooldown = 0;
+                }
+            }
+            
+            if (gameState.temporaryBoosts.bananaBlast.cooldown > 0) {
+                gameState.temporaryBoosts.bananaBlast.cooldown -= delta;
+                if (gameState.temporaryBoosts.bananaBlast.cooldown < 0) {
+                    gameState.temporaryBoosts.bananaBlast.cooldown = 0;
+                }
+            }
+        }
+        
+        // Démarrer le jeu
+        initGame();
+    </script>
+<script src="game.js"></script>
 </body>
 </html>
