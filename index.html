@@ -1365,16 +1365,29 @@
         }
         
         function handleGoogleSignIn(response) {
-            const token = response.credential;
-            localStorage.setItem('googleToken', token);
-            validateGoogleToken(token);
-            document.getElementById('authOverlay').style.display = 'none';
-            loadCloudSave();
+            try {
+                if (!response.credential) {
+                    throw new Error("Aucune information d'identification reçue");
+                }
+                
+                const token = response.credential;
+                localStorage.setItem('googleToken', token);
+                validateGoogleToken(token);
+                document.getElementById('authOverlay').style.display = 'none';
+                loadCloudSave();
+            } catch (error) {
+                console.error("Erreur lors de la connexion Google:", error);
+                showNotification("Erreur lors de la connexion avec Google. Veuillez réessayer.", true);
+            }
         }
         
         function validateGoogleToken(token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
+                if (!payload.sub || !payload.name || !payload.picture) {
+                    throw new Error("Informations d'utilisateur incomplètes");
+                }
+                
                 document.getElementById('userProfile').style.display = 'flex';
                 document.getElementById('userAvatar').src = payload.picture;
                 document.getElementById('userName').textContent = payload.name;
@@ -1382,7 +1395,7 @@
                 showNotification(`Connecté en tant que ${payload.name}`);
             } catch (e) {
                 console.error("Erreur lors de la validation du token:", e);
-                showNotification("Erreur de connexion", true);
+                showNotification("Erreur de validation du compte. Veuillez réessayer.", true);
                 handleSignOut();
             }
         }
