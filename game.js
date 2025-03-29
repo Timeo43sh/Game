@@ -526,8 +526,13 @@ function initAuth() {
 
 // Gestion de la connexion
 function handleLogin() {
-    const username = document.getElementById('username').value;
+    const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
+    
+    if (!username || !password) {
+        showNotification('Veuillez remplir tous les champs', 'error');
+        return;
+    }
     
     if (username === config.adminCredentials.username && password === config.adminCredentials.password) {
         gameState.user = {
@@ -548,6 +553,8 @@ function handleLogin() {
         showNotification('Connexion réussie!', 'success');
     } else {
         showNotification('Identifiants incorrects', 'error');
+        // Effacer le mot de passe en cas d'erreur
+        document.getElementById('password').value = '';
     }
 }
 
@@ -568,11 +575,25 @@ function handleSignOut() {
 function syncPlayerData() {
     if (!gameState.user) return;
     
-    // Sauvegarder les données localement
-    localStorage.setItem('bananaEmpireSave', JSON.stringify(gameState));
+    // Créer une copie des données à sauvegarder sans les informations sensibles
+    const saveData = {
+        bananas: gameState.bananas,
+        bananasPerSecond: gameState.bananasPerSecond,
+        totalClicks: gameState.totalClicks,
+        upgrades: gameState.upgrades,
+        achievements: gameState.achievements,
+        temporaryBoosts: gameState.temporaryBoosts,
+        specialUpgrades: gameState.specialUpgrades,
+        prestigePowers: gameState.prestigePowers,
+        prestige: gameState.prestige,
+        goldenBananas: gameState.goldenBananas,
+        lastUpdate: gameState.lastUpdate,
+        version: gameState.version,
+        isPremium: gameState.isPremium,
+        premiumBenefits: gameState.premiumBenefits
+    };
     
-    // Ici, vous pouvez ajouter la synchronisation avec un serveur si nécessaire
-    // Par exemple, envoyer les données à une API
+    localStorage.setItem('bananaEmpireSave', JSON.stringify(saveData));
 }
 
 // Chargement des données du joueur
@@ -583,11 +604,15 @@ function loadPlayerData() {
     if (savedData) {
         try {
             const parsed = JSON.parse(savedData);
-            gameState = {
-                ...gameState,
-                ...parsed,
-                user: gameState.user // Garder l'utilisateur actuel
-            };
+            
+            // Migration des versions si nécessaire
+            if (!parsed.version || parsed.version !== gameState.version) {
+                parsed.version = gameState.version;
+            }
+            
+            // Mettre à jour uniquement les données du joueur
+            Object.assign(gameState, parsed);
+            
             updateDisplay();
             showNotification('Données chargées avec succès!', 'success');
         } catch (e) {
@@ -640,13 +665,13 @@ function initAdminPanel() {
     const adminBananaAmount = document.getElementById('adminBananaAmount');
     const adminNewCode = document.getElementById('adminNewCode');
     
-    // Toujours afficher le bouton admin
-    adminBtn.style.display = 'block';
+    // Cacher le bouton admin par défaut
+    adminBtn.style.display = 'none';
     
     // Gérer le clic sur le bouton admin
     adminBtn.addEventListener('click', () => {
         // Vérifier si l'utilisateur est admin
-        if (gameState.user && config.adminCredentials.username === gameState.user.id) {
+        if (gameState.user && gameState.user.isAdmin) {
             // Basculer la visibilité de la section admin
             adminSection.style.display = adminSection.style.display === 'none' ? 'block' : 'none';
             
@@ -659,27 +684,43 @@ function initAdminPanel() {
     
     // Gérer l'ajout de bananes
     adminAddBananasBtn.addEventListener('click', () => {
-        const amount = parseInt(adminBananaAmount.value);
-        if (amount > 0) {
-            gameState.bananas += amount;
-            updateDisplay();
-            showNotification(`${formatNumber(amount)} bananes ajoutées`, 'success');
-            adminBananaAmount.value = '';
+        if (!gameState.user || !gameState.user.isAdmin) {
+            showNotification('Accès refusé', 'error');
+            return;
         }
+        
+        const amount = parseInt(adminBananaAmount.value);
+        if (isNaN(amount) || amount <= 0) {
+            showNotification('Veuillez entrer un nombre valide', 'error');
+            return;
+        }
+        
+        gameState.bananas += amount;
+        updateDisplay();
+        showNotification(`${formatNumber(amount)} bananes ajoutées`, 'success');
+        adminBananaAmount.value = '';
     });
     
     // Gérer la génération de codes premium
     adminGenerateCodeBtn.addEventListener('click', () => {
-        const code = adminNewCode.value.toUpperCase();
-        if (code) {
-            config.premiumCodes[code] = {
-                multiplier: 2,
-                production: 1.5,
-                duration: 'permanent'
-            };
-            showNotification(`Code premium ${code} généré`, 'success');
-            adminNewCode.value = '';
+        if (!gameState.user || !gameState.user.isAdmin) {
+            showNotification('Accès refusé', 'error');
+            return;
         }
+        
+        const code = adminNewCode.value.toUpperCase();
+        if (!code || code.length < 4) {
+            showNotification('Le code doit contenir au moins 4 caractères', 'error');
+            return;
+        }
+        
+        config.premiumCodes[code] = {
+            multiplier: 2,
+            production: 1.5,
+            duration: 'permanent'
+        };
+        showNotification(`Code premium ${code} généré`, 'success');
+        adminNewCode.value = '';
     });
 }
 
