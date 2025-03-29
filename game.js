@@ -40,7 +40,7 @@ const config = {
         'PREMIUM2024': { multiplier: 2, production: 1.5, duration: 'permanent' },
         'VIP2024': { multiplier: 3, production: 2, duration: 'permanent' }
     },
-    adminEmails: ['timeogayte43@gmail.com']
+    adminEmails: ['timeogayte43@gmail.com', 'admin@bananaempire.com']
 };
 
 // Données des améliorations de production
@@ -590,51 +590,26 @@ function updateLeaderboard() {
 
 // Gestion du panel administrateur
 function initAdminPanel() {
-    if (!gameState.user || !config.adminEmails.includes(gameState.user.email)) return;
-    
     const adminBtn = document.getElementById('adminBtn');
     const adminSection = document.getElementById('adminSection');
-    const adminAddBananasBtn = document.getElementById('adminAddBananas');
-    const adminGenerateCodeBtn = document.getElementById('adminGenerateCode');
-    const adminBananaAmount = document.getElementById('adminBananaAmount');
-    const adminNewCode = document.getElementById('adminNewCode');
     
-    // Afficher le bouton admin
-    adminBtn.style.display = 'block';
-    
-    // Gérer le clic sur le bouton admin
-    adminBtn.addEventListener('click', () => {
-        // Basculer la visibilité de la section admin
-        adminSection.style.display = adminSection.style.display === 'none' ? 'block' : 'none';
+    // Vérifier si l'utilisateur est admin
+    if (gameState.user && config.adminEmails.includes(gameState.user.email)) {
+        // Afficher le bouton admin
+        adminBtn.style.display = 'block';
         
-        // Mettre à jour les statistiques
-        updateAdminStats();
-    });
-    
-    // Gérer l'ajout de bananes
-    adminAddBananasBtn.addEventListener('click', () => {
-        const amount = parseInt(adminBananaAmount.value);
-        if (amount > 0) {
-            gameState.bananas += amount;
-            updateDisplay();
-            showNotification(`${formatNumber(amount)} bananes ajoutées`, 'success');
-            adminBananaAmount.value = '';
-        }
-    });
-    
-    // Gérer la génération de codes premium
-    adminGenerateCodeBtn.addEventListener('click', () => {
-        const code = adminNewCode.value.toUpperCase();
-        if (code) {
-            config.premiumCodes[code] = {
-                multiplier: 2,
-                production: 1.5,
-                duration: 'permanent'
-            };
-            showNotification(`Code premium ${code} généré`, 'success');
-            adminNewCode.value = '';
-        }
-    });
+        // Gérer le clic sur le bouton admin
+        adminBtn.addEventListener('click', () => {
+            // Basculer la visibilité de la section admin
+            adminSection.style.display = adminSection.style.display === 'none' ? 'block' : 'none';
+            
+            // Mettre à jour les statistiques
+            updateAdminStats();
+        });
+    } else {
+        // Cacher le bouton admin si l'utilisateur n'est pas admin
+        adminBtn.style.display = 'none';
+    }
 }
 
 // Mise à jour des statistiques admin
