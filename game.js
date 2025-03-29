@@ -529,9 +529,8 @@ function handleSignIn(googleUser) {
     document.getElementById('authContainer').style.display = 'none';
     document.querySelector('.game-container').style.display = 'flex';
     
-    if (config.adminEmails.includes(gameState.user.email)) {
-        document.getElementById('adminBtn').style.display = 'block';
-    }
+    // Toujours afficher le bouton admin
+    document.getElementById('adminBtn').style.display = 'block';
     
     loadPlayerData();
 }
@@ -546,6 +545,7 @@ function handleSignOut() {
         document.getElementById('logoutBtn').style.display = 'none';
         document.getElementById('authContainer').style.display = 'flex';
         document.querySelector('.game-container').style.display = 'none';
+        // Ne plus cacher le bouton admin
     });
 }
 
@@ -591,6 +591,10 @@ function updateLeaderboard() {
 function initAdminPanel() {
     const adminBtn = document.getElementById('adminBtn');
     const adminSection = document.getElementById('adminSection');
+    const adminAddBananasBtn = document.getElementById('adminAddBananas');
+    const adminGenerateCodeBtn = document.getElementById('adminGenerateCode');
+    const adminBananaAmount = document.getElementById('adminBananaAmount');
+    const adminNewCode = document.getElementById('adminNewCode');
     
     // Toujours afficher le bouton admin
     adminBtn.style.display = 'block';
@@ -606,6 +610,31 @@ function initAdminPanel() {
             updateAdminStats();
         } else {
             showNotification('Accès refusé: Droits administrateur requis', 'error');
+        }
+    });
+    
+    // Gérer l'ajout de bananes
+    adminAddBananasBtn.addEventListener('click', () => {
+        const amount = parseInt(adminBananaAmount.value);
+        if (amount > 0) {
+            gameState.bananas += amount;
+            updateDisplay();
+            showNotification(`${formatNumber(amount)} bananes ajoutées`, 'success');
+            adminBananaAmount.value = '';
+        }
+    });
+    
+    // Gérer la génération de codes premium
+    adminGenerateCodeBtn.addEventListener('click', () => {
+        const code = adminNewCode.value.toUpperCase();
+        if (code) {
+            config.premiumCodes[code] = {
+                multiplier: 2,
+                production: 1.5,
+                duration: 'permanent'
+            };
+            showNotification(`Code premium ${code} généré`, 'success');
+            adminNewCode.value = '';
         }
     });
 }
