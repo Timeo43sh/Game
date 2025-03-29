@@ -634,3 +634,105 @@ h1 {
         margin-bottom: 1rem;
     }
 }
+
+/* Styles pour le bouton admin */
+#adminBtn {
+    background: linear-gradient(to right, #FF4444, #CC0000);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 10px rgba(255,0,0,0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    width: 100%;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+#adminBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(255,0,0,0.4);
+}
+
+#adminBtn:active {
+    transform: translateY(1px);
+}
+
+#adminBtn i {
+    font-size: 1.2rem;
+}
+
+/* Styles pour le panel admin */
+.admin-section {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 15px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.admin-section h3 {
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-section h3 i {
+    color: #FF4444;
+}
+
+.admin-input-group {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.admin-input-group input {
+    flex: 1;
+    padding: 0.8rem;
+    border: 2px solid var(--primary-light);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: var(--background);
+    color: var(--text);
+}
+
+.admin-input-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.admin-stat-card {
+    background: var(--light);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.admin-stat-card h4 {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.admin-stat-card p {
+    color: var(--primary-dark);
+    font-size: 1.2rem;
+    font-weight: 600;
+}

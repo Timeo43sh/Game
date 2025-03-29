@@ -592,20 +592,37 @@ function updateLeaderboard() {
 function initAdminPanel() {
     if (!gameState.user || !config.adminEmails.includes(gameState.user.email)) return;
     
+    const adminBtn = document.getElementById('adminBtn');
+    const adminSection = document.getElementById('adminSection');
     const adminAddBananasBtn = document.getElementById('adminAddBananas');
     const adminGenerateCodeBtn = document.getElementById('adminGenerateCode');
     const adminBananaAmount = document.getElementById('adminBananaAmount');
     const adminNewCode = document.getElementById('adminNewCode');
     
+    // Afficher le bouton admin
+    adminBtn.style.display = 'block';
+    
+    // Gérer le clic sur le bouton admin
+    adminBtn.addEventListener('click', () => {
+        // Basculer la visibilité de la section admin
+        adminSection.style.display = adminSection.style.display === 'none' ? 'block' : 'none';
+        
+        // Mettre à jour les statistiques
+        updateAdminStats();
+    });
+    
+    // Gérer l'ajout de bananes
     adminAddBananasBtn.addEventListener('click', () => {
         const amount = parseInt(adminBananaAmount.value);
         if (amount > 0) {
             gameState.bananas += amount;
             updateDisplay();
             showNotification(`${formatNumber(amount)} bananes ajoutées`, 'success');
+            adminBananaAmount.value = '';
         }
     });
     
+    // Gérer la génération de codes premium
     adminGenerateCodeBtn.addEventListener('click', () => {
         const code = adminNewCode.value.toUpperCase();
         if (code) {
@@ -615,8 +632,34 @@ function initAdminPanel() {
                 duration: 'permanent'
             };
             showNotification(`Code premium ${code} généré`, 'success');
+            adminNewCode.value = '';
         }
     });
+}
+
+// Mise à jour des statistiques admin
+function updateAdminStats() {
+    const adminStats = document.getElementById('adminStats');
+    if (!adminStats) return;
+    
+    adminStats.innerHTML = `
+        <div class="admin-stat-card">
+            <h4>Joueurs actifs</h4>
+            <p>${gameState.user ? 1 : 0}</p>
+        </div>
+        <div class="admin-stat-card">
+            <h4>Codes premium actifs</h4>
+            <p>${Object.keys(config.premiumCodes).length}</p>
+        </div>
+        <div class="admin-stat-card">
+            <h4>Bananes totales</h4>
+            <p>${formatNumber(gameState.bananas)}</p>
+        </div>
+        <div class="admin-stat-card">
+            <h4>Production/s</h4>
+            <p>${formatNumber(gameState.bananasPerSecond)}</p>
+        </div>
+    `;
 }
 
 // Gestion de la touche espace
