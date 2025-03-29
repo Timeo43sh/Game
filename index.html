@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banana Empire Ultimate</title>
+    <title>Game Hub - Plateforme de Jeux</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -92,7 +92,157 @@
             -webkit-text-fill-color: transparent;
             font-weight: 800;
         }
+
+        /* Style pour la plateforme de jeux */
+        .platform-nav {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .platform-nav ul {
+            display: flex;
+            list-style: none;
+            overflow-x: auto;
+            padding: 0.5rem;
+        }
+
+        .platform-nav li {
+            padding: 0.5rem 0;
+        }
+
+        .platform-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .platform-nav a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .platform-nav a.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .platform-nav i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-frame {
+            display: none;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .game-frame.active {
+            display: block;
+        }
         
+        .game-iframe {
+            width: 100%;
+            height: 700px;
+            border: none;
+        }
+
+        .back-to-hub {
+            margin-bottom: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-to-hub:hover {
+            background: var(--primary-dark);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .game-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .game-card-content {
+            padding: 1rem;
+        }
+
+        .game-card h3 {
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .game-card p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            height: 4rem;
+            overflow: hidden;
+        }
+
+        .game-card .btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .game-card .btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        /* Banana Clicker Styles */
         .prestige-info {
             display: flex;
             align-items: center;
@@ -103,19 +253,20 @@
             border-radius: 50px;
             font-weight: 600;
             box-shadow: var(--shadow);
+            margin-bottom: 1rem;
         }
-        
+
         .prestige-info i {
             font-size: 1.2rem;
         }
-        
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
-        
+
         .stat-card {
             background: var(--card-bg);
             padding: 1.5rem;
@@ -126,38 +277,38 @@
             overflow: hidden;
             border-left: 5px solid var(--primary);
         }
-        
+
         .stat-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
-        
+
         .stat-card h2 {
             font-size: 1rem;
             color: var(--primary-dark);
             margin-bottom: 0.5rem;
             font-weight: 600;
         }
-        
+
         .stat-card p {
             font-size: 1.8rem;
             font-weight: 700;
         }
-        
+
         .golden {
             color: var(--golden);
         }
-        
+
         .prestige {
             color: var(--prestige);
         }
-        
+
         #banana-container {
             text-align: center;
             margin: 2.5rem 0;
             position: relative;
         }
-        
+
         #banana {
             width: 220px;
             height: 220px;
@@ -169,215 +320,22 @@
             filter: drop-shadow(0 10px 20px rgba(255,160,0,0.4));
             margin: 0 auto;
         }
-        
+
         #banana:active {
             transform: scale(0.92);
         }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-        
-        .click-effect {
-            position: absolute;
-            font-size: 1.8rem;
-            animation: floatAway 1.5s forwards;
-            z-index: 100;
-            pointer-events: none;
-            font-weight: 700;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        .click-effect.special {
-            animation: floatAway 1.5s forwards, pulse 0.5s infinite alternate;
-            z-index: 101;
-            font-size: 2.2rem;
-            font-weight: 900;
-            text-shadow: 0 0 10px gold;
-        }
-        
-        @keyframes floatAway {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(-100px) rotate(20deg); opacity: 0; }
-        }
-        
-        @keyframes pulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.2); }
-        }
-        
-        .game-section {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-        
-        .section-title {
-            color: var(--primary-dark);
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .section-title i {
-            font-size: 1.2rem;
-        }
-        
-        .upgrade-category {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px dashed var(--primary-light);
-        }
-        
-        .upgrade-category h4 {
-            color: var(--primary);
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .upgrades-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .upgrade {
-            background: var(--light);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-            border-left: 4px solid var(--primary);
-        }
-        
-        .upgrade:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-        
-        .upgrade h3 {
-            color: var(--primary-dark);
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .upgrade p {
-            color: var(--text-light);
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .upgrade-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .upgrade-cost {
-            font-weight: 600;
-            color: var(--accent);
-        }
-        
-        .upgrade-owned {
-            font-style: italic;
-            color: var(--secondary);
-        }
-        
-        .upgrade-cooldown {
-            font-style: italic;
-            color: var(--accent);
-        }
-        
-        .upgrade-bps {
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            color: var(--text-light);
-        }
-        
-        .upgrade-progress {
-            height: 5px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            overflow: hidden;
-        }
-        
-        .upgrade-progress .progress-bar {
-            height: 100%;
-            background: var(--primary);
-            transition: width 0.3s ease;
-        }
-        
-        .btn {
-            background: linear-gradient(to right, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 4px 10px rgba(255,160,0,0.3);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            width: 100%;
-            justify-content: center;
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(255,160,0,0.4);
-        }
-        
-        .btn:active {
-            transform: translateY(1px);
-        }
-        
-        .btn:disabled {
-            background: #CCCCCC;
-            cursor: not-allowed;
-            transform: none !important;
-            box-shadow: none !important;
-        }
-        
-        .btn-golden {
-            background: linear-gradient(to right, var(--golden), #FFC000);
-        }
-        
-        .btn-prestige {
-            background: linear-gradient(to right, var(--prestige), #7B1FA2);
-        }
-        
+
         .tab-container {
             margin-bottom: 1.5rem;
         }
-        
+
         .tab-buttons {
             display: flex;
             border-bottom: 2px solid var(--light);
             margin-bottom: 1.5rem;
             gap: 0.5rem;
         }
-        
+
         .tab-btn {
             padding: 0.8rem 1.5rem;
             background: none;
@@ -389,16 +347,16 @@
             transition: var(--transition);
             border-radius: 8px 8px 0 0;
         }
-        
+
         .tab-btn:hover {
             color: var(--primary-dark);
             background: rgba(255, 193, 7, 0.1);
         }
-        
+
         .tab-btn.active {
             color: var(--primary-dark);
         }
-        
+
         .tab-btn.active::after {
             content: '';
             position: absolute;
@@ -408,21 +366,21 @@
             height: 2px;
             background: var(--primary);
         }
-        
+
         .tab-content {
             display: none;
             animation: fadeIn 0.3s ease;
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
+
         .notification {
             position: fixed;
             top: 20px;
@@ -440,757 +398,17 @@
             gap: 0.8rem;
             max-width: 350px;
         }
-        
+
         .notification.show {
             transform: translateX(0);
         }
-        
+
         .notification.error {
             background: #dc3545;
         }
-        
+
         .notification i {
             font-size: 1.5rem;
-        }
-        
-        .progress-container {
-            width: 100%;
-            background: rgba(0,0,0,0.1);
-            border-radius: 10px;
-            height: 10px;
-            margin: 1rem 0;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(to right, var(--prestige), #BA68C8);
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-        
-        .locked-upgrade {
-            position: relative;
-            opacity: 0.7;
-            filter: grayscale(50%);
-        }
-        
-        .locked-upgrade::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1;
-            border-radius: 8px;
-        }
-        
-        .locked-label {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            z-index: 2;
-            text-align: center;
-            width: 80%;
-        }
-        
-        .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .achievement {
-            background: var(--light);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            border-left: 4px solid var(--primary-light);
-        }
-        
-        .achievement.unlocked {
-            border-left: 4px solid var(--golden);
-            background: linear-gradient(to right, rgba(255, 215, 0, 0.1), var(--light));
-        }
-        
-        .achievement-icon {
-            width: 50px;
-            height: 50px;
-            background: var(--primary-light);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: var(--primary-dark);
-            flex-shrink: 0;
-        }
-        
-        .achievement.unlocked .achievement-icon {
-            background: var(--golden);
-            color: white;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-        
-        .achievement-text {
-            flex: 1;
-        }
-        
-        .achievement h4 {
-            color: var(--primary-dark);
-            margin-bottom: 0.3rem;
-            font-size: 1.1rem;
-        }
-        
-        .achievement p {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .achievement-reward {
-            font-size: 0.8rem;
-            color: var(--golden);
-            font-weight: 600;
-        }
-        
-        .achievement-progress {
-            height: 5px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 5px;
-            margin-top: 0.5rem;
-            overflow: hidden;
-        }
-        
-        .achievement-progress-bar {
-            height: 100%;
-            background: var(--primary);
-            transition: width 0.3s ease;
-        }
-        
-        .achievement.unlocked .achievement-progress-bar {
-            background: var(--golden);
-        }
-        
-        /* Styles pour le système de connexion */
-        .auth-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-        
-        .auth-box {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
-        
-        .auth-box h2 {
-            margin-bottom: 1.5rem;
-            color: var(--primary-dark);
-        }
-        
-        .auth-box p {
-            margin-bottom: 1.5rem;
-            color: var(--text-light);
-        }
-        
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-left: auto;
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .user-name {
-            font-weight: 600;
-            color: var(--text);
-        }
-        
-        .logout-btn {
-            background: none;
-            border: none;
-            color: var(--accent);
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin-left: 0.5rem;
-        }
-        
-        .logout-btn:hover {
-            text-decoration: underline;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .upgrades-grid, .achievements-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            #banana {
-                width: 180px;
-                height: 180px;
-            }
-            
-            .tab-buttons {
-                overflow-x: auto;
-                padding-bottom: 0.5rem;
-            }
-            
-            .tab-btn {
-                padding: 0.6rem 1rem;
-                font-size: 0.9rem;
-            }
-            
-            .user-profile {
-                display: none;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            #banana {
-                width: 150px;
-                height: 150px;
-            }
-            
-            .prestige-info {
-                font-size: 0.9rem;
-                padding: 0.4rem 1rem;
-            }
-            
-            .achievement {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .achievement-icon {
-                margin-bottom: 1rem;
-            }
-            
-            .auth-box {
-                padding: 1.5rem;
-                margin: 0 1rem;
-            }
-        }
-        
-        #adminBtn i {
-            font-size: 1.2rem;
-        }
-        
-        /* Styles pour le panneau admin avancé */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            overflow-y: auto;
-        }
-        
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background: var(--card-bg);
-            width: 90%;
-            max-width: 900px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            animation: modalIn 0.3s ease;
-        }
-        
-        @keyframes modalIn {
-            from { opacity: 0; transform: translateY(-50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--light);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-header h3 {
-            color: var(--primary-dark);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .btn-close {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: var(--text-light);
-            padding: 0.5rem;
-        }
-        
-        .modal-body {
-            padding: 1.5rem;
-            overflow-y: auto;
-            flex: 1;
-        }
-        
-        .modal-footer {
-            padding: 1.5rem;
-            border-top: 1px solid var(--light);
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-        }
-        
-        /* Onglets admin */
-        .admin-tabs {
-            display: flex;
-            border-bottom: 2px solid var(--light);
-            margin-bottom: 1.5rem;
-            gap: 0.5rem;
-            overflow-x: auto;
-            padding-bottom: 0.5rem;
-        }
-        
-        .admin-tab-btn {
-            padding: 0.8rem 1.5rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-light);
-            position: relative;
-            transition: var(--transition);
-            border-radius: 8px 8px 0 0;
-            white-space: nowrap;
-        }
-        
-        .admin-tab-btn:hover {
-            color: var(--primary-dark);
-            background: rgba(255, 193, 7, 0.1);
-        }
-        
-        .admin-tab-btn.active {
-            color: var(--primary-dark);
-        }
-        
-        .admin-tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--primary);
-        }
-        
-        .admin-tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .admin-tab-content.active {
-            display: block;
-        }
-        
-        /* Contenu des onglets admin */
-        
-        /* Gestion utilisateurs */
-        .search-bar {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .search-bar input {
-            flex: 1;
-            padding: 0.8rem;
-            border: 2px solid var(--primary-light);
-            border-radius: 8px;
-            font-size: 1rem;
-            background: var(--background);
-            color: var(--text);
-        }
-        
-        .search-bar input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .search-bar .btn {
-            padding: 0.8rem 1.2rem;
-        }
-        
-        .admin-user-list-container {
-            margin-bottom: 1.5rem;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .admin-user-list {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .admin-user-list th, 
-        .admin-user-list td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--light);
-        }
-        
-        .admin-user-list th {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            font-weight: 600;
-        }
-        
-        .admin-user-list tbody tr:nth-child(even) {
-            background: rgba(0, 0, 0, 0.03);
-        }
-        
-        .admin-user-list tbody tr:hover {
-            background: rgba(255, 193, 7, 0.1);
-        }
-        
-        .user-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .user-actions button {
-            padding: 0.5rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            border-radius: 50%;
-            transition: var(--transition);
-        }
-        
-        .user-actions .edit-btn {
-            color: var(--secondary);
-        }
-        
-        .user-actions .delete-btn {
-            color: #dc3545;
-        }
-        
-        .user-actions .sync-btn {
-            color: var(--primary);
-        }
-        
-        .user-actions button:hover {
-            background: var(--light);
-        }
-        
-        .user-status {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .user-status.active {
-            background: rgba(76, 175, 80, 0.2);
-            color: var(--secondary);
-        }
-        
-        .user-status.suspended {
-            background: rgba(255, 193, 7, 0.2);
-            color: var(--primary-dark);
-        }
-        
-        .user-status.banned {
-            background: rgba(220, 53, 69, 0.2);
-            color: #dc3545;
-        }
-        
-        .admin-actions {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        /* Formulaire édition utilisateur */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text);
-        }
-        
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 0.8rem;
-            border: 2px solid var(--primary-light);
-            border-radius: 8px;
-            font-size: 1rem;
-            background: var(--background);
-            color: var(--text);
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .checkbox-group {
-            margin-top: 0.5rem;
-        }
-        
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 400;
-        }
-        
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-        }
-        
-        /* Gestion synchronisation */
-        .sync-status-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--light);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin: 0.5rem 0;
-        }
-        
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #dc3545;
-        }
-        
-        .status-dot.active {
-            background: var(--secondary);
-        }
-        
-        .sync-actions {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .sync-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .sync-conflict-list {
-            background: var(--light);
-            padding: 1.5rem;
-            border-radius: 10px;
-        }
-        
-        .conflict-container {
-            margin-top: 1rem;
-        }
-        
-        .conflict-item {
-            background: var(--background);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border-left: 4px solid var(--primary);
-        }
-        
-        .conflict-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-        
-        .conflict-header h5 {
-            color: var(--primary-dark);
-        }
-        
-        .conflict-info {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .conflict-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        
-        /* Logs système */
-        .logs-filter {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-        
-        .logs-filter select {
-            padding: 0.8rem;
-            border: 2px solid var(--primary-light);
-            border-radius: 8px;
-            background: var(--background);
-            color: var(--text);
-        }
-        
-        .logs-container {
-            background: var(--light);
-            padding: 1rem;
-            border-radius: 8px;
-            height: 400px;
-            overflow-y: auto;
-            font-family: monospace;
-        }
-        
-        .log-entry {
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-        
-        .log-entry.info {
-            background: rgba(33, 150, 243, 0.1);
-            border-left: 3px solid #2196F3;
-        }
-        
-        .log-entry.warning {
-            background: rgba(255, 193, 7, 0.1);
-            border-left: 3px solid var(--primary);
-        }
-        
-        .log-entry.error {
-            background: rgba(220, 53, 69, 0.1);
-            border-left: 3px solid #dc3545;
-        }
-        
-        .log-timestamp {
-            color: var(--text-light);
-            margin-right: 0.5rem;
-        }
-        
-        .no-data {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-light);
-            font-style: italic;
-        }
-        
-        /* Boutons et alertes */
-        .btn-warning {
-            background: linear-gradient(to right, #FF9800, #F57C00);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(to right, #dc3545, #c82333);
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .modal-content {
-                width: 95%;
-                max-height: 95vh;
-            }
-            
-            .admin-user-list th:nth-child(1),
-            .admin-user-list td:nth-child(1),
-            .admin-user-list th:nth-child(4),
-            .admin-user-list td:nth-child(4) {
-                display: none;
-            }
-            
-            .sync-status-container {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .sync-actions {
-                width: 100%;
-            }
-            
-            .admin-actions {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
         }
     </style>
 </head>
@@ -1231,11 +449,7 @@
                 <button class="theme-toggle" id="themeToggle" title="Changer de thème">
                     <i class="fas fa-moon"></i>
                 </button>
-                <h1>Banana Empire Ultimate</h1>
-            </div>
-            <div class="prestige-info">
-                <i class="fas fa-trophy"></i> <span id="prestige-counter">0</span>
-                <span class="golden"><i class="fas fa-star"></i> <span id="golden-bananas">0</span></span>
+                <h1>Game Hub</h1>
             </div>
             <!-- Section profil utilisateur -->
             <div id="userProfile" class="user-profile" style="display: none;">
@@ -1244,211 +458,158 @@
                 <button onclick="handleSignOut()" class="logout-btn">Déconnexion</button>
             </div>
         </header>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h2><i class="fas fa-banana"></i> Bananes</h2>
-                <p id="counter">0</p>
-            </div>
-            <div class="stat-card">
-                <h2><i class="fas fa-bolt"></i> Bananes/Secondes</h2>
-                <p id="bananas-per-second">0</p>
-            </div>
-            <div class="stat-card">
-                <h2><i class="fas fa-hand-pointer"></i> Total Clics</h2>
-                <p id="total-clicks">0</p>
-            </div>
-            <div class="stat-card">
-                <h2><i class="fas fa-chart-line"></i> Multiplicateur</h2>
-                <p id="multiplier">1.00x</p>
+
+        <!-- Navigation de la plateforme -->
+        <nav class="platform-nav">
+            <ul>
+                <li><a href="#" class="active" onclick="showHub()"><i class="fas fa-home"></i>Accueil</a></li>
+                <li><a href="#" onclick="loadGame('banana-clicker')"><i class="fas fa-hand-point-up"></i>Banana Clicker</a></li>
+                <li><a href="#" onclick="loadGame('snake')"><i class="fas fa-dragon"></i>Snake</a></li>
+                <li><a href="#" onclick="loadGame('tetris')"><i class="fas fa-th-large"></i>Tetris</a></li>
+                <li><a href="#" onclick="loadGame('memory')"><i class="fas fa-brain"></i>Memory</a></li>
+                <li><a href="#" onclick="loadGame('flappy')"><i class="fas fa-feather-alt"></i>Flappy Bird</a></li>
+            </ul>
+        </nav>
+
+        <!-- Hub de jeux -->
+        <div id="games-hub" class="games-hub">
+            <h2>Nos Jeux</h2>
+            <div class="games-grid">
+                <div class="game-card">
+                    <img src="images/banana-clicker.jpg" alt="Banana Clicker" onerror="this.src='https://via.placeholder.com/250x150/FFC107/FFFFFF?text=Banana+Clicker'">
+                    <div class="game-card-content">
+                        <h3>Banana Clicker</h3>
+                        <p>Cliquez pour récolter des bananes et bâtir votre empire de la banane!</p>
+                        <button class="btn" onclick="loadGame('banana-clicker')"><i class="fas fa-play"></i> Jouer</button>
+                    </div>
+                </div>
+                <div class="game-card">
+                    <img src="images/snake.jpg" alt="Snake" onerror="this.src='https://via.placeholder.com/250x150/4CAF50/FFFFFF?text=Snake'">
+                    <div class="game-card-content">
+                        <h3>Snake</h3>
+                        <p>Le jeu classique du serpent qui grandit en mangeant des pommes.</p>
+                        <button class="btn" onclick="loadGame('snake')"><i class="fas fa-play"></i> Jouer</button>
+                    </div>
+                </div>
+                <div class="game-card">
+                    <img src="images/tetris.jpg" alt="Tetris" onerror="this.src='https://via.placeholder.com/250x150/2196F3/FFFFFF?text=Tetris'">
+                    <div class="game-card-content">
+                        <h3>Tetris</h3>
+                        <p>Empilez des blocs et complétez des lignes dans ce jeu légendaire.</p>
+                        <button class="btn" onclick="loadGame('tetris')"><i class="fas fa-play"></i> Jouer</button>
+                    </div>
+                </div>
+                <div class="game-card">
+                    <img src="images/memory.jpg" alt="Memory" onerror="this.src='https://via.placeholder.com/250x150/9C27B0/FFFFFF?text=Memory'">
+                    <div class="game-card-content">
+                        <h3>Memory</h3>
+                        <p>Testez votre mémoire en trouvant les paires de cartes identiques.</p>
+                        <button class="btn" onclick="loadGame('memory')"><i class="fas fa-play"></i> Jouer</button>
+                    </div>
+                </div>
+                <div class="game-card">
+                    <img src="images/flappy.jpg" alt="Flappy Bird" onerror="this.src='https://via.placeholder.com/250x150/FF5722/FFFFFF?text=Flappy+Bird'">
+                    <div class="game-card-content">
+                        <h3>Flappy Bird</h3>
+                        <p>Faites voler l'oiseau à travers les obstacles. Simple mais addictif!</p>
+                        <button class="btn" onclick="loadGame('flappy')"><i class="fas fa-play"></i> Jouer</button>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div id="banana-container">
-            <div id="banana" title="Cliquez pour gagner des bananes!"></div>
-            <div class="tooltip">
-                <span class="tooltiptext">Chaque clic rapporte 1 banane + bonus de prestige</span>
-            </div>
-        </div>
-        
-        <div class="tab-container">
-            <div class="tab-buttons">
-                <button class="tab-btn active" onclick="openTab(event, 'upgrades')">
-                    <i class="fas fa-arrow-up"></i> Améliorations
-                </button>
-                <button class="tab-btn" onclick="openTab(event, 'achievements')">
-                    <i class="fas fa-trophy"></i> Succès
-                </button>
-                <button class="tab-btn" onclick="openTab(event, 'prestige')">
-                    <i class="fas fa-redo"></i> Prestige
-                </button>
-            </div>
-            
-            <div id="upgrades" class="tab-content active">
-                <div class="game-section">
-                    <h3 class="section-title"><i class="fas fa-arrow-up"></i> Améliorations</h3>
-                    
-                    <div class="upgrade-category">
-                        <h4><i class="fas fa-bolt"></i> Boosters Temporaires</h4>
-                        <div class="upgrades-grid">
-                            <div class="upgrade">
-                                <h3><i class="fas fa-hourglass-half"></i> Minute Dorée</h3>
-                                <p>Double la production pendant 1 minute</p>
-                                <div class="upgrade-info">
-                                    <span class="upgrade-cost">Coût: <span id="golden-minute-cost">500</span> bananes</span>
-                                    <span class="upgrade-cooldown">Disponible dans: <span id="golden-minute-cooldown">0</span>s</span>
-                                </div>
-                                <button class="btn btn-golden" onclick="activateGoldenMinute()" id="golden-minute-btn">
-                                    <i class="fas fa-play"></i> Activer
-                                </button>
-                            </div>
-                            
-                            <div class="upgrade">
-                                <h3><i class="fas fa-bomb"></i> Explosion Bananière</h3>
-                                <p>+1000 bananes instantanément</p>
-                                <div class="upgrade-info">
-                                    <span class="upgrade-cost">Coût: <span id="banana-blast-cost">50</span> Bananes Dorées</span>
-                                    <span class="upgrade-cooldown">Disponible dans: <span id="banana-blast-cooldown">0</span>s</span>
-                                </div>
-                                <button class="btn btn-prestige" onclick="activateBananaBlast()" id="banana-blast-btn">
-                                    <i class="fas fa-bolt"></i> Activer
-                                </button>
-                            </div>
-                            
-                            <div class="upgrade">
-                                <h3><i class="fas fa-infinity"></i> Boucle Temporelle</h3>
-                                <p>10x production pendant 30 secondes</p>
-                                <div class="upgrade-info">
-                                    <span class="upgrade-cost">Coût: <span id="timeLoop-cost">5,000</span> Bananes Dorées</span>
-                                    <span class="upgrade-cooldown">Disponible dans: <span id="timeLoop-cooldown">0</span>s</span>
-                                </div>
-                                <button class="btn btn-prestige" onclick="activateTimeLoop()" id="timeLoop-btn">
-                                    <i class="fas fa-play"></i> Activer
-                                </button>
-                            </div>
-                            
-                            <div class="upgrade">
-                                <h3><i class="fas fa-sync-alt"></i> Résonance Bananière</h3>
-                                <p>Production continue même hors ligne pendant 24h</p>
-                                <div class="upgrade-info">
-                                    <span class="upgrade-cost">Coût: <span id="resonance-cost">10,000</span> Bananes Dorées</span>
-                                    <span class="upgrade-cooldown">Disponible dans: <span id="resonance-cooldown">0</span>s</span>
-                                </div>
-                                <button class="btn btn-golden" onclick="activateResonance()" id="resonance-btn">
-                                    <i class="fas fa-play"></i> Activer
-                                </button>
-                            </div>
-                        </div>
+
+        <!-- Conteneur pour les jeux -->
+        <div id="game-container" class="game-frame">
+            <button class="back-to-hub" onclick="showHub()"><i class="fas fa-arrow-left"></i> Retour à l'accueil</button>
+            <div id="banana-clicker" class="game-content">
+                <!-- Contenu original de Banana Empire Ultimate -->
+                <div class="prestige-info">
+                    <i class="fas fa-trophy"></i> <span id="prestige-counter">0</span>
+                    <span class="golden"><i class="fas fa-star"></i> <span id="golden-bananas">0</span></span>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h2><i class="fas fa-apple-alt"></i> Bananes</h2>
+                        <p id="counter">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h2><i class="fas fa-bolt"></i> Bananes/Secondes</h2>
+                        <p id="bananas-per-second">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h2><i class="fas fa-hand-pointer"></i> Total Clics</h2>
+                        <p id="total-clicks">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h2><i class="fas fa-chart-line"></i> Multiplicateur</h2>
+                        <p id="multiplier">1.00x</p>
+                    </div>
+                </div>
+                
+                <div id="banana-container">
+                    <div id="banana" title="Cliquez pour gagner des bananes!"></div>
+                </div>
+                
+                <div class="tab-container">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="upgrades">
+                            <i class="fas fa-arrow-up"></i> Améliorations
+                        </button>
+                        <button class="tab-btn" data-tab="achievements">
+                            <i class="fas fa-trophy"></i> Succès
+                        </button>
+                        <button class="tab-btn" data-tab="prestige">
+                            <i class="fas fa-redo"></i> Prestige
+                        </button>
                     </div>
                     
-                    <div class="upgrade-category">
-                        <h4><i class="fas fa-industry"></i> Productions Automatiques</h4>
-                        <div class="upgrades-grid" id="production-upgrades">
-                            <!-- Les améliorations de production seront ajoutées dynamiquement -->
-                        </div>
+                    <div id="upgrades" class="tab-content active">
+                        <div id="production-upgrades"></div>
                     </div>
                     
-                    <div class="upgrade-category">
-                        <h4><i class="fas fa-star"></i> Améliorations Spéciales</h4>
-                        <div class="upgrades-grid">
-                            <div class="upgrade">
-                                <h3><i class="fas fa-magic"></i> Multiplicateur Aléatoire</h3>
-                                <p>Chance de x2 à x10 sur chaque clic</p>
-                                <div class="upgrade-info">
-                                    <span class="upgrade-cost">Coût: <span id="random-multiplier-cost">10,000</span> bananes</span>
-                                    <span class="upgrade-owned">Niveau: <span id="random-multiplier-level">0</span>/5</span>
-                                </div>
-                                <div class="upgrade-progress">
-                                    <div class="progress-bar" style="width: 0%"></div>
-                                </div>
-                                <button class="btn" onclick="buyRandomMultiplier()" id="random-multiplier-btn">
-                                    <i class="fas fa-shopping-cart"></i> Améliorer
-                                </button>
-                            </div>
-                            
-                            <div class="upgrade">
-                                <h3><i class="fas fa-recycle"></i> Recyclage Bananier</h3>
-                                <p>Convertit 1% des BPS en bananes immédiates chaque minute</p>
-                                <div class="upgrade-info">
-                                    <span class="upgrade-cost">Coût: <span id="recycling-cost">25,000</span> bananes</span>
-                                    <span class="upgrade-owned">Niveau: <span id="recycling-level">0</span>/3</span>
-                                </div>
-                                <button class="btn" onclick="buyRecycling()" id="recycling-btn">
-                                    <i class="fas fa-shopping-cart"></i> Améliorer
-                                </button>
-                            </div>
-                        </div>
+                    <div id="achievements" class="tab-content">
+                        <div id="achievements-container"></div>
                     </div>
                     
-                    <div class="upgrade-category" id="prestige-upgrades-container">
-                        <h4><i class="fas fa-trophy"></i> Pouvoirs de Prestige</h4>
-                        <div class="upgrades-grid">
-                            <div class="upgrade">
-                                <h3><i class="fas fa-hand-holding-usd"></i> Intérêts Bananiers</h3>
-                                <p>Gagnez 1% de vos bananes chaque heure</p>
-                                <div class="upgrade-info">
-                                    <span class="upgrade-cost">Coût: <span id="interest-cost">5</span> Bananes Dorées</span>
-                                    <span class="upgrade-owned">Niveau: <span id="interest-level">0</span>/10</span>
-                                </div>
-                                <button class="btn btn-golden" onclick="buyInterest()" id="interest-btn">
-                                    <i class="fas fa-shopping-cart"></i> Améliorer
-                                </button>
-                            </div>
-                            
-                            <div class="upgrade">
-                                <h3><i class="fas fa-chess-queen"></i> Multiplicateur de Prestige</h3>
-                                <p>Augmente le bonus de prestige de +0.1% par niveau</p>
-                                <div class="upgrade-info">
-                                    <span class="upgrade-cost">Coût: <span id="prestige-mult-cost">10</span> Bananes Dorées</span>
-                                    <span class="upgrade-owned">Niveau: <span id="prestige-mult-level">0</span>/20</span>
-                                </div>
-                                <button class="btn btn-prestige" onclick="buyPrestigeMultiplier()" id="prestige-mult-btn">
-                                    <i class="fas fa-shopping-cart"></i> Améliorer
-                                </button>
-                            </div>
-                        </div>
+                    <div id="prestige" class="tab-content">
+                        <button class="btn" id="prestige-btn">
+                            <i class="fas fa-redo"></i> Prestige
+                        </button>
                     </div>
                 </div>
             </div>
             
-            <div id="achievements" class="tab-content">
-                <div class="game-section">
-                    <h3 class="section-title"><i class="fas fa-trophy"></i> Succès</h3>
-                    <div class="achievements-grid" id="achievements-container">
-                        <!-- Les succès seront ajoutés dynamiquement -->
-                    </div>
+            <!-- Autres jeux à venir -->
+            <div id="snake" class="game-content" style="display: none;">
+                <h2>Snake</h2>
+                <p>Le jeu Snake sera bientôt disponible !</p>
+                <div class="game-placeholder" style="background: #4CAF50; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                    <i class="fas fa-code"></i> En développement
                 </div>
             </div>
             
-            <div id="prestige" class="tab-content">
-                <div class="game-section">
-                    <h3 class="section-title"><i class="fas fa-redo"></i> Prestige</h3>
-                    <p>Redémarrez votre progression en échange de Bananes Dorées qui donnent des bonus permanents!</p>
-                    
-                    <div class="stat-card">
-                        <h2><i class="fas fa-star golden"></i> Bananes Dorées</h2>
-                        <p class="golden"><span id="golden-bananas-counter">0</span></p>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <h2><i class="fas fa-chart-line"></i> Multiplicateur actuel</h2>
-                        <p id="current-multiplier">1.00x</p>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <h2><i class="fas fa-trophy prestige"></i> Niveau de Prestige</h2>
-                        <p class="prestige"><span id="prestige-level">0</span></p>
-                    </div>
-                    
-                    <p id="prestige-requirement">Vous avez besoin d'au moins 1,000,000 bananes pour effectuer un prestige.</p>
-                    <p id="prestige-progress">Progression: <span>0.00</span>%</p>
-                    <div class="progress-container">
-                        <div class="progress-bar" id="prestige-progress-bar"></div>
-                    </div>
-                    
-                    <button class="btn btn-prestige" id="prestige-btn" onclick="prestige()" disabled>
-                        <i class="fas fa-redo"></i> Prestige (Obtenez <span id="prestige-reward">0</span> Bananes Dorées)
-                    </button>
+            <div id="tetris" class="game-content" style="display: none;">
+                <h2>Tetris</h2>
+                <p>Le jeu Tetris sera bientôt disponible !</p>
+                <div class="game-placeholder" style="background: #2196F3; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                    <i class="fas fa-code"></i> En développement
+                </div>
+            </div>
+            
+            <div id="memory" class="game-content" style="display: none;">
+                <h2>Memory</h2>
+                <p>Le jeu Memory sera bientôt disponible !</p>
+                <div class="game-placeholder" style="background: #9C27B0; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                    <i class="fas fa-code"></i> En développement
+                </div>
+            </div>
+            
+            <div id="flappy" class="game-content" style="display: none;">
+                <h2>Flappy Bird</h2>
+                <p>Le jeu Flappy Bird sera bientôt disponible !</p>
+                <div class="game-placeholder" style="background: #FF5722; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                    <i class="fas fa-code"></i> En développement
                 </div>
             </div>
         </div>
@@ -1466,1387 +627,82 @@
     <audio id="specialSound" src="https://assets.mixkit.co/sfx/preview/mixkit-extra-bonus-in-a-video-game-2045.mp3"></audio>
 
     <script>
-        // Variables du jeu
-        let gameState = {
-            bananas: 0,
-            bananasPerSecond: 0,
-            totalClicks: 0,
-            upgrades: {},
-            achievements: {},
-            temporaryBoosts: {
-                goldenMinute: { active: false, endTime: 0, cooldown: 0 },
-                bananaBlast: { cooldown: 0 },
-                timeLoop: { active: false, endTime: 0, cooldown: 0 },
-                resonance: { active: false, endTime: 0, cooldown: 0 }
-            },
-            specialUpgrades: {
-                randomMultiplier: { level: 0 },
-                recycling: { level: 0, lastCollection: 0 }
-            },
-            prestigePowers: {
-                interest: { level: 0 },
-                prestigeMultiplier: { level: 0 },
-                lastInterest: 0
-            },
-            prestige: 0,
-            goldenBananas: 0,
-            lastUpdate: Date.now(),
-            version: "1.4.0",
-            userId: null
-        };
-        
-        // Données des améliorations de production
-        const productionUpgrades = [
-            { 
-                id: 'monkey', 
-                name: 'Singe Assistant', 
-                desc: 'Un petit singe qui travaille pour vous', 
-                baseCost: 15, 
-                bps: 0.2,
-                icon: 'fas fa-monkey',
-                unlockAt: 0
-            },
-            { 
-                id: 'grandma', 
-                name: 'Grand-mère Bananière', 
-                desc: 'Elle a des recettes secrètes pour faire pousser les bananes', 
-                baseCost: 100, 
-                bps: 1,
-                icon: 'fas fa-grandma',
-                unlockAt: 50
-            },
-            { 
-                id: 'farm', 
-                name: 'Ferme Tropicale', 
-                desc: 'Une plantation dédiée à vos bananes', 
-                baseCost: 500, 
-                bps: 4,
-                icon: 'fas fa-tractor',
-                unlockAt: 200
-            },
-            { 
-                id: 'factory', 
-                name: 'Usine de Transformation', 
-                desc: 'Transformez vos bananes en produits dérivés', 
-                baseCost: 3000, 
-                bps: 10,
-                icon: 'fas fa-industry',
-                unlockAt: 1000
-            },
-            { 
-                id: 'plantation', 
-                name: 'Plantation Géante', 
-                desc: 'Dominez le marché mondial de la banane', 
-                baseCost: 10000, 
-                bps: 25,
-                icon: 'fas fa-globe-americas',
-                unlockAt: 5000
-            },
-            { 
-                id: 'research', 
-                name: 'Laboratoire de Recherche', 
-                desc: 'Bananes génétiquement modifiées pour plus de rendement', 
-                baseCost: 50000, 
-                bps: 100,
-                icon: 'fas fa-flask',
-                unlockAt: 20000
-            },
-            { 
-                id: 'portal', 
-                name: 'Portail Bananier', 
-                desc: 'Importez des bananes d\'autres dimensions', 
-                baseCost: 250000, 
-                bps: 500,
-                icon: 'fas fa-portal-enter',
-                unlockAt: 100000
-            },
-            { 
-                id: 'timeMachine', 
-                name: 'Machine Temporelle', 
-                desc: 'Récupérez des bananes du futur', 
-                baseCost: 1000000, 
-                bps: 2000,
-                icon: 'fas fa-clock',
-                unlockAt: 500000
-            },
-            { 
-                id: 'bananaGod', 
-                name: 'Temple du Dieu Banane', 
-                desc: 'Vénérez le dieu suprême de la banane', 
-                baseCost: 5000000, 
-                bps: 10000,
-                icon: 'fas fa-place-of-worship',
-                unlockAt: 2000000
-            },
-            { 
-                id: 'quantumFarm', 
-                name: 'Ferme Quantique', 
-                desc: 'Cultivez des bananes dans des univers parallèles', 
-                baseCost: 25000000, 
-                bps: 50000,
-                icon: 'fas fa-atom',
-                unlockAt: 10000000
-            },
-            { 
-                id: 'robotFactory', 
-                name: 'Usine Robotisée', 
-                desc: 'Des robots ultra-efficaces pour maximiser la production', 
-                baseCost: 100000000, 
-                bps: 200000,
-                icon: 'fas fa-robot',
-                unlockAt: 50000000
-            },
-            { 
-                id: 'asteroidMine', 
-                name: 'Mine Astéroïde', 
-                desc: 'Extraction de bananes depuis les astéroïdes', 
-                baseCost: 1000000000, 
-                bps: 1000000,
-                icon: 'fas fa-meteor',
-                unlockAt: 500000000
-            },
-            { 
-                id: 'quantumReplicator', 
-                name: 'Réplicateur Quantique', 
-                desc: 'Crée des bananes à partir du vide quantique', 
-                baseCost: 10000000000, 
-                bps: 10000000,
-                icon: 'fas fa-galaxy',
-                unlockAt: 5000000000
-            }
-        ];
-        
-        // Données des succès
-        const achievementsData = [
-            { 
-                id: 'ach-10', 
-                name: 'Premières Bananes', 
-                desc: 'Atteignez 10 bananes', 
-                threshold: 10, 
-                reward: 5,
-                icon: 'fas fa-seedling'
-            },
-            { 
-                id: 'ach-100', 
-                name: 'Banane Affamé', 
-                desc: 'Atteignez 100 bananes', 
-                threshold: 100, 
-                reward: 20,
-                icon: 'fas fa-utensils'
-            },
-            { 
-                id: 'ach-1000', 
-                name: 'Roi des Bananes', 
-                desc: 'Atteignez 1,000 bananes', 
-                threshold: 1000, 
-                reward: 100,
-                icon: 'fas fa-crown'
-            },
-            { 
-                id: 'ach-10000', 
-                name: 'Empereur Banane', 
-                desc: 'Atteignez 10,000 bananes', 
-                threshold: 10000, 
-                reward: 500,
-                icon: 'fas fa-chess-king'
-            },
-            { 
-                id: 'ach-100000', 
-                name: 'Dieu de la Banane', 
-                desc: 'Atteignez 100,000 bananes', 
-                threshold: 100000, 
-                reward: 5000,
-                icon: 'fas fa-god'
-            },
-            { 
-                id: 'ach-1M', 
-                name: 'Légende Bananière', 
-                desc: 'Atteignez 1,000,000 bananes', 
-                threshold: 1000000, 
-                reward: 0,
-                icon: 'fas fa-monument'
-            },
-            { 
-                id: 'ach-1B', 
-                name: 'Bananes Interstellaires', 
-                desc: 'Atteignez 1 milliard de bananes', 
-                threshold: 1000000000, 
-                reward: 1000000,
-                icon: 'fas fa-rocket'
-            },
-            { 
-                id: 'ach-1T', 
-                name: 'Singularité Bananière', 
-                desc: 'Atteignez 1 trillion de bananes', 
-                threshold: 1000000000000, 
-                reward: 100000000,
-                icon: 'fas fa-atom'
-            },
-            { 
-                id: 'ach-1Q', 
-                name: 'Empire Infini', 
-                desc: 'Atteignez 1 quadrillion de bananes', 
-                threshold: 1000000000000000, 
-                reward: 1000000000,
-                icon: 'fas fa-infinity'
-            }
-        ];
-
-        // Initialiser les structures de données du jeu
-        function initializeGameData() {
-            // Initialiser les améliorations de production
-            productionUpgrades.forEach(upgrade => {
-                if (!gameState.upgrades[upgrade.id]) {
-                    gameState.upgrades[upgrade.id] = { owned: 0 };
-                }
-            });
+        // Fonction pour la navigation entre les jeux
+        function showHub() {
+            document.getElementById('games-hub').style.display = 'block';
+            document.getElementById('game-container').classList.remove('active');
             
-            // Initialiser les succès
-            achievementsData.forEach(ach => {
-                if (gameState.achievements[ach.id] === undefined) {
-                    gameState.achievements[ach.id] = false;
-                }
-            });
+            // Mettre à jour la navigation
+            const navLinks = document.querySelectorAll('.platform-nav a');
+            navLinks.forEach(link => link.classList.remove('active'));
+            navLinks[0].classList.add('active');
+        }
+        
+        function loadGame(gameId) {
+            // Masquer le hub
+            document.getElementById('games-hub').style.display = 'none';
+            document.getElementById('game-container').classList.add('active');
             
-            // Charger depuis le localStorage si disponible
-            const save = localStorage.getItem('bananaEmpireSave');
-            if (save) {
-                try {
-                    const parsed = JSON.parse(save);
-                    
-                    // Migration des versions si nécessaire
-                    if (!parsed.version || parsed.version !== gameState.version) {
-                        parsed.version = gameState.version;
-                    }
-                    
-                    // Fusionner avec l'état actuel
-                    gameState = {
-                        ...gameState,
-                        ...parsed,
-                        temporaryBoosts: {
-                            ...gameState.temporaryBoosts,
-                            ...(parsed.temporaryBoosts || {})
-                        },
-                        specialUpgrades: {
-                            ...gameState.specialUpgrades,
-                            ...(parsed.specialUpgrades || {})
-                        },
-                        prestigePowers: {
-                            ...gameState.prestigePowers,
-                            ...(parsed.prestigePowers || {})
-                        }
-                    };
-                    
-                    showNotification('Partie chargée avec succès!');
-                    
-                    // Calculer les gains hors ligne
-                    if (gameState.lastUpdate) {
-                        const offlineTime = Date.now() - gameState.lastUpdate;
-                        const offlineSeconds = offlineTime / 1000;
-                        
-                        if (gameState.bananasPerSecond > 0) {
-                            const offlineBananas = gameState.bananasPerSecond * offlineSeconds;
-                            gameState.bananas += offlineBananas;
-                            
-                            if (offlineSeconds > 5) {
-                                showNotification(`Bienvenue de retour! Vous avez gagné ${formatNumber(offlineBananas)} bananes pendant votre absence.`);
-                            }
-                        }
-                        
-                        if (gameState.specialUpgrades.recycling.level > 0) {
-                            const recyclingInterval = 60;
-                            const recyclingTimes = Math.floor(offlineSeconds / recyclingInterval);
-                            
-                            if (recyclingTimes > 0) {
-                                const recycled = gameState.bananasPerSecond * 0.01 * gameState.specialUpgrades.recycling.level * recyclingTimes;
-                                gameState.bananas += recycled;
-                                showNotification(`Recyclage: +${formatNumber(recycled)} bananes recyclées`);
-                            }
-                        }
-                        
-                        if (gameState.prestigePowers.interest.level > 0) {
-                            const interestInterval = 3600;
-                            const interestTimes = Math.floor(offlineSeconds / interestInterval);
-                            
-                            if (interestTimes > 0) {
-                                const interest = gameState.bananas * 0.01 * gameState.prestigePowers.interest.level * interestTimes;
-                                gameState.bananas += interest;
-                                showNotification(`Intérêts: +${formatNumber(interest)} bananes accumulées`);
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.error("Erreur lors du chargement de la sauvegarde:", e);
-                    showNotification("Erreur lors du chargement de la sauvegarde", true);
+            // Masquer tous les jeux
+            const gameContents = document.querySelectorAll('.game-content');
+            gameContents.forEach(game => game.style.display = 'none');
+            
+            // Afficher le jeu sélectionné
+            document.getElementById(gameId).style.display = 'block';
+            
+            // Mettre à jour la navigation
+            const navLinks = document.querySelectorAll('.platform-nav a');
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            // Trouver et activer le lien du jeu sélectionné
+            for (let i = 0; i < navLinks.length; i++) {
+                if (navLinks[i].textContent.toLowerCase().includes(gameId.replace('-', ' '))) {
+                    navLinks[i].classList.add('active');
+                    break;
+                }
+            }
+            
+            // Initialiser le jeu si c'est Banana Clicker
+            if (gameId === 'banana-clicker' && typeof initGame === 'function') {
+                // Vérifier si le jeu est déjà initialisé
+                if (!window.gameInitialized) {
+                    initGame();
+                    window.gameInitialized = true;
                 }
             }
         }
         
-        // Éléments du DOM
-        const banana = document.getElementById('banana');
-        const bananaContainer = document.getElementById('banana-container');
-        const counter = document.getElementById('counter');
-        const bpsCounter = document.getElementById('bananas-per-second');
-        const clickCounter = document.getElementById('total-clicks');
-        const multiplierDisplay = document.getElementById('multiplier');
-        const prestigeCounter = document.getElementById('prestige-counter');
-        const goldenBananasCounter = document.getElementById('golden-bananas-counter');
-        const productionUpgradesContainer = document.getElementById('production-upgrades');
-        const achievementsContainer = document.getElementById('achievements-container');
-        const prestigeBtn = document.getElementById('prestige-btn');
-        const themeToggleBtn = document.getElementById('themeToggle');
-        
-        // Sons
-        const clickSound = document.getElementById('clickSound');
-        const upgradeSound = document.getElementById('upgradeSound');
-        const achievementSound = document.getElementById('achievementSound');
-        const prestigeSound = document.getElementById('prestigeSound');
-        const specialSound = document.getElementById('specialSound');
-        
-        // Initialiser le jeu
-        function initGame() {
-            // Vérifier si l'utilisateur est connecté
-            checkAuthState();
-            
-            initializeGameData();
-            
-            // Générer les améliorations de production
-            renderProductionUpgrades();
-            
-            // Générer les succès
-            renderAchievements();
-            
-            // Mettre à jour l'affichage
-            updateDisplay();
-            
-            // Démarrer la boucle de jeu
-            gameLoop();
-            
-            // Configurer les écouteurs d'événements
-            setupEventListeners();
-        }
-        
-        // Gestion de l'authentification
-        function checkAuthState() {
-            const token = localStorage.getItem('googleToken');
-            if (token) {
-                validateGoogleToken(token);
-            } else {
-                document.getElementById('authOverlay').style.display = 'flex';
-            }
-        }
-        
-        function handleGoogleSignIn(response) {
-            const token = response.credential;
-            localStorage.setItem('googleToken', token);
-            validateGoogleToken(token);
-            document.getElementById('authOverlay').style.display = 'none';
-            loadCloudSave();
-        }
-        
-        function validateGoogleToken(token) {
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                document.getElementById('userProfile').style.display = 'flex';
-                document.getElementById('userAvatar').src = payload.picture;
-                document.getElementById('userName').textContent = payload.name;
-                gameState.userId = payload.sub;
-                showNotification(`Connecté en tant que ${payload.name}`);
-            } catch (e) {
-                console.error("Erreur lors de la validation du token:", e);
-                showNotification("Erreur de connexion", true);
-                handleSignOut();
-            }
-        }
-        
-        function handleSignOut() {
-            localStorage.removeItem('googleToken');
-            document.getElementById('userProfile').style.display = 'none';
-            document.getElementById('authOverlay').style.display = 'flex';
-            showNotification("Déconnecté avec succès");
-        }
-        
-        function playOffline() {
-            document.getElementById('authOverlay').style.display = 'none';
-            showNotification("Mode hors ligne activé - Votre progression sera sauvegardée localement");
-        }
-        
-        // Sauvegarde dans le cloud
-        async function saveToCloud() {
-            if (!gameState.userId) return;
-            
-            try {
-                localStorage.setItem(`bananaEmpireSave_${gameState.userId}`, JSON.stringify(gameState));
-                console.log("Sauvegarde dans le cloud réussie");
-            } catch (error) {
-                console.error("Erreur lors de la sauvegarde dans le cloud:", error);
-                showNotification("Erreur lors de la sauvegarde en ligne", true);
-            }
-        }
-        
-        // Chargement depuis le cloud
-        async function loadCloudSave() {
-            if (!gameState.userId) return;
-            
-            try {
-                const cloudSave = localStorage.getItem(`bananaEmpireSave_${gameState.userId}`);
-                if (cloudSave) {
-                    const parsed = JSON.parse(cloudSave);
-                    if (!parsed.version || parsed.version !== gameState.version) {
-                        parsed.version = gameState.version;
-                    }
-                    gameState = {
-                        ...gameState,
-                        ...parsed
-                    };
-                    showNotification('Partie chargée depuis le cloud!');
-                    
-                    if (gameState.lastUpdate) {
-                        const offlineTime = Date.now() - gameState.lastUpdate;
-                        const offlineSeconds = offlineTime / 1000;
-                        if (gameState.bananasPerSecond > 0) {
-                            const offlineBananas = gameState.bananasPerSecond * offlineSeconds;
-                            gameState.bananas += offlineBananas;
-                            if (offlineSeconds > 5) {
-                                showNotification(`Bienvenue de retour! Vous avez gagné ${formatNumber(offlineBananas)} bananes pendant votre absence.`);
-                            }
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error("Erreur lors du chargement depuis le cloud:", error);
-                showNotification("Erreur lors du chargement de la sauvegarde en ligne", true);
-            }
-        }
-        
-        // Rendre les améliorations de production
-        function renderProductionUpgrades() {
-            productionUpgradesContainer.innerHTML = '';
-            
-            productionUpgrades.forEach(upgrade => {
-                const owned = gameState.upgrades[upgrade.id]?.owned || 0;
-                const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, owned));
-                const isLocked = gameState.bananas < upgrade.unlockAt;
-                
-                const upgradeEl = document.createElement('div');
-                upgradeEl.className = `upgrade ${isLocked ? 'locked-upgrade' : ''}`;
-                upgradeEl.innerHTML = `
-                    <h3><i class="${upgrade.icon}"></i> ${upgrade.name}</h3>
-                    <p>${upgrade.desc}</p>
-                    <div class="upgrade-info">
-                        <span class="upgrade-cost">Coût: <span id="${upgrade.id}-cost">${formatNumber(cost)}</span> bananes</span>
-                        <span class="upgrade-owned">Possédés: <span id="${upgrade.id}-owned">${owned}</span></span>
-                    </div>
-                    <p class="upgrade-bps">Production: +${formatNumber(upgrade.bps)} bananes/sec</p>
-                    ${isLocked ? `
-                        <div class="locked-label">Débloqué à ${formatNumber(upgrade.unlockAt)} bananes</div>
-                        <button class="btn" disabled>
-                            <i class="fas fa-lock"></i> Verrouillé
-                        </button>
-                    ` : `
-                        <button class="btn" onclick="buyProductionUpgrade('${upgrade.id}')" id="${upgrade.id}-btn">
-                            <i class="fas fa-shopping-cart"></i> Acheter
-                        </button>
-                    `}
-                `;
-                
-                productionUpgradesContainer.appendChild(upgradeEl);
-            });
-        }
-        
-        // Rendre les succès
-        function renderAchievements() {
-            achievementsContainer.innerHTML = '';
-            
-            achievementsData.forEach(ach => {
-                const achieved = gameState.bananas >= ach.threshold;
-                const progress = Math.min(100, (gameState.bananas / ach.threshold) * 100);
-                
-                const achEl = document.createElement('div');
-                achEl.className = `achievement ${achieved ? 'unlocked' : ''}`;
-                achEl.id = ach.id;
-                achEl.innerHTML = `
-                    <div class="achievement-icon">
-                        <i class="${ach.icon}"></i>
-                    </div>
-                    <div class="achievement-text">
-                        <h4>${ach.name}</h4>
-                        <p>${ach.desc}</p>
-                        ${ach.reward > 0 ? `<p class="achievement-reward">Récompense: +${formatNumber(ach.reward)} bananes</p>` : ''}
-                        ${!achieved ? `
-                            <div class="achievement-progress">
-                                <div class="achievement-progress-bar" style="width: ${progress}%"></div>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-                
-                achievementsContainer.appendChild(achEl);
-            });
-        }
-        
-        // Mise à jour de l'affichage
-        function updateDisplay() {
-            // Bananes
-            counter.textContent = formatNumber(Math.floor(gameState.bananas));
-            
-            // Bananes par seconde
-            updateBPS();
-            bpsCounter.textContent = formatNumber(gameState.bananasPerSecond);
-            
-            // Clics
-            clickCounter.textContent = formatNumber(gameState.totalClicks);
-            
-            // Multiplicateur
-            const multiplier = 1 + (gameState.prestige * 0.1) + (gameState.prestigePowers.prestigeMultiplier.level * 0.001);
-            multiplierDisplay.textContent = multiplier.toFixed(3) + 'x';
-            
-            // Prestige
-            prestigeCounter.textContent = gameState.prestige;
-            goldenBananasCounter.textContent = formatNumber(gameState.goldenBananas);
-            
-            // Mettre à jour les améliorations de production
-            updateProductionUpgrades();
-            
-            // Mettre à jour les succès
-            updateAchievements();
-            
-            // Mettre à jour les boosters temporaires
-            updateTemporaryBoosts();
-            
-            // Mettre à jour les améliorations spéciales
-            updateSpecialUpgrades();
-            
-            // Mettre à jour les pouvoirs de prestige
-            updatePrestigePowers();
-            
-            // Mettre à jour la section prestige
-            updatePrestigeSection();
-        }
-        
-        // Mettre à jour les améliorations de production
-        function updateProductionUpgrades() {
-            productionUpgrades.forEach(upgrade => {
-                const owned = gameState.upgrades[upgrade.id]?.owned || 0;
-                const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, owned));
-                const isLocked = gameState.bananas < upgrade.unlockAt;
-                
-                if (!isLocked) {
-                    const btn = document.getElementById(`${upgrade.id}-btn`);
-                    if (btn) {
-                        btn.disabled = gameState.bananas < cost;
-                    }
-                    
-                    const costEl = document.getElementById(`${upgrade.id}-cost`);
-                    if (costEl) costEl.textContent = formatNumber(cost);
-                    
-                    const ownedEl = document.getElementById(`${upgrade.id}-owned`);
-                    if (ownedEl) ownedEl.textContent = owned;
-                }
-            });
-        }
-        
-        // Mettre à jour les succès
-        function updateAchievements() {
-            achievementsData.forEach(ach => {
-                const achieved = gameState.bananas >= ach.threshold;
-                const achEl = document.getElementById(ach.id);
-                
-                if (achEl) {
-                    const wasAchieved = achEl.classList.contains('unlocked');
-                    const progressBar = achEl.querySelector('.achievement-progress-bar');
-                    
-                    if (!achieved && progressBar) {
-                        const progress = Math.min(100, (gameState.bananas / ach.threshold) * 100);
-                        progressBar.style.width = `${progress}%`;
-                    }
-                    
-                    if (achieved && !wasAchieved) {
-                        achEl.classList.add('unlocked');
-                        const icon = achEl.querySelector('.achievement-icon');
-                        if (icon) {
-                            icon.style.background = 'var(--golden)';
-                            icon.style.color = 'white';
-                            icon.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.5)';
-                        }
-                        
-                        if (!gameState.achievements[ach.id]) {
-                            gameState.achievements[ach.id] = true;
-                            gameState.bananas += ach.reward;
-                            showNotification(`Succès débloqué: ${ach.name}${ach.reward > 0 ? ` (+${formatNumber(ach.reward)} bananes)` : ''}`);
-                            playSound(achievementSound);
-                            
-                            const progressContainer = achEl.querySelector('.achievement-progress');
-                            if (progressContainer) progressContainer.remove();
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Mettre à jour les boosters temporaires
-        function updateTemporaryBoosts() {
-            // Minute Dorée
-            const goldenMinute = gameState.temporaryBoosts.goldenMinute;
-            const goldenMinuteBtn = document.getElementById('golden-minute-btn');
-            const goldenMinuteCost = document.getElementById('golden-minute-cost');
-            const goldenMinuteCooldown = document.getElementById('golden-minute-cooldown');
-            
-            goldenMinuteCost.textContent = '500';
-            
-            if (goldenMinute.active) {
-                goldenMinuteBtn.disabled = true;
-                goldenMinuteBtn.innerHTML = '<i class="fas fa-hourglass-end"></i> Actif';
-                goldenMinuteCooldown.textContent = '0';
-            } else {
-                goldenMinuteBtn.disabled = gameState.bananas < 500 || goldenMinute.cooldown > 0;
-                goldenMinuteBtn.innerHTML = '<i class="fas fa-play"></i> Activer';
-                goldenMinuteCooldown.textContent = Math.ceil(goldenMinute.cooldown / 1000);
-            }
-            
-            // Explosion Bananière
-            const bananaBlast = gameState.temporaryBoosts.bananaBlast;
-            const bananaBlastBtn = document.getElementById('banana-blast-btn');
-            const bananaBlastCost = document.getElementById('banana-blast-cost');
-            const bananaBlastCooldown = document.getElementById('banana-blast-cooldown');
-            
-            bananaBlastCost.textContent = '50';
-            bananaBlastBtn.disabled = gameState.goldenBananas < 50 || bananaBlast.cooldown > 0;
-            bananaBlastCooldown.textContent = Math.ceil(bananaBlast.cooldown / 1000);
-            
-            // Boucle Temporelle
-            const timeLoop = gameState.temporaryBoosts.timeLoop;
-            const timeLoopBtn = document.getElementById('timeLoop-btn');
-            const timeLoopCost = document.getElementById('timeLoop-cost');
-            const timeLoopCooldown = document.getElementById('timeLoop-cooldown');
-            
-            timeLoopCost.textContent = '5,000';
-            
-            if (timeLoop.active) {
-                timeLoopBtn.disabled = true;
-                timeLoopBtn.innerHTML = '<i class="fas fa-hourglass-end"></i> Actif';
-                timeLoopCooldown.textContent = '0';
-            } else {
-                timeLoopBtn.disabled = gameState.goldenBananas < 5000 || timeLoop.cooldown > 0;
-                timeLoopBtn.innerHTML = '<i class="fas fa-play"></i> Activer';
-                timeLoopCooldown.textContent = Math.ceil(timeLoop.cooldown / 1000);
-            }
-            
-            // Résonance Bananière
-            const resonance = gameState.temporaryBoosts.resonance;
-            const resonanceBtn = document.getElementById('resonance-btn');
-            const resonanceCost = document.getElementById('resonance-cost');
-            const resonanceCooldown = document.getElementById('resonance-cooldown');
-            
-            resonanceCost.textContent = '10,000';
-            
-            if (resonance.active) {
-                resonanceBtn.disabled = true;
-                resonanceBtn.innerHTML = '<i class="fas fa-hourglass-end"></i> Actif';
-                resonanceCooldown.textContent = '0';
-            } else {
-                resonanceBtn.disabled = gameState.goldenBananas < 10000 || resonance.cooldown > 0;
-                resonanceBtn.innerHTML = '<i class="fas fa-play"></i> Activer';
-                resonanceCooldown.textContent = Math.ceil(resonance.cooldown / 1000);
-            }
-        }
-        
-        // Mettre à jour les améliorations spéciales
-        function updateSpecialUpgrades() {
-            // Multiplicateur Aléatoire
-            const randomMultiplier = gameState.specialUpgrades.randomMultiplier;
-            const randomMultiplierCost = document.getElementById('random-multiplier-cost');
-            const randomMultiplierLevel = document.getElementById('random-multiplier-level');
-            const randomMultiplierBtn = document.getElementById('random-multiplier-btn');
-            const randomMultiplierProgress = document.querySelector('#random-multiplier-btn').previousElementSibling.querySelector('.progress-bar');
-            
-            const randomMultiplierNextCost = 10000 * Math.pow(2, randomMultiplier.level);
-            randomMultiplierCost.textContent = formatNumber(randomMultiplierNextCost);
-            randomMultiplierLevel.textContent = randomMultiplier.level;
-            randomMultiplierBtn.disabled = gameState.bananas < randomMultiplierNextCost || randomMultiplier.level >= 5;
-            
-            if (randomMultiplier.level > 0) {
-                randomMultiplierProgress.style.width = `${randomMultiplier.level * 20}%`;
-            }
-            
-            // Recyclage Bananier
-            const recycling = gameState.specialUpgrades.recycling;
-            const recyclingCost = document.getElementById('recycling-cost');
-            const recyclingLevel = document.getElementById('recycling-level');
-            const recyclingBtn = document.getElementById('recycling-btn');
-            
-            const recyclingNextCost = 25000 * Math.pow(3, recycling.level);
-            recyclingCost.textContent = formatNumber(recyclingNextCost);
-            recyclingLevel.textContent = recycling.level;
-            recyclingBtn.disabled = gameState.bananas < recyclingNextCost || recycling.level >= 3;
-        }
-        
-        // Mettre à jour les pouvoirs de prestige
-        function updatePrestigePowers() {
-            // Intérêts Bananiers
-            const interest = gameState.prestigePowers.interest;
-            const interestCost = document.getElementById('interest-cost');
-            const interestLevel = document.getElementById('interest-level');
-            const interestBtn = document.getElementById('interest-btn');
-            
-            const interestNextCost = 5 * Math.pow(2, interest.level);
-            interestCost.textContent = formatNumber(interestNextCost);
-            interestLevel.textContent = interest.level;
-            interestBtn.disabled = gameState.goldenBananas < interestNextCost || interest.level >= 10;
-            
-            // Multiplicateur de Prestige
-            const prestigeMult = gameState.prestigePowers.prestigeMultiplier;
-            const prestigeMultCost = document.getElementById('prestige-mult-cost');
-            const prestigeMultLevel = document.getElementById('prestige-mult-level');
-            const prestigeMultBtn = document.getElementById('prestige-mult-btn');
-            
-            const prestigeMultNextCost = 10 * Math.pow(2, prestigeMult.level);
-            prestigeMultCost.textContent = formatNumber(prestigeMultNextCost);
-            prestigeMultLevel.textContent = prestigeMult.level;
-            prestigeMultBtn.disabled = gameState.goldenBananas < prestigeMultNextCost || prestigeMult.level >= 20;
-        }
-        
-        // Mettre à jour la section prestige
-        function updatePrestigeSection() {
-            const canPrestige = gameState.bananas >= 1000000;
-            const goldenBananasEarned = Math.floor(gameState.bananas / 1000000);
-            
-            document.getElementById('golden-bananas-counter').textContent = formatNumber(gameState.goldenBananas);
-            document.getElementById('prestige-level').textContent = gameState.prestige;
-            
-            const baseMultiplier = 1 + (gameState.prestige * 0.1);
-            const bonusMultiplier = gameState.prestigePowers.prestigeMultiplier.level * 0.001;
-            document.getElementById('current-multiplier').textContent = (baseMultiplier + bonusMultiplier).toFixed(3) + 'x';
-            
-            if (canPrestige) {
-                document.getElementById('prestige-requirement').innerHTML = `<span class="prestige">Vous pouvez effectuer un prestige!</span>`;
-                prestigeBtn.disabled = false;
-            } else {
-                document.getElementById('prestige-requirement').textContent = 'Vous avez besoin d\'au moins 1,000,000 bananes pour effectuer un prestige.';
-                prestigeBtn.disabled = true;
-            }
-            
-            const progress = Math.min(100, gameState.bananas / 1000000 * 100);
-            document.getElementById('prestige-progress').innerHTML = `Progression: <span>${progress.toFixed(2)}</span>%`;
-            document.getElementById('prestige-progress-bar').style.width = `${progress}%`;
-            document.getElementById('prestige-reward').textContent = formatNumber(goldenBananasEarned);
-        }
-        
-        // Calculer les bananes par seconde
-        function updateBPS() {
-            let bps = 0;
-            
-            productionUpgrades.forEach(upgrade => {
-                const owned = gameState.upgrades[upgrade.id]?.owned || 0;
-                bps += upgrade.bps * owned;
-            });
-            
-            if (gameState.temporaryBoosts.goldenMinute.active) {
-                bps *= 2;
-            }
-            if (gameState.temporaryBoosts.timeLoop.active) {
-                bps *= 10;
-            }
-            
-            gameState.bananasPerSecond = bps;
-        }
-        
-        // Gestion du clic sur la banane
-        function handleClick() {
-            let gain = 1 + (gameState.prestige * 0.1) + (gameState.prestigePowers.prestigeMultiplier.level * 0.001);
-            
-            if (gameState.specialUpgrades.randomMultiplier.level > 0) {
-                const chance = Math.random();
-                if (chance < 0.1 * gameState.specialUpgrades.randomMultiplier.level) {
-                    const multiplier = 2 + Math.floor(Math.random() * 9);
-                    gain *= multiplier;
-                    
-                    createSpecialClickEffect(gain, multiplier);
-                    playSound(specialSound);
-                }
-            }
-            
-            gameState.bananas += gain;
-            gameState.totalClicks++;
-            
-            createClickEffect(gain);
-            playSound(clickSound);
-            updateDisplay();
-        }
-        
-        // Achat d'amélioration de production
-        function buyProductionUpgrade(id) {
-            const upgrade = productionUpgrades.find(u => u.id === id);
-            if (!upgrade) return;
-            
-            const owned = gameState.upgrades[id]?.owned || 0;
-            const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, owned));
-            
-            if (gameState.bananas >= cost) {
-                gameState.bananas -= cost;
-                gameState.upgrades[id].owned = owned + 1;
-                
-                updateBPS();
-                playSound(upgradeSound);
-                showNotification(`Amélioration achetée: ${upgrade.name}`);
-                updateDisplay();
-                saveGame();
-            } else {
-                showNotification("Pas assez de bananes!", true);
-            }
-        }
-        
-        // Activer la Minute Dorée
-        function activateGoldenMinute() {
-            if (gameState.bananas >= 500 && gameState.temporaryBoosts.goldenMinute.cooldown <= 0) {
-                gameState.bananas -= 500;
-                gameState.temporaryBoosts.goldenMinute.active = true;
-                gameState.temporaryBoosts.goldenMinute.endTime = Date.now() + 60000;
-                gameState.temporaryBoosts.goldenMinute.cooldown = 300000;
-                
-                updateBPS();
-                showNotification("Minute Dorée activée! Production doublée pendant 1 minute");
-                playSound(specialSound);
-                updateDisplay();
-                saveGame();
-            }
-        }
-        
-        // Activer l'Explosion Bananière
-        function activateBananaBlast() {
-            if (gameState.goldenBananas >= 50 && gameState.temporaryBoosts.bananaBlast.cooldown <= 0) {
-                gameState.goldenBananas -= 50;
-                gameState.bananas += 1000;
-                gameState.temporaryBoosts.bananaBlast.cooldown = 86400000;
-                
-                showNotification("Explosion Bananière! +1000 bananes obtenues");
-                playSound(specialSound);
-                updateDisplay();
-                saveGame();
-            }
-        }
-        
-        // Activer la Boucle Temporelle
-        function activateTimeLoop() {
-            if (gameState.goldenBananas >= 5000 && gameState.temporaryBoosts.timeLoop.cooldown <= 0) {
-                gameState.goldenBananas -= 5000;
-                gameState.temporaryBoosts.timeLoop.active = true;
-                gameState.temporaryBoosts.timeLoop.endTime = Date.now() + 30000;
-                gameState.temporaryBoosts.timeLoop.cooldown = 86400000;
-                
-                updateBPS();
-                showNotification("Boucle Temporelle activée! Production x10 pendant 30 secondes");
-                playSound(specialSound);
-                updateDisplay();
-                saveGame();
-            }
-        }
-        
-        // Activer la Résonance Bananière
-        function activateResonance() {
-            if (gameState.goldenBananas >= 10000 && gameState.temporaryBoosts.resonance.cooldown <= 0) {
-                gameState.goldenBananas -= 10000;
-                gameState.temporaryBoosts.resonance.active = true;
-                gameState.temporaryBoosts.resonance.endTime = Date.now() + 86400000;
-                gameState.temporaryBoosts.resonance.cooldown = 172800000;
-                
-                showNotification("Résonance Bananière activée! Production continue hors ligne pendant 24h");
-                playSound(specialSound);
-                updateDisplay();
-                saveGame();
-            }
-        }
-        
-        // Acheter le Multiplicateur Aléatoire
-        function buyRandomMultiplier() {
-            const cost = 10000 * Math.pow(2, gameState.specialUpgrades.randomMultiplier.level);
-            if (gameState.bananas >= cost && gameState.specialUpgrades.randomMultiplier.level < 5) {
-                gameState.bananas -= cost;
-                gameState.specialUpgrades.randomMultiplier.level++;
-                
-                showNotification(`Multiplicateur Aléatoire niveau ${gameState.specialUpgrades.randomMultiplier.level} acheté!`);
-                playSound(upgradeSound);
-                updateDisplay();
-                saveGame();
-            }
-        }
-        
-        // Acheter le Recyclage Bananier
-        function buyRecycling() {
-            const cost = 25000 * Math.pow(3, gameState.specialUpgrades.recycling.level);
-            if (gameState.bananas >= cost && gameState.specialUpgrades.recycling.level < 3) {
-                gameState.bananas -= cost;
-                gameState.specialUpgrades.recycling.level++;
-                gameState.specialUpgrades.recycling.lastCollection = Date.now();
-                
-                showNotification(`Recyclage Bananier niveau ${gameState.specialUpgrades.recycling.level} acheté!`);
-                playSound(upgradeSound);
-                updateDisplay();
-                saveGame();
-            }
-        }
-        
-        // Acheter les Intérêts Bananiers
-        function buyInterest() {
-            const cost = 5 * Math.pow(2, gameState.prestigePowers.interest.level);
-            if (gameState.goldenBananas >= cost && gameState.prestigePowers.interest.level < 10) {
-                gameState.goldenBananas -= cost;
-                gameState.prestigePowers.interest.level++;
-                gameState.prestigePowers.lastInterest = Date.now();
-                
-                showNotification(`Intérêts Bananiers niveau ${gameState.prestigePowers.interest.level} acheté!`);
-                playSound(upgradeSound);
-                updateDisplay();
-                saveGame();
-            }
-        }
-        
-        // Acheter le Multiplicateur de Prestige
-        function buyPrestigeMultiplier() {
-            const cost = 10 * Math.pow(2, gameState.prestigePowers.prestigeMultiplier.level);
-            if (gameState.goldenBananas >= cost && gameState.prestigePowers.prestigeMultiplier.level < 20) {
-                gameState.goldenBananas -= cost;
-                gameState.prestigePowers.prestigeMultiplier.level++;
-                
-                showNotification(`Multiplicateur de Prestige niveau ${gameState.prestigePowers.prestigeMultiplier.level} acheté!`);
-                playSound(upgradeSound);
-                updateDisplay();
-                saveGame();
-            }
-        }
-        
-        // Prestige
-        function prestige() {
-            if (gameState.bananas >= 1000000) {
-                if (confirm(`Voulez-vous vraiment effectuer un prestige? Vous obtiendrez ${formatNumber(Math.floor(gameState.bananas / 1000000))} Bananes Dorées mais perdrez toute votre progression actuelle.`)) {
-                    const goldenBananasEarned = Math.floor(gameState.bananas / 1000000);
-                    gameState.prestige++;
-                    gameState.goldenBananas += goldenBananasEarned;
-                    
-                    gameState.bananas = 0;
-                    gameState.bananasPerSecond = 0;
-                    gameState.totalClicks = 0;
-                    
-                    Object.keys(gameState.upgrades).forEach(key => {
-                        gameState.upgrades[key].owned = 0;
-                    });
-                    
-                    Object.keys(gameState.achievements).forEach(key => {
-                        gameState.achievements[key] = false;
-                    });
-                    
-                    gameState.temporaryBoosts = {
-                        goldenMinute: { active: false, endTime: 0, cooldown: 0 },
-                        bananaBlast: { cooldown: 0 },
-                        timeLoop: { active: false, endTime: 0, cooldown: 0 },
-                        resonance: { active: false, endTime: 0, cooldown: 0 }
-                    };
-                    
-                    gameState.specialUpgrades = {
-                        randomMultiplier: { level: 0 },
-                        recycling: { level: 0, lastCollection: 0 }
-                    };
-                    
-                    playSound(prestigeSound);
-                    showNotification(`Prestige effectué! +${formatNumber(goldenBananasEarned)} Bananes Dorées. Nouveau multiplicateur: ${(1 + (gameState.prestige * 0.1) + (gameState.prestigePowers.prestigeMultiplier.level * 0.001)).toFixed(3)}x`);
-                    
-                    renderProductionUpgrades();
-                    renderAchievements();
-                    updateDisplay();
-                    saveGame();
-                }
-            }
-        }
-        
-        // Effets visuels
-        function createClickEffect(gain) {
-            const clickEffect = document.createElement('div');
-            clickEffect.className = 'click-effect';
-            clickEffect.textContent = `+${gain.toFixed(1)}`;
-            clickEffect.style.left = `${Math.random() * 100 + 50}px`;
-            clickEffect.style.color = `hsl(${Math.random() * 60 + 30}, 100%, 50%)`;
-            bananaContainer.appendChild(clickEffect);
-            
-            setTimeout(() => {
-                clickEffect.remove();
-            }, 1500);
-        }
-        
-        function createSpecialClickEffect(gain, multiplier) {
-            const effect = document.createElement('div');
-            effect.className = 'click-effect special';
-            effect.textContent = `x${multiplier}! +${gain.toFixed(1)}`;
-            effect.style.left = `${Math.random() * 100 + 50}px`;
-            effect.style.color = `hsl(${Math.random() * 60 + 30}, 100%, 50%)`;
-            bananaContainer.appendChild(effect);
-            
-            setTimeout(() => {
-                effect.remove();
-            }, 2000);
-        }
-        
-        // Gestion des onglets
-        function openTab(event, tabId) {
+        // Gestion des onglets dans Banana Clicker
+        function openTab(tabId) {
+            // Masquer tous les onglets
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
+            // Désactiver tous les boutons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
+            // Activer l'onglet sélectionné
             document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
-        
-        // Basculer entre thème clair/sombre
-        function toggleTheme() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             
-            if (isDark) {
-                document.documentElement.removeAttribute('data-theme');
-                themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-            }
+            // Activer le bouton correspondant
+            document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
         }
         
-        // Notification
-        function showNotification(message, isError = false) {
-            const notification = document.getElementById('notification');
-            const content = notification.querySelector('.notification-content');
-            
-            notification.className = isError ? 'notification error' : 'notification';
-            content.textContent = message;
-            
-            const icon = notification.querySelector('i');
-            if (isError) {
-                icon.className = 'fas fa-exclamation-circle';
-            } else {
-                icon.className = 'fas fa-check-circle';
-            }
-            
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-        
-        // Jouer un son
-        function playSound(sound) {
-            sound.currentTime = 0;
-            sound.play().catch(e => console.log("Le son n'a pas pu être joué:", e));
-        }
-        
-        // Formater les nombres
-        function formatNumber(num) {
-            if (num >= 1000000000000000) {
-                return (num / 1000000000000000).toFixed(2) + 'Q';
-            } else if (num >= 1000000000000) {
-                return (num / 1000000000000).toFixed(2) + 'T';
-            } else if (num >= 1000000000) {
-                return (num / 1000000000).toFixed(2) + 'B';
-            } else if (num >= 1000000) {
-                return (num / 1000000).toFixed(2) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return num.toLocaleString();
-        }
-        
-        // Sauvegarder le jeu
-        function saveGame() {
-            gameState.lastUpdate = Date.now();
-            localStorage.setItem('bananaEmpireSave', JSON.stringify(gameState));
-            saveToCloud();
-        }
-        
-        // Configurer les écouteurs d'événements
-        function setupEventListeners() {
-            banana.addEventListener('click', handleClick);
-            themeToggleBtn.addEventListener('click', toggleTheme);
-            window.addEventListener('beforeunload', function() {
-                saveGame();
+        // Ajouter des écouteurs d'événements pour les onglets
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    openTab(this.dataset.tab);
+                });
             });
-        }
-        
-        // Boucle de jeu
-        function gameLoop() {
-            const now = Date.now();
-            const delta = (now - gameState.lastUpdate) / 1000;
-            gameState.lastUpdate = now;
             
-            updateCooldowns(delta * 1000);
-            
-            if (gameState.bananasPerSecond > 0) {
-                gameState.bananas += gameState.bananasPerSecond * delta;
-            }
-            
-            if (gameState.specialUpgrades.recycling.level > 0) {
-                const recyclingInterval = 60;
-                const timeSinceLastRecycling = now - gameState.specialUpgrades.recycling.lastCollection;
-                
-                if (timeSinceLastRecycling >= recyclingInterval * 1000) {
-                    const recycled = gameState.bananasPerSecond * 0.01 * gameState.specialUpgrades.recycling.level;
-                    gameState.bananas += recycled;
-                    gameState.specialUpgrades.recycling.lastCollection = now;
-                    
-                    if (recycled >= 1) {
-                        showNotification(`Recyclage: +${formatNumber(recycled)} bananes recyclées`);
-                    }
-                }
-            }
-            
-            if (gameState.prestigePowers.interest.level > 0) {
-                const interestInterval = 3600;
-                const timeSinceLastInterest = now - gameState.prestigePowers.lastInterest;
-                
-                if (timeSinceLastInterest >= interestInterval * 1000) {
-                    const interest = gameState.bananas * 0.01 * gameState.prestigePowers.interest.level;
-                    gameState.bananas += interest;
-                    gameState.prestigePowers.lastInterest = now;
-                    
-                    if (interest >= 1) {
-                        showNotification(`Intérêts: +${formatNumber(interest)} bananes accumulées`);
-                    }
-                }
-            }
-            
-            updateDisplay();
-            
-            if (now % 30000 < 100) {
-                saveGame();
-            }
-            
-            requestAnimationFrame(gameLoop);
-        }
-        
-        // Mettre à jour les cooldowns
-        function updateCooldowns(delta) {
-            if (gameState.temporaryBoosts.goldenMinute.active && Date.now() > gameState.temporaryBoosts.goldenMinute.endTime) {
-                gameState.temporaryBoosts.goldenMinute.active = false;
-                updateBPS();
-                showNotification("La Minute Dorée est terminée");
-            }
-            
-            if (gameState.temporaryBoosts.timeLoop.active && Date.now() > gameState.temporaryBoosts.timeLoop.endTime) {
-                gameState.temporaryBoosts.timeLoop.active = false;
-                updateBPS();
-                showNotification("La Boucle Temporelle est terminée");
-            }
-            
-            if (gameState.temporaryBoosts.resonance.active && Date.now() > gameState.temporaryBoosts.resonance.endTime) {
-                gameState.temporaryBoosts.resonance.active = false;
-                showNotification("La Résonance Bananière est terminée");
-            }
-            
-            if (gameState.temporaryBoosts.goldenMinute.cooldown > 0) {
-                gameState.temporaryBoosts.goldenMinute.cooldown -= delta;
-                if (gameState.temporaryBoosts.goldenMinute.cooldown < 0) {
-                    gameState.temporaryBoosts.goldenMinute.cooldown = 0;
-                }
-            }
-            
-            if (gameState.temporaryBoosts.bananaBlast.cooldown > 0) {
-                gameState.temporaryBoosts.bananaBlast.cooldown -= delta;
-                if (gameState.temporaryBoosts.bananaBlast.cooldown < 0) {
-                    gameState.temporaryBoosts.bananaBlast.cooldown = 0;
-                }
-            }
-            
-            if (gameState.temporaryBoosts.timeLoop.cooldown > 0) {
-                gameState.temporaryBoosts.timeLoop.cooldown -= delta;
-                if (gameState.temporaryBoosts.timeLoop.cooldown < 0) {
-                    gameState.temporaryBoosts.timeLoop.cooldown = 0;
-                }
-            }
-            
-            if (gameState.temporaryBoosts.resonance.cooldown > 0) {
-                gameState.temporaryBoosts.resonance.cooldown -= delta;
-                if (gameState.temporaryBoosts.resonance.cooldown < 0) {
-                    gameState.temporaryBoosts.resonance.cooldown = 0;
-                }
-            }
-        }
-        
-        // Démarrer le jeu
-        initGame();
+            // Initialiser la plateforme
+            showHub();
+        });
     </script>
-    
-    <!-- Notification -->
-    <div id="notification" class="notification">
-        <i class="fas fa-check-circle"></i>
-        <span class="notification-content"></span>
-    </div>
-    
-    <!-- Modal Admin Avancé -->
-    <div id="advancedAdminModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-user-shield"></i> Panneau d'Administration Avancé</h3>
-                <button class="btn-close btn-secondary"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                <div class="admin-tabs">
-                    <button class="admin-tab-btn active" data-tab="userManagement">Gestion des Utilisateurs</button>
-                    <button class="admin-tab-btn" data-tab="syncManagement">Gestion de Synchronisation</button>
-                    <button class="admin-tab-btn" data-tab="systemLogs">Journaux Système</button>
-                </div>
-                
-                <div class="admin-tab-content active" id="userManagement">
-                    <div class="search-bar">
-                        <input type="text" id="userSearchInput" placeholder="Rechercher un utilisateur...">
-                        <button class="btn" id="userSearchBtn"><i class="fas fa-search"></i></button>
-                    </div>
-                    
-                    <div class="admin-user-list-container">
-                        <table class="admin-user-list">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nom</th>
-                                    <th>Statut</th>
-                                    <th>Dernière Connexion</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminUserTableBody">
-                                <!-- Les utilisateurs seront injectés ici -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="admin-actions">
-                        <button class="btn" id="addUserBtn"><i class="fas fa-user-plus"></i> Ajouter Utilisateur</button>
-                        <button class="btn btn-warning" id="exportUsersBtn"><i class="fas fa-file-export"></i> Exporter Données</button>
-                    </div>
-                </div>
-                
-                <div class="admin-tab-content" id="syncManagement">
-                    <div class="sync-status-container">
-                        <div class="sync-status">
-                            <h4>État de Synchronisation</h4>
-                            <div class="status-indicator">
-                                <span class="status-dot active"></span>
-                                <span>Système opérationnel</span>
-                            </div>
-                            <p>Dernière synchronisation: <span id="lastSyncTime">Jamais</span></p>
-                        </div>
-                        
-                        <div class="sync-actions">
-                            <button class="btn" id="forceSync"><i class="fas fa-sync-alt"></i> Forcer Synchronisation</button>
-                            <button class="btn btn-warning" id="resetSync"><i class="fas fa-history"></i> Réinitialiser Synchronisation</button>
-                        </div>
-                    </div>
-                    
-                    <div class="sync-stats">
-                        <div class="admin-stat-card">
-                            <h4>Synchronisations Totales</h4>
-                            <p id="totalSyncs">0</p>
-                        </div>
-                        <div class="admin-stat-card">
-                            <h4>Synchronisations Réussies</h4>
-                            <p id="successfulSyncs">0</p>
-                        </div>
-                        <div class="admin-stat-card">
-                            <h4>Échecs de Synchronisation</h4>
-                            <p id="failedSyncs">0</p>
-                        </div>
-                        <div class="admin-stat-card">
-                            <h4>Conflits de Données</h4>
-                            <p id="dataConflicts">0</p>
-                        </div>
-                    </div>
-                    
-                    <div class="sync-conflict-list">
-                        <h4>Conflits en Attente</h4>
-                        <div class="conflict-container" id="pendingConflicts">
-                            <!-- Les conflits seront ajoutés ici -->
-                            <p class="no-data">Aucun conflit détecté</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="admin-tab-content" id="systemLogs">
-                    <div class="logs-filter">
-                        <select id="logLevelFilter">
-                            <option value="all">Tous les niveaux</option>
-                            <option value="info">Information</option>
-                            <option value="warning">Avertissement</option>
-                            <option value="error">Erreur</option>
-                        </select>
-                        <button class="btn" id="clearLogs"><i class="fas fa-trash"></i> Effacer les Logs</button>
-                    </div>
-                    
-                    <div class="logs-container" id="systemLogsContainer">
-                        <!-- Les logs seront ajoutés ici -->
-                        <p class="no-data">Aucun log disponible</p>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="closeAdminModal">Fermer</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Édition Utilisateur -->
-    <div id="userEditModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-user-edit"></i> Éditer Utilisateur</h3>
-                <button class="btn-close btn-secondary"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                <form id="userEditForm">
-                    <input type="hidden" id="editUserId">
-                    <div class="form-group">
-                        <label for="editUserName">Nom d'utilisateur</label>
-                        <input type="text" id="editUserName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editUserEmail">Email</label>
-                        <input type="email" id="editUserEmail" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editUserRole">Rôle</label>
-                        <select id="editUserRole">
-                            <option value="user">Utilisateur</option>
-                            <option value="premium">Premium</option>
-                            <option value="admin">Administrateur</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editUserStatus">Statut</label>
-                        <select id="editUserStatus">
-                            <option value="active">Actif</option>
-                            <option value="suspended">Suspendu</option>
-                            <option value="banned">Banni</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Options de synchronisation</label>
-                        <div class="checkbox-group">
-                            <label>
-                                <input type="checkbox" id="allowSync" checked>
-                                Autoriser la synchronisation
-                            </label>
-                            <label>
-                                <input type="checkbox" id="forceResync">
-                                Forcer la re-synchronisation
-                            </label>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-danger" id="deleteUserBtn">Supprimer</button>
-                <button class="btn btn-secondary" id="cancelUserEdit">Annuler</button>
-                <button class="btn" id="saveUserEdit">Enregistrer</button>
-            </div>
-        </div>
-    </div>
+    <script src="game.js"></script>
 </body>
 </html>

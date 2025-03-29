@@ -21,13 +21,24 @@ const gameState = {
     prestige: 0,
     goldenBananas: 0,
     lastUpdate: Date.now(),
-    version: "1.3.1",
+    version: "1.4.0",
     // Nouvelles propriétés pour l'authentification et le premium
     user: null,
     isPremium: false,
     premiumBenefits: {
         multiplier: 1,
         production: 1
+    },
+    // Ajout pour la plateforme multi-jeux
+    platform: {
+        currentGame: 'banana-clicker',
+        games: {
+            'banana-clicker': { lastPlayed: Date.now() },
+            'snake': { highScore: 0, lastPlayed: null },
+            'tetris': { highScore: 0, lastPlayed: null },
+            'memory': { bestTime: null, lastPlayed: null },
+            'flappy': { highScore: 0, lastPlayed: null }
+        }
     }
 };
 
@@ -43,6 +54,11 @@ const config = {
     adminCredentials: {
         username: 'admin',
         password: 'admin'
+    },
+    // Configuration de la plateforme
+    platform: {
+        saveInterval: 60000, // Sauvegarder toutes les minutes
+        cloudSync: true
     }
 };
 
@@ -248,7 +264,7 @@ function initializeGameData() {
     });
     
     // Charger depuis le localStorage si disponible
-    const save = localStorage.getItem('bananaEmpireSave');
+    const save = localStorage.getItem('gameHubSave');
     if (save) {
         try {
             const parsed = JSON.parse(save);
@@ -257,6 +273,11 @@ function initializeGameData() {
             if (!parsed.version || parsed.version !== gameState.version) {
                 // Ajouter ici toute logique de migration si la structure change
                 parsed.version = gameState.version;
+                
+                // Si c'est une ancienne sauvegarde sans la plateforme
+                if (!parsed.platform) {
+                    parsed.platform = gameState.platform;
+                }
             }
             
             // Fusionner avec l'état actuel
@@ -274,10 +295,18 @@ function initializeGameData() {
                 prestigePowers: {
                     ...gameState.prestigePowers,
                     ...(parsed.prestigePowers || {})
+                },
+                platform: {
+                    ...gameState.platform,
+                    ...(parsed.platform || {})
                 }
             };
             
             showNotification('Partie chargée avec succès!');
+            
+            // Mettre à jour le jeu actuel
+            gameState.platform.currentGame = 'banana-clicker';
+            gameState.platform.games['banana-clicker'].lastPlayed = Date.now();
             
             // Calculer les gains hors ligne
             if (gameState.lastUpdate) {
@@ -463,12 +492,23 @@ function updateDisplay() {
 
 // Initialiser le jeu
 function initGame() {
-    initializeGameData();
-    renderProductionUpgrades();
-    renderAchievements();
-    setupEventListeners();
-    updateDisplay();
-    gameLoop();
+    // Vérifier si on est sur la page de jeu Banana Clicker
+    if (document.getElementById('banana-clicker')) {
+        initializeGameData();
+        renderProductionUpgrades();
+        renderAchievements();
+        setupEventListeners();
+        updateDisplay();
+        
+        // Démarrer la boucle de jeu
+        if (!window.gameLoopRunning) {
+            window.gameLoopRunning = true;
+            gameLoop();
+        }
+        
+        // Vérifier l'authentification
+        checkAuthState();
+    }
 }
 
 // Basculer entre thème clair/sombre
@@ -593,14 +633,14 @@ function syncPlayerData() {
         premiumBenefits: gameState.premiumBenefits
     };
     
-    localStorage.setItem('bananaEmpireSave', JSON.stringify(saveData));
+    localStorage.setItem('gameHubSave', JSON.stringify(saveData));
 }
 
 // Chargement des données du joueur
 function loadPlayerData() {
     if (!gameState.user) return;
     
-    const savedData = localStorage.getItem('bananaEmpireSave');
+    const savedData = localStorage.getItem('gameHubSave');
     if (savedData) {
         try {
             const parsed = JSON.parse(savedData);
@@ -1660,3 +1700,35 @@ function saveToCloud() {
 
 // Démarrer le jeu
 initGame();
+
+// Gestion des événements pour la plateforme
+function setupPlatformEvents() {
+    // Gérer la navigation entre les jeux
+    const navLinks = document.querySelectorAll('.platform-nav a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const gameId = this.getAttribute('data-game');
+            if (gameId) {
+                loadGame(gameId);
+            } else {
+                showHub();
+            }
+        });
+    });
+    
+    // Sauvegarder périodiquement
+    setInterval(saveGame, config.platform.saveInterval);
+}
+
+// Démarrer automatiquement le jeu si on est sur la page de jeu
+if (document.getElementById('banana-clicker')) {
+    // Initialiser seulement si on est directement sur la page de jeu
+    if (!window.location.hash.includes('hub')) {
+        initGame();
+    }
+}
+
+// Exposer les fonctions nécessaires pour la plateforme
+window.loadBananaClicker = initGame;
+window.saveBananaClicker = saveGame;
