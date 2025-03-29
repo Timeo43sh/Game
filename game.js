@@ -665,6 +665,21 @@ function initAdminPanel() {
     const adminBananaAmount = document.getElementById('adminBananaAmount');
     const adminNewCode = document.getElementById('adminNewCode');
     
+    // Nouvelles variables pour le panneau d'admin avancé
+    const advancedAdminModal = document.getElementById('advancedAdminModal');
+    const adminTabBtns = document.querySelectorAll('.admin-tab-btn');
+    
+    // Bouton pour ouvrir le panneau d'administration avancé
+    const advancedAdminBtn = document.createElement('button');
+    advancedAdminBtn.className = 'btn';
+    advancedAdminBtn.innerHTML = '<i class="fas fa-tools"></i> Administration Avancée';
+    advancedAdminBtn.style.marginTop = '1rem';
+    
+    // Ajouter le bouton à la section admin existante
+    if (adminSection) {
+        adminSection.appendChild(advancedAdminBtn);
+    }
+    
     // Cacher le bouton admin par défaut
     adminBtn.style.display = 'none';
     
@@ -681,6 +696,637 @@ function initAdminPanel() {
             showNotification('Accès refusé: Droits administrateur requis', 'error');
         }
     });
+    
+    // Données de test
+    const mockUsers = [
+        { id: 'user1', name: 'Jean Dupont', email: 'jean@example.com', role: 'user', status: 'active', lastLogin: Date.now() - 86400000 },
+        { id: 'user2', name: 'Marie Martin', email: 'marie@example.com', role: 'premium', status: 'active', lastLogin: Date.now() - 3600000 },
+        { id: 'user3', name: 'Pierre Durand', email: 'pierre@example.com', role: 'user', status: 'suspended', lastLogin: Date.now() - 604800000 },
+        { id: 'admin', name: 'Administrateur', email: 'admin@example.com', role: 'admin', status: 'active', lastLogin: Date.now() }
+    ];
+    
+    const syncStats = {
+        totalSyncs: 142,
+        successfulSyncs: 135,
+        failedSyncs: 7,
+        dataConflicts: 2,
+        lastSync: Date.now() - 1800000
+    };
+    
+    // Gérer le clic sur le bouton d'administration avancée
+    advancedAdminBtn.addEventListener('click', () => {
+        if (!gameState.user || !gameState.user.isAdmin) {
+            showNotification('Accès refusé: Droits administrateur requis', 'error');
+            return;
+        }
+        
+        advancedAdminModal.classList.add('show');
+        initAdvancedAdmin();
+    });
+    
+    // Fonction pour initialiser le panneau d'administration avancé
+    function initAdvancedAdmin() {
+        // Charger les utilisateurs
+        loadUsers();
+        
+        // Charger les statistiques de synchronisation
+        loadSyncStats();
+        
+        // Charger les logs système
+        loadSystemLogs();
+        
+        // Configurer les écouteurs d'événements
+        setupAdvancedAdminEvents();
+    }
+    
+    // Fonction pour charger les utilisateurs dans le tableau
+    function loadUsers() {
+        const adminUserTableBody = document.getElementById('adminUserTableBody');
+        adminUserTableBody.innerHTML = '';
+        
+        mockUsers.forEach(user => {
+            const tr = document.createElement('tr');
+            const lastLoginDate = new Date(user.lastLogin);
+            
+            tr.innerHTML = `
+                <td>${user.id}</td>
+                <td>
+                    <div class="user-info">
+                        <strong>${user.name}</strong>
+                        <div>${user.email}</div>
+                    </div>
+                </td>
+                <td><span class="user-status ${user.status}">${user.status.charAt(0).toUpperCase() + user.status.slice(1)}</span></td>
+                <td>${lastLoginDate.toLocaleDateString()} ${lastLoginDate.toLocaleTimeString()}</td>
+                <td>
+                    <div class="user-actions">
+                        <button class="edit-btn" data-id="${user.id}"><i class="fas fa-edit"></i></button>
+                        <button class="sync-btn" data-id="${user.id}"><i class="fas fa-sync-alt"></i></button>
+                        <button class="delete-btn" data-id="${user.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            `;
+            
+            adminUserTableBody.appendChild(tr);
+        });
+    }
+    
+    // Fonction pour charger les statistiques de synchronisation
+    function loadSyncStats() {
+        const syncState = syncManager.getSyncState();
+        document.getElementById('totalSyncs').textContent = syncState.stats.totalSyncs;
+        document.getElementById('successfulSyncs').textContent = syncState.stats.successfulSyncs;
+        document.getElementById('failedSyncs').textContent = syncState.stats.failedSyncs;
+        document.getElementById('dataConflicts').textContent = syncState.stats.conflicts.filter(c => c.status === 'pending').length;
+        
+        const lastSyncDate = new Date(syncState.lastSync);
+        document.getElementById('lastSyncTime').textContent = `${lastSyncDate.toLocaleDateString()} ${lastSyncDate.toLocaleTimeString()}`;
+        
+        // Charger les conflits
+        loadConflicts();
+    }
+    
+    // Fonction pour charger les conflits
+    function loadConflicts() {
+        const pendingConflicts = document.getElementById('pendingConflicts');
+        const syncState = syncManager.getSyncState();
+        const conflicts = syncState.stats.conflicts.filter(c => c.status === 'pending');
+        
+        if (conflicts.length === 0) {
+            pendingConflicts.innerHTML = '<p class="no-data">Aucun conflit détecté</p>';
+            return;
+        }
+        
+        pendingConflicts.innerHTML = '';
+        
+        // Créer des conflits fictifs pour la démo si aucun n'existe
+        if (conflicts.length === 0 && mockUsers.length > 0) {
+            // Créer quelques conflits pour démonstration
+            const user1 = mockUsers[0];
+            const user2 = mockUsers.length > 1 ? mockUsers[1] : mockUsers[0];
+            
+            syncManager.registerConflict(
+                user1.id,
+                'data_mismatch',
+                { bananas: 1500 },
+                { bananas: 1200 },
+                'Bananes: 1500 (local) vs 1200 (serveur)'
+            );
+            
+            syncManager.registerConflict(
+                user2.id,
+                'upgrade_conflict',
+                { upgrades: { monkey: { owned: 5 } } },
+                { upgrades: { monkey: { owned: 3 } } },
+                'Mise à niveau "Singe Assistant": 5 (local) vs 3 (serveur)'
+            );
+        }
+        
+        // Afficher les conflits
+        syncState.stats.conflicts.filter(c => c.status === 'pending').forEach(conflict => {
+            const user = mockUsers.find(u => u.id === conflict.userId) || { name: 'Utilisateur inconnu' };
+            const conflictDate = new Date(conflict.timestamp);
+            
+            const conflictEl = document.createElement('div');
+            conflictEl.className = 'conflict-item';
+            conflictEl.innerHTML = `
+                <div class="conflict-header">
+                    <h5>Conflit: ${user.name}</h5>
+                    <span class="conflict-type">${getConflictTypeName(conflict.type)}</span>
+                </div>
+                <div class="conflict-info">
+                    <p>Date du conflit: ${conflictDate.toLocaleDateString()} à ${conflictDate.toLocaleTimeString()}</p>
+                    <p>Détails: ${conflict.details}</p>
+                </div>
+                <div class="conflict-actions">
+                    <button class="btn resolve-btn" data-id="${conflict.id}" data-resolution="local">Garder Local</button>
+                    <button class="btn resolve-btn" data-id="${conflict.id}" data-resolution="server">Garder Serveur</button>
+                    <button class="btn resolve-btn" data-id="${conflict.id}" data-resolution="merge">Fusionner</button>
+                </div>
+            `;
+            
+            pendingConflicts.appendChild(conflictEl);
+        });
+        
+        // Ajouter les écouteurs pour les boutons de résolution
+        document.querySelectorAll('.resolve-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const conflictId = btn.dataset.id;
+                const resolution = btn.dataset.resolution;
+                resolveConflict(conflictId, resolution);
+            });
+        });
+    }
+    
+    // Fonction pour résoudre un conflit
+    function resolveConflict(conflictId, resolution) {
+        // Résoudre le conflit via le gestionnaire de synchronisation
+        syncManager.resolveConflict(conflictId, resolution);
+        
+        // Mettre à jour l'affichage
+        loadSyncStats();
+        
+        // Afficher une notification
+        showNotification(`Conflit résolu avec la stratégie: ${resolution}`, false);
+    }
+    
+    // Fonction pour obtenir le nom du type de conflit
+    function getConflictTypeName(type) {
+        const conflictTypes = {
+            'data_mismatch': 'Données Divergentes',
+            'upgrade_conflict': 'Conflit de Mise à Niveau',
+            'missing_data': 'Données Manquantes',
+            'sync_error': 'Erreur de Synchronisation'
+        };
+        
+        return conflictTypes[type] || type;
+    }
+    
+    // Fonction pour charger les logs système
+    function loadSystemLogs() {
+        const systemLogsContainer = document.getElementById('systemLogsContainer');
+        systemLogsContainer.innerHTML = '';
+        
+        // Exemple de logs
+        const mockLogs = [
+            { timestamp: Date.now() - 100000, level: 'info', message: 'Utilisateur Jean Dupont connecté' },
+            { timestamp: Date.now() - 200000, level: 'info', message: 'Synchronisation réussie pour Marie Martin' },
+            { timestamp: Date.now() - 300000, level: 'warning', message: 'Tentative de synchronisation échouée pour Pierre Durand' },
+            { timestamp: Date.now() - 400000, level: 'error', message: 'Erreur de connexion à la base de données' }
+        ];
+        
+        mockLogs.forEach(log => {
+            const logDate = new Date(log.timestamp);
+            const formattedTime = `${logDate.toLocaleDateString()} ${logDate.toLocaleTimeString()}`;
+            
+            const logEl = document.createElement('div');
+            logEl.className = `log-entry ${log.level}`;
+            logEl.innerHTML = `
+                <span class="log-timestamp">[${formattedTime}]</span>
+                <span class="log-level">[${log.level.toUpperCase()}]</span>
+                <span class="log-message">${log.message}</span>
+            `;
+            
+            systemLogsContainer.appendChild(logEl);
+        });
+    }
+    
+    // Configurer les écouteurs d'événements pour le panneau d'administration avancé
+    function setupAdvancedAdminEvents() {
+        // Gestion des onglets
+        adminTabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+                
+                // Désactiver tous les onglets
+                document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.remove('active'));
+                
+                // Activer l'onglet cliqué
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Recherche d'utilisateurs
+        const userSearchBtn = document.getElementById('userSearchBtn');
+        userSearchBtn.addEventListener('click', () => {
+            const searchTerm = document.getElementById('userSearchInput').value.toLowerCase();
+            const filteredUsers = mockUsers.filter(user => 
+                user.name.toLowerCase().includes(searchTerm) || 
+                user.email.toLowerCase().includes(searchTerm)
+            );
+            
+            // Recharger la table avec les utilisateurs filtrés
+            adminUserTableBody.innerHTML = '';
+            filteredUsers.forEach(user => {
+                // Afficher les utilisateurs filtrés (même code que dans loadUsers)
+            });
+        });
+        
+        // Forcer une synchronisation
+        const forceSync = document.getElementById('forceSync');
+        forceSync.addEventListener('click', () => {
+            showNotification('Synchronisation globale en cours...', false);
+            
+            // Utiliser le gestionnaire de synchronisation
+            syncManager.fullSync()
+                .then(result => {
+                    // Mettre à jour les statistiques du panneau
+                    const syncState = syncManager.getSyncState();
+                    document.getElementById('totalSyncs').textContent = syncState.stats.totalSyncs;
+                    document.getElementById('successfulSyncs').textContent = syncState.stats.successfulSyncs;
+                    document.getElementById('failedSyncs').textContent = syncState.stats.failedSyncs;
+                    document.getElementById('dataConflicts').textContent = syncState.stats.conflicts.filter(c => c.status === 'pending').length;
+                    
+                    const lastSyncDate = new Date(syncState.lastSync);
+                    document.getElementById('lastSyncTime').textContent = 
+                        `${lastSyncDate.toLocaleDateString()} ${lastSyncDate.toLocaleTimeString()}`;
+                    
+                    showNotification('Synchronisation globale terminée avec succès', false);
+                    
+                    // Mettre à jour les logs
+                    updateSystemLogs(syncState.logs);
+                })
+                .catch(error => {
+                    showNotification('Erreur lors de la synchronisation: ' + error.message, true);
+                });
+        });
+        
+        // Réinitialiser la synchronisation
+        const resetSync = document.getElementById('resetSync');
+        resetSync.addEventListener('click', () => {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser le système de synchronisation ? Cette action ne peut pas être annulée.')) {
+                syncManager.resetSync();
+                
+                // Mettre à jour l'interface
+                const syncState = syncManager.getSyncState();
+                document.getElementById('totalSyncs').textContent = syncState.stats.totalSyncs;
+                document.getElementById('successfulSyncs').textContent = syncState.stats.successfulSyncs;
+                document.getElementById('failedSyncs').textContent = syncState.stats.failedSyncs;
+                document.getElementById('dataConflicts').textContent = syncState.stats.conflicts.length;
+                
+                const lastSyncDate = new Date(syncState.lastSync);
+                document.getElementById('lastSyncTime').textContent = 
+                    `${lastSyncDate.toLocaleDateString()} ${lastSyncDate.toLocaleTimeString()}`;
+                
+                // Afficher le message de succès
+                showNotification('Système de synchronisation réinitialisé avec succès', false);
+                
+                // Mettre à jour les logs
+                updateSystemLogs(syncState.logs);
+                
+                // Vider la section des conflits
+                document.getElementById('pendingConflicts').innerHTML = '<p class="no-data">Aucun conflit détecté</p>';
+            }
+        });
+
+        // Fonction pour mettre à jour les logs système
+        function updateSystemLogs(logs) {
+            const systemLogsContainer = document.getElementById('systemLogsContainer');
+            systemLogsContainer.innerHTML = '';
+            
+            if (logs.length === 0) {
+                systemLogsContainer.innerHTML = '<p class="no-data">Aucun log disponible</p>';
+                return;
+            }
+            
+            logs.slice(0, 30).forEach(log => { // Afficher seulement les 30 derniers logs
+                const logDate = new Date(log.timestamp);
+                const formattedTime = `${logDate.toLocaleDateString()} ${logDate.toLocaleTimeString()}`;
+                
+                const logEl = document.createElement('div');
+                logEl.className = `log-entry ${log.type === 'error' ? 'error' : log.type === 'success' ? 'info' : 'warning'}`;
+                logEl.innerHTML = `
+                    <span class="log-timestamp">[${formattedTime}]</span>
+                    <span class="log-level">[${log.type.toUpperCase()}]</span>
+                    <span class="log-message">${log.userId ? `Utilisateur: ${log.userId} - ` : ''}${log.details}</span>
+                `;
+                
+                systemLogsContainer.appendChild(logEl);
+            });
+        }
+        
+        // Synchroniser un utilisateur spécifique
+        document.querySelectorAll('.sync-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const userId = btn.dataset.id;
+                const user = mockUsers.find(u => u.id === userId);
+                
+                if (!user) return;
+                
+                showNotification(`Synchronisation de ${user.name} en cours...`, false);
+                
+                syncManager.syncUserData(userId, true)
+                    .then(result => {
+                        showNotification(`Synchronisation de ${user.name} terminée avec succès`, false);
+                        
+                        // Mettre à jour les statistiques
+                        const syncState = syncManager.getSyncState();
+                        document.getElementById('totalSyncs').textContent = syncState.stats.totalSyncs;
+                        document.getElementById('successfulSyncs').textContent = syncState.stats.successfulSyncs;
+                        
+                        const lastSyncDate = new Date(syncState.lastSync);
+                        document.getElementById('lastSyncTime').textContent = 
+                            `${lastSyncDate.toLocaleDateString()} ${lastSyncDate.toLocaleTimeString()}`;
+                        
+                        // Mettre à jour les logs
+                        updateSystemLogs(syncState.logs);
+                    })
+                    .catch(error => {
+                        showNotification(`Erreur lors de la synchronisation de ${user.name}: ${error.message || error}`, true);
+                        
+                        // Mettre à jour les statistiques
+                        const syncState = syncManager.getSyncState();
+                        document.getElementById('totalSyncs').textContent = syncState.stats.totalSyncs;
+                        document.getElementById('failedSyncs').textContent = syncState.stats.failedSyncs;
+                        
+                        // Mettre à jour les logs
+                        updateSystemLogs(syncState.logs);
+                    });
+            });
+        });
+        
+        // Filtrer les logs
+        const logLevelFilter = document.getElementById('logLevelFilter');
+        logLevelFilter.addEventListener('change', () => {
+            const level = logLevelFilter.value;
+            const syncState = syncManager.getSyncState();
+            
+            let filteredLogs;
+            if (level === 'all') {
+                filteredLogs = syncState.logs;
+            } else if (level === 'error') {
+                filteredLogs = syncState.logs.filter(log => log.type === 'error');
+            } else if (level === 'warning') {
+                filteredLogs = syncState.logs.filter(log => log.type !== 'success' && log.type !== 'error');
+            } else {
+                filteredLogs = syncState.logs.filter(log => log.type === 'success');
+            }
+            
+            updateSystemLogs(filteredLogs);
+        });
+        
+        // Effacer les logs
+        const clearLogs = document.getElementById('clearLogs');
+        clearLogs.addEventListener('click', () => {
+            if (confirm('Êtes-vous sûr de vouloir effacer tous les logs ?')) {
+                const syncState = syncManager.getSyncState();
+                syncState.logs = [];
+                
+                // Mettre à jour l'affichage
+                const systemLogsContainer = document.getElementById('systemLogsContainer');
+                systemLogsContainer.innerHTML = '<p class="no-data">Aucun log disponible</p>';
+                
+                showNotification('Logs système effacés', false);
+            }
+        });
+        
+        // Fermer le modal
+        document.getElementById('closeAdminModal').addEventListener('click', () => {
+            advancedAdminModal.classList.remove('show');
+        });
+        
+        // Gestion des utilisateurs
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const userId = btn.dataset.id;
+                const user = mockUsers.find(u => u.id === userId);
+                
+                if (user) {
+                    openUserEditModal(user);
+                }
+            });
+        });
+        
+        // Ajouter un nouvel utilisateur
+        const addUserBtn = document.getElementById('addUserBtn');
+        addUserBtn.addEventListener('click', () => {
+            const newUser = {
+                id: 'user' + (mockUsers.length + 1),
+                name: 'Nouvel Utilisateur',
+                email: 'nouveau@example.com',
+                role: 'user',
+                status: 'active',
+                lastLogin: Date.now()
+            };
+            
+            openUserEditModal(newUser, true);
+        });
+        
+        // Exporter les données utilisateurs
+        const exportUsersBtn = document.getElementById('exportUsersBtn');
+        exportUsersBtn.addEventListener('click', () => {
+            // Préparer les données à exporter
+            const exportData = JSON.stringify(mockUsers, null, 2);
+            
+            // Créer un objet Blob contenant les données
+            const blob = new Blob([exportData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            // Créer un lien de téléchargement et le simuler
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `utilisateurs_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Nettoyer
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+            
+            showNotification('Données utilisateurs exportées avec succès', false);
+        });
+        
+        // Fonction pour ouvrir le modal d'édition d'utilisateur
+        function openUserEditModal(user, isNew = false) {
+            const userEditModal = document.getElementById('userEditModal');
+            const editUserId = document.getElementById('editUserId');
+            const editUserName = document.getElementById('editUserName');
+            const editUserEmail = document.getElementById('editUserEmail');
+            const editUserRole = document.getElementById('editUserRole');
+            const editUserStatus = document.getElementById('editUserStatus');
+            const allowSync = document.getElementById('allowSync');
+            const forceResync = document.getElementById('forceResync');
+            
+            // Remplir le formulaire avec les données de l'utilisateur
+            editUserId.value = user.id;
+            editUserName.value = user.name;
+            editUserEmail.value = user.email || '';
+            editUserRole.value = user.role || 'user';
+            editUserStatus.value = user.status || 'active';
+            allowSync.checked = true;
+            forceResync.checked = false;
+            
+            // Afficher le modal
+            userEditModal.classList.add('show');
+            
+            // Configurer les événements pour le formulaire
+            setupUserFormEvents(isNew);
+        }
+        
+        // Configurer les écouteurs d'événements pour le formulaire d'édition utilisateur
+        function setupUserFormEvents(isNew) {
+            const userEditModal = document.getElementById('userEditModal');
+            const saveUserEdit = document.getElementById('saveUserEdit');
+            const cancelUserEdit = document.getElementById('cancelUserEdit');
+            const deleteUserBtn = document.getElementById('deleteUserBtn');
+            
+            // Supprimer les anciens écouteurs s'ils existent
+            const newSaveBtn = saveUserEdit.cloneNode(true);
+            saveUserEdit.parentNode.replaceChild(newSaveBtn, saveUserEdit);
+            
+            const newCancelBtn = cancelUserEdit.cloneNode(true);
+            cancelUserEdit.parentNode.replaceChild(newCancelBtn, cancelUserEdit);
+            
+            const newDeleteBtn = deleteUserBtn.cloneNode(true);
+            deleteUserBtn.parentNode.replaceChild(newDeleteBtn, deleteUserBtn);
+            
+            // Masquer le bouton supprimer pour les nouveaux utilisateurs
+            if (isNew) {
+                newDeleteBtn.style.display = 'none';
+            } else {
+                newDeleteBtn.style.display = 'block';
+            }
+            
+            // Configurer l'événement pour sauvegarder
+            newSaveBtn.addEventListener('click', () => {
+                saveUserChanges();
+            });
+            
+            // Configurer l'événement pour annuler
+            newCancelBtn.addEventListener('click', () => {
+                userEditModal.classList.remove('show');
+            });
+            
+            // Configurer l'événement pour supprimer
+            newDeleteBtn.addEventListener('click', () => {
+                const userId = document.getElementById('editUserId').value;
+                const user = mockUsers.find(u => u.id === userId);
+                
+                if (user && confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.name} ?`)) {
+                    deleteUser(userId);
+                    userEditModal.classList.remove('show');
+                }
+            });
+        }
+        
+        // Configurer les écouteurs d'événements pour les modales
+        function setupModalEvents() {
+            // Fermer les modales en cliquant sur les boutons de fermeture
+            document.querySelectorAll('.btn-close, #closeAdminModal, #cancelUserEdit').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.modal').classList.remove('show');
+                });
+            });
+            
+            // Fermer les modales en cliquant en dehors
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('show');
+                    }
+                });
+            });
+        }
+        
+        // Initialiser les événements des modales
+        setupModalEvents();
+        
+        // Sauvegarder les modifications d'un utilisateur
+        function saveUserChanges() {
+            const editUserId = document.getElementById('editUserId');
+            const editUserName = document.getElementById('editUserName');
+            const editUserEmail = document.getElementById('editUserEmail');
+            const editUserRole = document.getElementById('editUserRole');
+            const editUserStatus = document.getElementById('editUserStatus');
+            const allowSync = document.getElementById('allowSync');
+            const forceResync = document.getElementById('forceResync');
+            const userEditModal = document.getElementById('userEditModal');
+            
+            // Valider les données
+            if (!editUserName.value || !editUserEmail.value) {
+                showNotification('Veuillez remplir tous les champs obligatoires', true);
+                return;
+            }
+            
+            // Trouver l'utilisateur existant ou en créer un nouveau
+            const userIndex = mockUsers.findIndex(u => u.id === editUserId.value);
+            
+            const userData = {
+                id: editUserId.value,
+                name: editUserName.value,
+                email: editUserEmail.value,
+                role: editUserRole.value,
+                status: editUserStatus.value,
+                lastLogin: userIndex !== -1 ? mockUsers[userIndex].lastLogin : Date.now()
+            };
+            
+            if (userIndex !== -1) {
+                // Mettre à jour un utilisateur existant
+                mockUsers[userIndex] = userData;
+                showNotification(`Utilisateur ${userData.name} mis à jour avec succès`, false);
+                
+                // Forcer une synchronisation si demandé
+                if (forceResync.checked) {
+                    syncManager.syncUserData(userData.id, true)
+                        .then(() => {
+                            showNotification(`Données de ${userData.name} synchronisées`, false);
+                        })
+                        .catch(error => {
+                            showNotification(`Erreur de synchronisation: ${error.message || error}`, true);
+                        });
+                }
+            } else {
+                // Créer un nouvel utilisateur
+                mockUsers.push(userData);
+                showNotification(`Nouvel utilisateur ${userData.name} créé avec succès`, false);
+            }
+            
+            // Mettre à jour la liste des utilisateurs
+            loadUsers();
+            
+            // Fermer le modal
+            userEditModal.classList.remove('show');
+        }
+        
+        // Supprimer un utilisateur
+        function deleteUser(userId) {
+            const userIndex = mockUsers.findIndex(u => u.id === userId);
+            
+            if (userIndex !== -1) {
+                const userName = mockUsers[userIndex].name;
+                mockUsers.splice(userIndex, 1);
+                
+                // Mettre à jour la liste des utilisateurs
+                loadUsers();
+                
+                showNotification(`Utilisateur ${userName} supprimé avec succès`, false);
+            }
+        }
+    }
     
     // Gérer l'ajout de bananes
     adminAddBananasBtn.addEventListener('click', () => {
@@ -790,6 +1436,227 @@ setupEventListeners = function() {
     // Ajout de l'écouteur pour la touche espace
     document.addEventListener('keydown', handleSpacebar);
 };
+
+// Fonction pour gérer la synchronisation des données et les conflits
+function manageSynchronization() {
+    // État de la synchronisation
+    const syncState = {
+        isActive: true,
+        lastSync: Date.now(),
+        stats: {
+            totalSyncs: 0,
+            successfulSyncs: 0,
+            failedSyncs: 0,
+            conflicts: []
+        },
+        logs: []
+    };
+    
+    // Fonctions de gestion de la synchronisation
+    return {
+        // Récupérer l'état actuel de la synchronisation
+        getSyncState: () => {
+            return { ...syncState };
+        },
+        
+        // Enregistrer un événement de synchronisation
+        recordSync: (success = true, userId = null, details = '') => {
+            syncState.lastSync = Date.now();
+            syncState.stats.totalSyncs++;
+            
+            if (success) {
+                syncState.stats.successfulSyncs++;
+            } else {
+                syncState.stats.failedSyncs++;
+            }
+            
+            // Ajouter au journal
+            syncState.logs.unshift({
+                timestamp: Date.now(),
+                type: success ? 'success' : 'error',
+                userId: userId,
+                details: details
+            });
+            
+            // Limiter la taille du journal
+            if (syncState.logs.length > 100) {
+                syncState.logs.pop();
+            }
+            
+            return true;
+        },
+        
+        // Enregistrer un conflit de données
+        registerConflict: (userId, conflictType, localData, serverData, details = '') => {
+            const conflict = {
+                id: 'conflict_' + Date.now(),
+                userId: userId,
+                type: conflictType,
+                timestamp: Date.now(),
+                localData: localData,
+                serverData: serverData,
+                details: details,
+                status: 'pending' // pending, resolved, ignored
+            };
+            
+            syncState.stats.conflicts.push(conflict);
+            
+            return conflict.id;
+        },
+        
+        // Résoudre un conflit
+        resolveConflict: (conflictId, resolution = 'local') => {
+            const conflictIndex = syncState.stats.conflicts.findIndex(c => c.id === conflictId);
+            
+            if (conflictIndex === -1) {
+                return false;
+            }
+            
+            syncState.stats.conflicts[conflictIndex].status = 'resolved';
+            syncState.stats.conflicts[conflictIndex].resolution = resolution;
+            syncState.stats.conflicts[conflictIndex].resolvedAt = Date.now();
+            
+            return true;
+        },
+        
+        // Synchroniser les données d'un utilisateur
+        syncUserData: (userId, forceSync = false) => {
+            // Simuler le processus de synchronisation
+            return new Promise((resolve, reject) => {
+                // Vérifier si la synchronisation est active
+                if (!syncState.isActive && !forceSync) {
+                    return reject('Synchronisation désactivée pour cet utilisateur');
+                }
+                
+                // Simuler un délai de réseau
+                setTimeout(() => {
+                    // 80% de chances de succès
+                    const isSuccess = Math.random() > 0.2;
+                    
+                    if (isSuccess) {
+                        syncState.recordSync(true, userId, 'Synchronisation réussie');
+                        resolve({
+                            success: true,
+                            message: 'Données synchronisées avec succès',
+                            timestamp: Date.now()
+                        });
+                    } else {
+                        // Simuler un échec de synchronisation
+                        syncState.recordSync(false, userId, 'Échec de la synchronisation');
+                        reject({
+                            success: false,
+                            message: 'Échec de la synchronisation',
+                            error: 'network_error',
+                            timestamp: Date.now()
+                        });
+                    }
+                }, 1000 + Math.random() * 1000); // Entre 1 et 2 secondes
+            });
+        },
+        
+        // Détecter les conflits potentiels
+        detectConflicts: (userData, serverData) => {
+            const conflicts = [];
+            
+            // Comparer les bananes
+            if (Math.abs(userData.bananas - serverData.bananas) > 100) {
+                conflicts.push({
+                    type: 'data_mismatch',
+                    field: 'bananas',
+                    localValue: userData.bananas,
+                    serverValue: serverData.bananas
+                });
+            }
+            
+            // Comparer les améliorations
+            for (const upgradeId in userData.upgrades) {
+                if (!serverData.upgrades[upgradeId] || 
+                    userData.upgrades[upgradeId].owned !== serverData.upgrades[upgradeId].owned) {
+                    conflicts.push({
+                        type: 'upgrade_conflict',
+                        field: 'upgrades.' + upgradeId,
+                        localValue: userData.upgrades[upgradeId].owned,
+                        serverValue: serverData.upgrades[upgradeId]?.owned || 0
+                    });
+                }
+            }
+            
+            return conflicts;
+        },
+        
+        // Effectuer une synchronisation complète
+        fullSync: () => {
+            return new Promise((resolve) => {
+                // Simuler une synchronisation globale
+                setTimeout(() => {
+                    syncState.lastSync = Date.now();
+                    syncState.stats.totalSyncs++;
+                    syncState.stats.successfulSyncs++;
+                    
+                    // Ajouter au journal
+                    syncState.logs.unshift({
+                        timestamp: Date.now(),
+                        type: 'success',
+                        userId: 'all',
+                        details: 'Synchronisation globale terminée'
+                    });
+                    
+                    resolve({
+                        success: true,
+                        message: 'Synchronisation globale terminée avec succès',
+                        timestamp: Date.now()
+                    });
+                }, 2000 + Math.random() * 1000);
+            });
+        },
+        
+        // Réinitialiser le système de synchronisation
+        resetSync: () => {
+            syncState.lastSync = Date.now();
+            syncState.stats.totalSyncs = 0;
+            syncState.stats.successfulSyncs = 0;
+            syncState.stats.failedSyncs = 0;
+            syncState.stats.conflicts = [];
+            syncState.logs = [{
+                timestamp: Date.now(),
+                type: 'info',
+                userId: 'system',
+                details: 'Système de synchronisation réinitialisé'
+            }];
+            
+            return true;
+        },
+        
+        // Activer/désactiver la synchronisation
+        toggleSync: (active = true) => {
+            syncState.isActive = active;
+            return syncState.isActive;
+        }
+    };
+}
+
+// Instancier le gestionnaire de synchronisation
+const syncManager = manageSynchronization();
+
+// Fonction pour sauvegarder dans le cloud (simulée)
+function saveToCloud() {
+    // Si l'utilisateur n'est pas connecté, ne rien faire
+    if (!gameState.user) return;
+    
+    // Utiliser notre gestionnaire de synchronisation si disponible
+    if (typeof syncManager !== 'undefined') {
+        syncManager.syncUserData(gameState.user.id)
+            .then(result => {
+                console.log('Sauvegarde cloud réussie:', result);
+            })
+            .catch(error => {
+                console.error('Erreur de sauvegarde cloud:', error);
+            });
+    } else {
+        // Ancienne méthode de sauvegarde (simulée)
+        console.log('Sauvegarde cloud simulée pour', gameState.user.name);
+    }
+}
 
 // Démarrer le jeu
 initGame();
