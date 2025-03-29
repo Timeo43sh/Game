@@ -40,7 +40,7 @@ const config = {
         'PREMIUM2024': { multiplier: 2, production: 1.5, duration: 'permanent' },
         'VIP2024': { multiplier: 3, production: 2, duration: 'permanent' }
     },
-    adminEmails: ['timeogayte@gmail.com']
+    adminEmails: ['timeogayte43@gmail.com']
 };
 
 // Données des améliorations de production
