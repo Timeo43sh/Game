@@ -21,7 +21,26 @@ const gameState = {
     prestige: 0,
     goldenBananas: 0,
     lastUpdate: Date.now(),
-    version: "1.3.1"
+    version: "1.3.1",
+    // Nouvelles propriétés pour l'authentification et le premium
+    user: null,
+    isPremium: false,
+    premiumBenefits: {
+        multiplier: 1,
+        production: 1
+    }
+};
+
+// Configuration du jeu
+const config = {
+    recyclingInterval: 60,
+    interestInterval: 3600,
+    prestigeThreshold: 1000000,
+    premiumCodes: {
+        'PREMIUM2024': { multiplier: 2, production: 1.5, duration: 'permanent' },
+        'VIP2024': { multiplier: 3, production: 2, duration: 'permanent' }
+    },
+    adminEmails: ['timeogayte@gmail.com']
 };
 
 // Données des améliorations de production
@@ -190,6 +209,24 @@ const upgradeSound = document.getElementById('upgradeSound');
 const achievementSound = document.getElementById('achievementSound');
 const prestigeSound = document.getElementById('prestigeSound');
 const specialSound = document.getElementById('specialSound');
+
+// Éléments DOM supplémentaires
+const elements = {
+    ...elements,
+    authContainer: document.getElementById('authContainer'),
+    gameContainer: document.querySelector('.game-container'),
+    premiumOverlay: document.querySelector('.premium-overlay'),
+    premiumModal: document.getElementById('premiumModal'),
+    adminModal: document.getElementById('adminModal'),
+    adminBtn: document.getElementById('adminBtn'),
+    userAvatar: document.getElementById('userAvatar'),
+    userName: document.getElementById('userName'),
+    logoutBtn: document.getElementById('logoutBtn'),
+    premiumBtn: document.getElementById('premiumBtn'),
+    redeemCodeBtn: document.getElementById('redeemCode'),
+    premiumCodeInput: document.getElementById('premiumCode'),
+    leaderboardList: document.getElementById('leaderboardList')
+};
 
 // Initialiser les structures de données du jeu
 function initializeGameData() {
@@ -462,6 +499,227 @@ function openTab(tabId) {
     // Activer le bouton correspondant
     document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
 }
+
+// Initialisation de l'authentification Google
+function initGoogleAuth() {
+    gapi.load('auth2', function() {
+        gapi.auth2.init({
+            client_id: '501175363576-8lcgi4qd45qh4n317csi3lkm5j3tsuf8.apps.googleusercontent.com'
+        }).then(function(auth2) {
+            if (auth2.isSignedIn.get()) {
+                handleSignIn(auth2.currentUser.get());
+            }
+        });
+    });
+}
+
+// Gestion de la connexion Google
+function handleSignIn(googleUser) {
+    const profile = googleUser.getBasicProfile();
+    gameState.user = {
+        id: profile.getId(),
+        name: profile.getName(),
+        email: profile.getEmail(),
+        imageUrl: profile.getImageUrl()
+    };
+    
+    document.getElementById('userAvatar').src = gameState.user.imageUrl;
+    document.getElementById('userName').textContent = gameState.user.name;
+    document.getElementById('logoutBtn').style.display = 'block';
+    document.getElementById('authContainer').style.display = 'none';
+    document.querySelector('.game-container').style.display = 'flex';
+    
+    if (config.adminEmails.includes(gameState.user.email)) {
+        document.getElementById('adminBtn').style.display = 'block';
+    }
+    
+    loadPlayerData();
+}
+
+// Gestion de la déconnexion
+function handleSignOut() {
+    const auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function() {
+        gameState.user = null;
+        document.getElementById('userAvatar').src = 'default-avatar.png';
+        document.getElementById('userName').textContent = 'Non connecté';
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('authContainer').style.display = 'flex';
+        document.querySelector('.game-container').style.display = 'none';
+        document.getElementById('adminBtn').style.display = 'none';
+    });
+}
+
+// Gestion des codes premium
+function redeemPremiumCode(code) {
+    const premiumCode = config.premiumCodes[code.toUpperCase()];
+    if (premiumCode) {
+        gameState.isPremium = true;
+        gameState.premiumBenefits = {
+            multiplier: premiumCode.multiplier,
+            production: premiumCode.production
+        };
+        showNotification('Code premium activé avec succès!', 'success');
+        document.getElementById('premiumModal').classList.remove('show');
+        document.getElementById('premiumBtn').innerHTML = '<i class="fas fa-crown"></i> Premium Actif';
+        document.getElementById('premiumBtn').classList.add('active');
+        return true;
+    }
+    showNotification('Code premium invalide', 'error');
+    return false;
+}
+
+// Gestion du classement
+function updateLeaderboard() {
+    if (!gameState.user) return;
+    
+    const leaderboardData = [
+        { name: gameState.user.name, bananas: gameState.bananas, rank: 1 },
+        { name: 'Joueur 2', bananas: 900000, rank: 2 },
+        { name: 'Joueur 3', bananas: 800000, rank: 3 }
+    ];
+    
+    document.getElementById('leaderboardList').innerHTML = leaderboardData.map(player => `
+        <div class="leaderboard-entry">
+            <span class="rank rank-${player.rank}">#${player.rank}</span>
+            <span class="player-name">${player.name}</span>
+            <span class="player-score">${formatNumber(player.bananas)} bananes</span>
+        </div>
+    `).join('');
+}
+
+// Gestion du panel administrateur
+function initAdminPanel() {
+    if (!gameState.user || !config.adminEmails.includes(gameState.user.email)) return;
+    
+    const adminAddBananasBtn = document.getElementById('adminAddBananas');
+    const adminGenerateCodeBtn = document.getElementById('adminGenerateCode');
+    const adminBananaAmount = document.getElementById('adminBananaAmount');
+    const adminNewCode = document.getElementById('adminNewCode');
+    
+    adminAddBananasBtn.addEventListener('click', () => {
+        const amount = parseInt(adminBananaAmount.value);
+        if (amount > 0) {
+            gameState.bananas += amount;
+            updateDisplay();
+            showNotification(`${formatNumber(amount)} bananes ajoutées`, 'success');
+        }
+    });
+    
+    adminGenerateCodeBtn.addEventListener('click', () => {
+        const code = adminNewCode.value.toUpperCase();
+        if (code) {
+            config.premiumCodes[code] = {
+                multiplier: 2,
+                production: 1.5,
+                duration: 'permanent'
+            };
+            showNotification(`Code premium ${code} généré`, 'success');
+        }
+    });
+}
+
+// Gestion de la touche espace
+function handleSpacebar(event) {
+    if (event.code === 'Space') {
+        event.preventDefault();
+        handleClick();
+    }
+}
+
+// Modification de la fonction setupEventListeners
+const originalSetupEventListeners = setupEventListeners;
+setupEventListeners = function() {
+    originalSetupEventListeners();
+    
+    // Événements de connexion
+    document.getElementById('playOffline').addEventListener('click', () => {
+        document.getElementById('authContainer').style.display = 'none';
+        document.querySelector('.game-container').style.display = 'flex';
+    });
+    
+    document.getElementById('logoutBtn').addEventListener('click', handleSignOut);
+    document.getElementById('premiumBtn').addEventListener('click', () => {
+        document.getElementById('premiumModal').classList.add('show');
+    });
+    
+    document.getElementById('redeemCode').addEventListener('click', () => {
+        const code = document.getElementById('premiumCode').value;
+        if (redeemPremiumCode(code)) {
+            document.getElementById('premiumCode').value = '';
+        }
+    });
+    
+    // Fermeture des modales
+    document.querySelectorAll('.modal .btn-secondary').forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.closest('.modal').classList.remove('show');
+        });
+    });
+    
+    // Ajout de l'écouteur pour la touche espace
+    document.addEventListener('keydown', handleSpacebar);
+};
+
+// Modification de la fonction initGame
+const originalInitGame = initGame;
+initGame = function() {
+    initGoogleAuth();
+    originalInitGame();
+    initAdminPanel();
+};
+
+// Modification de la fonction handleClick pour prendre en compte le premium
+const originalHandleClick = handleClick;
+handleClick = function() {
+    const baseGain = 1 * gameState.multiplier;
+    let gain = baseGain;
+    
+    // Bonus premium
+    if (gameState.isPremium) {
+        gain *= gameState.premiumBenefits.multiplier;
+    }
+    
+    // Effets spéciaux existants
+    if (gameState.temporaryBoosts.goldenMinute.active) {
+        gain *= 2;
+    }
+    if (gameState.temporaryBoosts.bananaBlast.cooldown > 0) {
+        gain *= 1.5;
+    }
+    
+    gameState.bananas += gain;
+    gameState.totalClicks++;
+    
+    createClickEffect(gain);
+    
+    if (clickSound) clickSound.play();
+    
+    updateDisplay();
+    checkAchievements();
+    saveGame();
+};
+
+// Modification de la fonction updateBPS pour prendre en compte le premium
+const originalUpdateBPS = updateBPS;
+updateBPS = function() {
+    let bps = 0;
+    
+    productionUpgrades.forEach(upgrade => {
+        const owned = gameState.upgrades[upgrade.id]?.owned || 0;
+        bps += upgrade.bps * owned;
+    });
+    
+    const prestigeBonus = 1 + (gameState.prestige * 0.1);
+    bps *= prestigeBonus;
+    
+    // Bonus premium
+    if (gameState.isPremium) {
+        bps *= gameState.premiumBenefits.production;
+    }
+    
+    gameState.bananasPerSecond = bps;
+};
 
 // Démarrer le jeu
 initGame();
