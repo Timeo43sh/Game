@@ -40,7 +40,10 @@ const config = {
         'PREMIUM2024': { multiplier: 2, production: 1.5, duration: 'permanent' },
         'VIP2024': { multiplier: 3, production: 2, duration: 'permanent' }
     },
-    adminEmails: ['timeogayte43@gmail.com', 'admin@bananaempire.com']
+    adminCredentials: {
+        username: 'admin',
+        password: 'admin'
+    }
 };
 
 // Données des améliorations de production
@@ -500,73 +503,114 @@ function openTab(tabId) {
     document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
 }
 
-// Initialisation de l'authentification Google
-function initGoogleAuth() {
-    gapi.load('auth2', function() {
-        gapi.auth2.init({
-            client_id: '501175363576-8lcgi4qd45qh4n317csi3lkm5j3tsuf8.apps.googleusercontent.com'
-        }).then(function(auth2) {
-            if (auth2.isSignedIn.get()) {
-                handleSignIn(auth2.currentUser.get());
-            }
-        });
-    });
+// Initialisation de l'authentification
+function initAuth() {
+    const authContainer = document.getElementById('authContainer');
+    const loginForm = document.createElement('div');
+    loginForm.className = 'auth-form';
+    loginForm.innerHTML = `
+        <h2>Connexion</h2>
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Nom d'utilisateur">
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Mot de passe">
+        </div>
+        <button class="btn" id="loginBtn">Se connecter</button>
+    `;
+    
+    authContainer.appendChild(loginForm);
+    
+    document.getElementById('loginBtn').addEventListener('click', handleLogin);
 }
 
-// Gestion de la connexion Google
-function handleSignIn(googleUser) {
-    const profile = googleUser.getBasicProfile();
-    gameState.user = {
-        id: profile.getId(),
-        name: profile.getName(),
-        email: profile.getEmail(),
-        imageUrl: profile.getImageUrl()
-    };
+// Gestion de la connexion
+function handleLogin() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
     
-    document.getElementById('userAvatar').src = gameState.user.imageUrl;
-    document.getElementById('userName').textContent = gameState.user.name;
-    document.getElementById('logoutBtn').style.display = 'block';
-    document.getElementById('authContainer').style.display = 'none';
-    document.querySelector('.game-container').style.display = 'flex';
-    
-    // Toujours afficher le bouton admin
-    document.getElementById('adminBtn').style.display = 'block';
-    
-    loadPlayerData();
+    if (username === config.adminCredentials.username && password === config.adminCredentials.password) {
+        gameState.user = {
+            id: 'admin',
+            name: 'Administrateur',
+            isAdmin: true
+        };
+        
+        document.getElementById('userName').textContent = gameState.user.name;
+        document.getElementById('logoutBtn').style.display = 'block';
+        document.getElementById('authContainer').style.display = 'none';
+        document.querySelector('.game-container').style.display = 'flex';
+        
+        // Afficher le bouton admin
+        document.getElementById('adminBtn').style.display = 'block';
+        
+        loadPlayerData();
+        showNotification('Connexion réussie!', 'success');
+    } else {
+        showNotification('Identifiants incorrects', 'error');
+    }
 }
 
 // Gestion de la déconnexion
 function handleSignOut() {
-    const auth2 = gapi.auth2.getAuthInstance();
-    auth2.signOut().then(function() {
-        gameState.user = null;
-        document.getElementById('userAvatar').src = 'default-avatar.png';
-        document.getElementById('userName').textContent = 'Non connecté';
-        document.getElementById('logoutBtn').style.display = 'none';
-        document.getElementById('authContainer').style.display = 'flex';
-        document.querySelector('.game-container').style.display = 'none';
-        // Ne plus cacher le bouton admin
-    });
+    gameState.user = null;
+    document.getElementById('userName').textContent = 'Non connecté';
+    document.getElementById('logoutBtn').style.display = 'none';
+    document.getElementById('authContainer').style.display = 'flex';
+    document.querySelector('.game-container').style.display = 'none';
+    document.getElementById('adminBtn').style.display = 'none';
+    document.getElementById('adminSection').style.display = 'none';
+    saveGame();
+    showNotification('Déconnexion réussie', 'success');
 }
 
-// Gestion des codes premium
-function redeemPremiumCode(code) {
-    const premiumCode = config.premiumCodes[code.toUpperCase()];
-    if (premiumCode) {
-        gameState.isPremium = true;
-        gameState.premiumBenefits = {
-            multiplier: premiumCode.multiplier,
-            production: premiumCode.production
-        };
-        showNotification('Code premium activé avec succès!', 'success');
-        document.getElementById('premiumModal').classList.remove('show');
-        document.getElementById('premiumBtn').innerHTML = '<i class="fas fa-crown"></i> Premium Actif';
-        document.getElementById('premiumBtn').classList.add('active');
-        return true;
-    }
-    showNotification('Code premium invalide', 'error');
-    return false;
+// Synchronisation des données du joueur
+function syncPlayerData() {
+    if (!gameState.user) return;
+    
+    // Sauvegarder les données localement
+    localStorage.setItem('bananaEmpireSave', JSON.stringify(gameState));
+    
+    // Ici, vous pouvez ajouter la synchronisation avec un serveur si nécessaire
+    // Par exemple, envoyer les données à une API
 }
+
+// Chargement des données du joueur
+function loadPlayerData() {
+    if (!gameState.user) return;
+    
+    const savedData = localStorage.getItem('bananaEmpireSave');
+    if (savedData) {
+        try {
+            const parsed = JSON.parse(savedData);
+            gameState = {
+                ...gameState,
+                ...parsed,
+                user: gameState.user // Garder l'utilisateur actuel
+            };
+            updateDisplay();
+            showNotification('Données chargées avec succès!', 'success');
+        } catch (e) {
+            console.error("Erreur lors du chargement des données:", e);
+            showNotification("Erreur lors du chargement des données", 'error');
+        }
+    }
+}
+
+// Modification de la fonction initGame
+const originalInitGame = initGame;
+initGame = function() {
+    initAuth();
+    originalInitGame();
+    initAdminPanel();
+};
+
+// Modification de la fonction saveGame pour inclure la synchronisation
+const originalSaveGame = saveGame;
+saveGame = function() {
+    originalSaveGame();
+    syncPlayerData();
+};
 
 // Gestion du classement
 function updateLeaderboard() {
@@ -602,7 +646,7 @@ function initAdminPanel() {
     // Gérer le clic sur le bouton admin
     adminBtn.addEventListener('click', () => {
         // Vérifier si l'utilisateur est admin
-        if (gameState.user && config.adminEmails.includes(gameState.user.email)) {
+        if (gameState.user && config.adminCredentials.username === gameState.user.id) {
             // Basculer la visibilité de la section admin
             adminSection.style.display = adminSection.style.display === 'none' ? 'block' : 'none';
             
@@ -704,66 +748,6 @@ setupEventListeners = function() {
     
     // Ajout de l'écouteur pour la touche espace
     document.addEventListener('keydown', handleSpacebar);
-};
-
-// Modification de la fonction initGame
-const originalInitGame = initGame;
-initGame = function() {
-    initGoogleAuth();
-    originalInitGame();
-    initAdminPanel();
-};
-
-// Modification de la fonction handleClick pour prendre en compte le premium
-const originalHandleClick = handleClick;
-handleClick = function() {
-    const baseGain = 1 * gameState.multiplier;
-    let gain = baseGain;
-    
-    // Bonus premium
-    if (gameState.isPremium) {
-        gain *= gameState.premiumBenefits.multiplier;
-    }
-    
-    // Effets spéciaux existants
-    if (gameState.temporaryBoosts.goldenMinute.active) {
-        gain *= 2;
-    }
-    if (gameState.temporaryBoosts.bananaBlast.cooldown > 0) {
-        gain *= 1.5;
-    }
-    
-    gameState.bananas += gain;
-    gameState.totalClicks++;
-    
-    createClickEffect(gain);
-    
-    if (clickSound) clickSound.play();
-    
-    updateDisplay();
-    checkAchievements();
-    saveGame();
-};
-
-// Modification de la fonction updateBPS pour prendre en compte le premium
-const originalUpdateBPS = updateBPS;
-updateBPS = function() {
-    let bps = 0;
-    
-    productionUpgrades.forEach(upgrade => {
-        const owned = gameState.upgrades[upgrade.id]?.owned || 0;
-        bps += upgrade.bps * owned;
-    });
-    
-    const prestigeBonus = 1 + (gameState.prestige * 0.1);
-    bps *= prestigeBonus;
-    
-    // Bonus premium
-    if (gameState.isPremium) {
-        bps *= gameState.premiumBenefits.production;
-    }
-    
-    gameState.bananasPerSecond = bps;
 };
 
 // Démarrer le jeu
