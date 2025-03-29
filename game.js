@@ -546,7 +546,6 @@ function handleSignOut() {
         document.getElementById('logoutBtn').style.display = 'none';
         document.getElementById('authContainer').style.display = 'flex';
         document.querySelector('.game-container').style.display = 'none';
-        document.getElementById('adminBtn').style.display = 'none';
     });
 }
 
@@ -593,23 +592,22 @@ function initAdminPanel() {
     const adminBtn = document.getElementById('adminBtn');
     const adminSection = document.getElementById('adminSection');
     
-    // Vérifier si l'utilisateur est admin
-    if (gameState.user && config.adminEmails.includes(gameState.user.email)) {
-        // Afficher le bouton admin
-        adminBtn.style.display = 'block';
-        
-        // Gérer le clic sur le bouton admin
-        adminBtn.addEventListener('click', () => {
+    // Toujours afficher le bouton admin
+    adminBtn.style.display = 'block';
+    
+    // Gérer le clic sur le bouton admin
+    adminBtn.addEventListener('click', () => {
+        // Vérifier si l'utilisateur est admin
+        if (gameState.user && config.adminEmails.includes(gameState.user.email)) {
             // Basculer la visibilité de la section admin
             adminSection.style.display = adminSection.style.display === 'none' ? 'block' : 'none';
             
             // Mettre à jour les statistiques
             updateAdminStats();
-        });
-    } else {
-        // Cacher le bouton admin si l'utilisateur n'est pas admin
-        adminBtn.style.display = 'none';
-    }
+        } else {
+            showNotification('Accès refusé: Droits administrateur requis', 'error');
+        }
+    });
 }
 
 // Mise à jour des statistiques admin
