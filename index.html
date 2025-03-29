@@ -1192,6 +1192,192 @@
                 gap: 0.5rem;
             }
         }
+        
+        /* Styles pour l'en-tête et les boutons premium/admin */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .premium-btn {
+            background: linear-gradient(to right, #FFD700, #FFA500);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .premium-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
+        }
+        
+        .admin-btn {
+            background: linear-gradient(to right, #9C27B0, #673AB7);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .admin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(156, 39, 176, 0.5);
+        }
+        
+        /* Styles pour le modal Premium */
+        .premium-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--light);
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .premium-badge {
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .premium-badge.active {
+            background: linear-gradient(to right, #FFD700, #FFA500);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .premium-badge.inactive {
+            background: var(--card-bg);
+            border: 2px dashed #ccc;
+            color: var(--text-light);
+        }
+        
+        .premium-expires {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .premium-benefits {
+            margin-bottom: 2rem;
+        }
+        
+        .premium-benefits h4 {
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .benefits-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .benefits-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem;
+            background: var(--light);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        
+        .benefits-list li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .benefits-list li i {
+            color: var(--secondary);
+        }
+        
+        .premium-activation {
+            padding: 1.5rem;
+            background: var(--light);
+            border-radius: 12px;
+        }
+        
+        .premium-activation h4 {
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .premium-activation p {
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+        
+        .code-input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .code-input-container input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 2px solid var(--primary-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 2px;
+            background: var(--background);
+            color: var(--text);
+        }
+        
+        .code-input-container input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .header-right {
+                margin-top: 1rem;
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .benefits-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .code-input-container {
+                flex-direction: column;
+            }
+            
+            .premium-btn, .admin-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1228,20 +1414,25 @@
     <div class="container">
         <header>
             <div class="header-left">
-                <button class="theme-toggle" id="themeToggle" title="Changer de thème">
-                    <i class="fas fa-moon"></i>
+                <h1>Banana Empire</h1>
+                <button id="themeToggle" class="theme-toggle"><i class="fas fa-moon"></i></button>
+            </div>
+            
+            <div class="header-right">
+                <div class="user-profile">
+                    <span id="userName">Non connecté</span>
+                    <button id="logoutBtn" class="logout-btn" style="display: none;"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+                
+                <!-- Bouton Premium -->
+                <button id="premiumBtn" class="premium-btn">
+                    <i class="fas fa-crown"></i> Premium
                 </button>
-                <h1>Banana Empire Ultimate</h1>
-            </div>
-            <div class="prestige-info">
-                <i class="fas fa-trophy"></i> <span id="prestige-counter">0</span>
-                <span class="golden"><i class="fas fa-star"></i> <span id="golden-bananas">0</span></span>
-            </div>
-            <!-- Section profil utilisateur -->
-            <div id="userProfile" class="user-profile" style="display: none;">
-                <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
-                <span id="userName" class="user-name"></span>
-                <button onclick="handleSignOut()" class="logout-btn">Déconnexion</button>
+                
+                <!-- Bouton Admin (visible seulement pour les admins) -->
+                <button id="adminBtn" class="admin-btn" style="display: none;">
+                    <i class="fas fa-shield-alt"></i> Admin
+                </button>
             </div>
         </header>
         
@@ -1455,10 +1646,51 @@
         
         <div id="notification" class="notification">
             <i class="fas fa-check-circle"></i>
-            <div class="notification-content">Message de notification</div>
+            <span class="notification-content"></span>
         </div>
     </div>
 
+    <!-- Modal Premium -->
+    <div id="premiumModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-crown"></i> Espace Premium</h3>
+                <button type="button" class="btn-close" id="closePremiumModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="premium-status">
+                    <div id="premiumStatus" class="premium-badge inactive">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h4 id="premiumStatusText">Statut: Non-Premium</h4>
+                    <p id="premiumExpires"></p>
+                </div>
+                
+                <div class="premium-benefits">
+                    <h4><i class="fas fa-star"></i> Avantages Premium</h4>
+                    <ul class="benefits-list">
+                        <li><i class="fas fa-hand-pointer"></i> +50% de bananes par clic</li>
+                        <li><i class="fas fa-industry"></i> +100% de production automatique</li>
+                        <li><i class="fas fa-bolt"></i> -30% de cooldown sur les boosts</li>
+                        <li><i class="fas fa-sync"></i> Priorité de synchronisation</li>
+                        <li><i class="fas fa-palette"></i> Thèmes exclusifs</li>
+                        <li><i class="fas fa-medal"></i> Badge premium</li>
+                    </ul>
+                </div>
+                
+                <div class="premium-activation">
+                    <h4>Activer Premium</h4>
+                    <p>Entrez votre code premium ci-dessous pour activer les avantages</p>
+                    <div class="code-input-container">
+                        <input type="text" id="premiumCode" placeholder="ENTREZ VOTRE CODE">
+                        <button id="activatePremiumBtn" class="btn">Activer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio -->
     <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
     <audio id="upgradeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3"></audio>
     <audio id="achievementSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
@@ -2690,12 +2922,12 @@
             </div>
             <div class="modal-body">
                 <div class="admin-tabs">
-                    <button class="admin-tab-btn active" data-tab="userManagement">Gestion des Utilisateurs</button>
-                    <button class="admin-tab-btn" data-tab="syncManagement">Gestion de Synchronisation</button>
-                    <button class="admin-tab-btn" data-tab="systemLogs">Journaux Système</button>
+                    <button class="admin-tab-btn active" data-tab="users">Utilisateurs</button>
+                    <button class="admin-tab-btn" data-tab="sync">Synchronisation</button>
+                    <button class="admin-tab-btn" data-tab="premium">Codes Premium</button>
                 </div>
                 
-                <div class="admin-tab-content active" id="userManagement">
+                <div class="admin-tab-content active" id="usersTab">
                     <div class="search-bar">
                         <input type="text" id="userSearchInput" placeholder="Rechercher un utilisateur...">
                         <button class="btn" id="userSearchBtn"><i class="fas fa-search"></i></button>
@@ -2724,7 +2956,7 @@
                     </div>
                 </div>
                 
-                <div class="admin-tab-content" id="syncManagement">
+                <div class="admin-tab-content" id="syncTab">
                     <div class="sync-status-container">
                         <div class="sync-status">
                             <h4>État de Synchronisation</h4>
@@ -2769,20 +3001,47 @@
                     </div>
                 </div>
                 
-                <div class="admin-tab-content" id="systemLogs">
-                    <div class="logs-filter">
-                        <select id="logLevelFilter">
-                            <option value="all">Tous les niveaux</option>
-                            <option value="info">Information</option>
-                            <option value="warning">Avertissement</option>
-                            <option value="error">Erreur</option>
-                        </select>
-                        <button class="btn" id="clearLogs"><i class="fas fa-trash"></i> Effacer les Logs</button>
-                    </div>
-                    
-                    <div class="logs-container" id="systemLogsContainer">
-                        <!-- Les logs seront ajoutés ici -->
-                        <p class="no-data">Aucun log disponible</p>
+                <div class="admin-tab-content" id="premiumTab">
+                    <div class="premium-management">
+                        <h4>Gestion des Codes Premium</h4>
+                        
+                        <div class="code-generator">
+                            <h5>Générer un nouveau code</h5>
+                            <div class="form-group">
+                                <label for="adminNewCode">Code (laisser vide pour auto-générer)</label>
+                                <input type="text" id="adminNewCode" placeholder="ex: PREMIUM2024">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="premiumDuration">Durée (jours)</label>
+                                <input type="number" id="premiumDuration" value="30" min="1" max="365">
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="isPermanentCode">
+                                    Code permanent
+                                </label>
+                            </div>
+                            
+                            <button id="adminGenerateCodeBtn" class="btn">Générer Code</button>
+                        </div>
+                        
+                        <div class="active-codes">
+                            <h5>Codes Actifs</h5>
+                            <table id="premiumCodesTable" class="admin-user-list">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Durée</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rempli dynamiquement -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2845,6 +3104,47 @@
                 <button class="btn btn-danger" id="deleteUserBtn">Supprimer</button>
                 <button class="btn btn-secondary" id="cancelUserEdit">Annuler</button>
                 <button class="btn" id="saveUserEdit">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Premium -->
+    <div id="premiumModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-crown"></i> Avantages Premium</h3>
+                <button class="btn-close btn-secondary"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="premium-status">
+                    <div class="premium-badge" id="premiumStatus">
+                        <span id="premiumStatusText">Statut: Non-Premium</span>
+                    </div>
+                    <div class="premium-expires" id="premiumExpires"></div>
+                </div>
+                
+                <div class="premium-benefits">
+                    <h4>Avantages Premium</h4>
+                    <ul class="benefits-list">
+                        <li><i class="fas fa-check"></i> <strong>+100%</strong> de production de bananes</li>
+                        <li><i class="fas fa-check"></i> <strong>+50%</strong> de bananes par clic</li>
+                        <li><i class="fas fa-check"></i> Déverrouillage des thèmes exclusifs</li>
+                        <li><i class="fas fa-check"></i> Cooldown réduit sur les boosters spéciaux</li>
+                        <li><i class="fas fa-check"></i> Synchronisation prioritaire des données</li>
+                    </ul>
+                </div>
+                
+                <div class="premium-activation">
+                    <h4>Activer Premium</h4>
+                    <p>Entrez un code premium pour activer votre compte:</p>
+                    <div class="code-input-container">
+                        <input type="text" id="premiumCode" placeholder="CODE-PREMIUM" maxlength="12">
+                        <button class="btn" id="redeemCode"><i class="fas fa-check"></i> Activer</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="closePremiumModal">Fermer</button>
             </div>
         </div>
     </div>

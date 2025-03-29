@@ -25,9 +25,12 @@ const gameState = {
     // Nouvelles propriétés pour l'authentification et le premium
     user: null,
     isPremium: false,
+    premiumExpires: null,
     premiumBenefits: {
-        multiplier: 1,
-        production: 1
+        clickMultiplier: 1.5,  // +50% de bananes par clic
+        productionMultiplier: 2, // +100% de production
+        cooldownReduction: 0.7, // -30% de cooldown sur les boosts
+        syncPriority: true     // Priorité de synchronisation
     }
 };
 
@@ -37,8 +40,9 @@ const config = {
     interestInterval: 3600,
     prestigeThreshold: 1000000,
     premiumCodes: {
-        'PREMIUM2024': { multiplier: 2, production: 1.5, duration: 'permanent' },
-        'VIP2024': { multiplier: 3, production: 2, duration: 'permanent' }
+        'PREMIUM2024': { duration: 30 }, // 30 jours
+        'GOLD2024': { duration: 90 },    // 90 jours
+        'VIP2024': { duration: 'permanent' } // Permanent
     },
     adminCredentials: {
         username: 'admin',
@@ -349,6 +353,41 @@ function setupEventListeners() {
     
     // Sauvegarde quand l'onglet est fermé
     window.addEventListener('beforeunload', saveGame);
+    
+    // Écouteurs pour les fonctionnalités premium
+    const premiumBtn = document.getElementById('premiumBtn');
+    const premiumModal = document.getElementById('premiumModal');
+    const premiumCodeBtn = document.getElementById('activatePremiumBtn');
+    const premiumCodeInput = document.getElementById('premiumCode');
+    
+    if (premiumBtn) {
+        premiumBtn.addEventListener('click', () => {
+            premiumModal.classList.add('show');
+        });
+    }
+    
+    if (premiumCodeBtn) {
+        premiumCodeBtn.addEventListener('click', () => {
+            const code = premiumCodeInput.value.trim();
+            if (redeemPremiumCode(code)) {
+                premiumCodeInput.value = '';
+            }
+        });
+    }
+    
+    if (premiumCodeInput) {
+        premiumCodeInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                const code = premiumCodeInput.value.trim();
+                if (redeemPremiumCode(code)) {
+                    premiumCodeInput.value = '';
+                }
+            }
+        });
+    }
+    
+    // Écouter sur les modales d'administration
+    // ... existing event listeners ...
 }
 
 // Rendre les améliorations de production
@@ -468,6 +507,20 @@ function initGame() {
     renderAchievements();
     setupEventListeners();
     updateDisplay();
+    
+    // Vérifier si le compte premium est expiré
+    checkPremiumExpiry();
+    
+    // Mettre à jour le statut premium
+    updatePremiumStatus();
+    
+    // Configurer les événements pour les modales
+    setupModalEvents();
+    
+    // Initialiser les onglets admin
+    setupAdminTabs();
+    
+    // Démarrer la boucle de jeu
     gameLoop();
 }
 
@@ -564,7 +617,6 @@ function handleSignOut() {
     document.getElementById('userName').textContent = 'Non connecté';
     document.getElementById('logoutBtn').style.display = 'none';
     document.getElementById('authContainer').style.display = 'flex';
-    document.querySelector('.game-container').style.display = 'none';
     document.getElementById('adminBtn').style.display = 'none';
     document.getElementById('adminSection').style.display = 'none';
     saveGame();
@@ -590,6 +642,7 @@ function syncPlayerData() {
         lastUpdate: gameState.lastUpdate,
         version: gameState.version,
         isPremium: gameState.isPremium,
+        premiumExpires: gameState.premiumExpires,
         premiumBenefits: gameState.premiumBenefits
     };
     
@@ -1235,14 +1288,19 @@ function initAdminPanel() {
         
         // Configurer les écouteurs d'événements pour les modales
         function setupModalEvents() {
-            // Fermer les modales en cliquant sur les boutons de fermeture
-            document.querySelectorAll('.btn-close, #closeAdminModal, #cancelUserEdit').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    btn.closest('.modal').classList.remove('show');
-                });
+            // Fermer les modales lors d'un clic sur la croix
+            document.querySelectorAll('.btn-close, #closeAdminModal, #cancelUserEdit, #closePremiumModal').forEach(btn => {
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        const modal = btn.closest('.modal');
+                        if (modal) {
+                            modal.classList.remove('show');
+                        }
+                    });
+                }
             });
             
-            // Fermer les modales en cliquant en dehors
+            // Fermer les modales lors d'un clic à l'extérieur
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
@@ -1355,18 +1413,33 @@ function initAdminPanel() {
         }
         
         const code = adminNewCode.value.toUpperCase();
+        const duration = parseInt(document.getElementById('premiumDuration').value) || 30;
+        const isPermanent = document.getElementById('isPermanentCode').checked;
+        
+        let generatedCode;
+        
         if (!code || code.length < 4) {
-            showNotification('Le code doit contenir au moins 4 caractères', 'error');
-            return;
+            // Générer un code aléatoire
+            generatedCode = generatePremiumCode(isPermanent ? 'permanent' : duration);
+            showNotification(`Code premium ${generatedCode} généré`, 'success');
+        } else {
+            // Utiliser le code fourni
+            config.premiumCodes[code] = {
+                duration: isPermanent ? 'permanent' : duration
+            };
+            generatedCode = code;
+            showNotification(`Code premium ${code} généré`, 'success');
         }
         
-        config.premiumCodes[code] = {
-            multiplier: 2,
-            production: 1.5,
-            duration: 'permanent'
-        };
-        showNotification(`Code premium ${code} généré`, 'success');
-        adminNewCode.value = '';
+        // Ajouter au journal si le gestionnaire de synchronisation est disponible
+        if (typeof syncManager !== 'undefined') {
+            syncManager.recordSync(true, gameState.user.id, `Nouveau code premium généré: ${generatedCode}`);
+        }
+        
+        adminNewCode.value = generatedCode;
+        
+        // Afficher les codes actifs
+        updatePremiumCodesTable();
     });
 }
 
@@ -1658,5 +1731,276 @@ function saveToCloud() {
     }
 }
 
+// Mettre à jour le bouton premium selon l'état actuel
+function updatePremiumStatus() {
+    const premiumStatusEl = document.getElementById('premiumStatus');
+    const premiumStatusTextEl = document.getElementById('premiumStatusText');
+    const premiumExpiresEl = document.getElementById('premiumExpires');
+    const premiumBtn = document.getElementById('premiumBtn');
+    
+    if (gameState.isPremium) {
+        premiumStatusEl.classList.add('active');
+        premiumStatusEl.classList.remove('inactive');
+        premiumStatusTextEl.textContent = 'Statut: Premium Actif';
+        premiumBtn.innerHTML = '<i class="fas fa-crown"></i> Premium <span class="premium-active"></span>';
+        
+        if (gameState.premiumExpires && gameState.premiumExpires !== 'permanent') {
+            const expiryDate = new Date(gameState.premiumExpires);
+            const daysRemaining = Math.ceil((expiryDate - Date.now()) / (1000 * 60 * 60 * 24));
+            
+            premiumExpiresEl.textContent = `Expire dans ${daysRemaining} jour${daysRemaining > 1 ? 's' : ''}`;
+        } else {
+            premiumExpiresEl.textContent = 'Compte Premium permanent';
+        }
+    } else {
+        premiumStatusEl.classList.add('inactive');
+        premiumStatusEl.classList.remove('active');
+        premiumStatusTextEl.textContent = 'Statut: Non-Premium';
+        premiumBtn.innerHTML = '<i class="fas fa-crown"></i> Premium';
+        
+        premiumExpiresEl.textContent = '';
+    }
+}
+
+// Activer un code premium
+function redeemPremiumCode(code) {
+    code = code.toUpperCase();
+    
+    if (!code) {
+        showNotification('Veuillez entrer un code', true);
+        return false;
+    }
+    
+    if (config.premiumCodes[code]) {
+        const premium = config.premiumCodes[code];
+        
+        gameState.isPremium = true;
+        
+        if (premium.duration === 'permanent') {
+            gameState.premiumExpires = 'permanent';
+        } else {
+            // Ajouter la durée (en jours) à la date actuelle
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + premium.duration);
+            gameState.premiumExpires = expiryDate.getTime();
+        }
+        
+        // Mettre à jour l'affichage
+        updatePremiumStatus();
+        
+        // Mettre à jour le calcul de production
+        updateBPS();
+        
+        showNotification(`Code premium "${code}" activé avec succès!`, false);
+        
+        // Sauvegarder le jeu
+        saveGame();
+        
+        // Ajouter au journal si le gestionnaire de synchronisation est disponible
+        if (typeof syncManager !== 'undefined') {
+            syncManager.recordSync(true, gameState.user?.id || 'guest', `Code premium "${code}" activé`);
+        }
+        
+        return true;
+    } else {
+        showNotification(`Code "${code}" invalide ou expiré`, true);
+        return false;
+    }
+}
+
+// Vérifier si le compte premium est expiré
+function checkPremiumExpiry() {
+    if (gameState.isPremium && gameState.premiumExpires && gameState.premiumExpires !== 'permanent') {
+        if (Date.now() > gameState.premiumExpires) {
+            gameState.isPremium = false;
+            gameState.premiumExpires = null;
+            
+            showNotification('Votre compte premium a expiré', false);
+            
+            // Mettre à jour l'affichage
+            updatePremiumStatus();
+            
+            // Mettre à jour le calcul de production
+            updateBPS();
+            
+            saveGame();
+        }
+    }
+}
+
+// Générer un code premium aléatoire
+function generatePremiumCode(duration = 30, prefix = 'PREM') {
+    // Générer une chaîne aléatoire de lettres et chiffres
+    const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = prefix;
+    
+    // Ajouter des caractères aléatoires pour une longueur totale de 12
+    for (let i = 0; i < (8 - prefix.length); i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        code += characters.charAt(randomIndex);
+    }
+    
+    // Enregistrer le code dans la configuration
+    config.premiumCodes[code] = { duration: duration };
+    
+    return code;
+}
+
+// Mettre à jour la table des codes premium
+function updatePremiumCodesTable() {
+    const premiumCodesTableEl = document.getElementById('premiumCodesTable');
+    if (!premiumCodesTableEl) return;
+    
+    let tableHTML = `
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Durée</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+    
+    for (const code in config.premiumCodes) {
+        const premium = config.premiumCodes[code];
+        const duration = premium.duration === 'permanent' ? 'Permanent' : `${premium.duration} jours`;
+        
+        tableHTML += `
+            <tr>
+                <td>${code}</td>
+                <td>${duration}</td>
+                <td>
+                    <button class="delete-code-btn" data-code="${code}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+    
+    tableHTML += '</tbody>';
+    premiumCodesTableEl.innerHTML = tableHTML;
+    
+    // Ajouter les écouteurs de suppression de code
+    document.querySelectorAll('.delete-code-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const code = btn.dataset.code;
+            if (confirm(`Êtes-vous sûr de vouloir supprimer le code premium "${code}" ?`)) {
+                delete config.premiumCodes[code];
+                updatePremiumCodesTable();
+                showNotification(`Code premium "${code}" supprimé`, false);
+            }
+        });
+    });
+}
+
+// Adapter la fonction handleClick pour prendre en compte le bonus premium
+function handleClick() {
+    // Calculer le gain de base
+    let gain = 1;
+    
+    // Appliquer les multiplicateurs
+    gain *= (1 + (gameState.prestige * 0.1));
+    
+    // Appliquer le bonus premium si actif
+    if (gameState.isPremium) {
+        gain *= gameState.premiumBenefits.clickMultiplier;
+    }
+    
+    // Appliquer le bonus de minute dorée
+    if (gameState.temporaryBoosts.goldenMinute.active) {
+        gain *= 2;
+    }
+    
+    // Incrémenter le compteur
+    gameState.bananas += gain;
+    gameState.totalClicks++;
+    
+    // Jouer le son
+    playSound(clickSound);
+    
+    // Créer un effet visuel
+    createClickEffect(gain);
+    
+    // Mettre à jour l'affichage
+    updateDisplay();
+    
+    // Vérifier les succès
+    checkAchievements();
+}
+
+// Adapter la fonction updateBPS pour prendre en compte le bonus premium
+function updateBPS() {
+    let bps = 0;
+    
+    // Calculer la production de base
+    for (const upgradeId in gameState.upgrades) {
+        const upgrade = productionUpgrades.find(u => u.id === upgradeId);
+        if (upgrade) {
+            bps += upgrade.bps * gameState.upgrades[upgradeId].owned;
+        }
+    }
+    
+    // Appliquer les multiplicateurs
+    bps *= (1 + (gameState.prestige * 0.1));
+    
+    // Appliquer le bonus premium si actif
+    if (gameState.isPremium) {
+        bps *= gameState.premiumBenefits.productionMultiplier;
+    }
+    
+    // Appliquer le bonus de minute dorée
+    if (gameState.temporaryBoosts.goldenMinute.active) {
+        bps *= 2;
+    }
+    
+    gameState.bananasPerSecond = bps;
+}
+
 // Démarrer le jeu
 initGame();
+
+// Configuration des onglets du panneau admin
+function setupAdminTabs() {
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Désactiver tous les onglets
+            document.querySelectorAll('.admin-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Activer l'onglet cliqué
+            btn.classList.add('active');
+            const tabId = btn.getAttribute('data-tab');
+            if (tabId === 'users') {
+                document.getElementById('usersTab').classList.add('active');
+            } else if (tabId === 'sync') {
+                document.getElementById('syncTab').classList.add('active');
+                updateSyncStatus();
+                loadSyncStats();
+                loadConflicts();
+            } else if (tabId === 'premium') {
+                document.getElementById('premiumTab').classList.add('active');
+                updatePremiumCodesTable();
+            }
+        });
+    });
+}
+
+// Mettre à jour l'affichage des onglets admin lors de l'ouverture du modal
+document.getElementById('adminBtn').addEventListener('click', () => {
+    document.getElementById('adminModal').classList.add('show');
+    loadUserList();
+    updateSyncStatus();
+    loadSyncStats();
+    loadConflicts();
+    updatePremiumCodesTable();
+    
+    // Initialiser les onglets
+    setupAdminTabs();
+});
