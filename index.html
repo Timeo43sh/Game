@@ -92,7 +92,7 @@
             -webkit-text-fill-color: transparent;
             font-weight: 800;
         }
-
+        
         /* Style pour la plateforme de jeux */
         .platform-nav {
             background-color: var(--card-bg);
@@ -237,7 +237,7 @@
             justify-content: center;
             gap: 0.5rem;
         }
-
+        
         .game-card .btn:hover {
             background: var(--primary-dark);
         }
@@ -259,14 +259,14 @@
         .prestige-info i {
             font-size: 1.2rem;
         }
-
+        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
-
+        
         .stat-card {
             background: var(--card-bg);
             padding: 1.5rem;
@@ -277,12 +277,12 @@
             overflow: hidden;
             border-left: 5px solid var(--primary);
         }
-
+        
         .stat-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
-
+        
         .stat-card h2 {
             font-size: 1rem;
             color: var(--primary-dark);
@@ -324,18 +324,18 @@
         #banana:active {
             transform: scale(0.92);
         }
-
+        
         .tab-container {
             margin-bottom: 1.5rem;
         }
-
+        
         .tab-buttons {
             display: flex;
             border-bottom: 2px solid var(--light);
             margin-bottom: 1.5rem;
             gap: 0.5rem;
         }
-
+        
         .tab-btn {
             padding: 0.8rem 1.5rem;
             background: none;
@@ -347,16 +347,16 @@
             transition: var(--transition);
             border-radius: 8px 8px 0 0;
         }
-
+        
         .tab-btn:hover {
             color: var(--primary-dark);
             background: rgba(255, 193, 7, 0.1);
         }
-
+        
         .tab-btn.active {
             color: var(--primary-dark);
         }
-
+        
         .tab-btn.active::after {
             content: '';
             position: absolute;
@@ -366,21 +366,21 @@
             height: 2px;
             background: var(--primary);
         }
-
+        
         .tab-content {
             display: none;
             animation: fadeIn 0.3s ease;
         }
-
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
+        
         .tab-content.active {
             display: block;
         }
-
+        
         .notification {
             position: fixed;
             top: 20px;
@@ -398,15 +398,15 @@
             gap: 0.8rem;
             max-width: 350px;
         }
-
+        
         .notification.show {
             transform: translateX(0);
         }
-
+        
         .notification.error {
             background: #dc3545;
         }
-
+        
         .notification i {
             font-size: 1.5rem;
         }
@@ -527,90 +527,90 @@
                     <i class="fas fa-trophy"></i> <span id="prestige-counter">0</span>
                     <span class="golden"><i class="fas fa-star"></i> <span id="golden-bananas">0</span></span>
                 </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
+        
+        <div class="stats-grid">
+            <div class="stat-card">
                         <h2><i class="fas fa-apple-alt"></i> Bananes</h2>
-                        <p id="counter">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h2><i class="fas fa-bolt"></i> Bananes/Secondes</h2>
-                        <p id="bananas-per-second">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h2><i class="fas fa-hand-pointer"></i> Total Clics</h2>
-                        <p id="total-clicks">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h2><i class="fas fa-chart-line"></i> Multiplicateur</h2>
-                        <p id="multiplier">1.00x</p>
-                    </div>
-                </div>
-                
-                <div id="banana-container">
-                    <div id="banana" title="Cliquez pour gagner des bananes!"></div>
-                </div>
-                
-                <div class="tab-container">
-                    <div class="tab-buttons">
+                <p id="counter">0</p>
+            </div>
+            <div class="stat-card">
+                <h2><i class="fas fa-bolt"></i> Bananes/Secondes</h2>
+                <p id="bananas-per-second">0</p>
+            </div>
+            <div class="stat-card">
+                <h2><i class="fas fa-hand-pointer"></i> Total Clics</h2>
+                <p id="total-clicks">0</p>
+            </div>
+            <div class="stat-card">
+                <h2><i class="fas fa-chart-line"></i> Multiplicateur</h2>
+                <p id="multiplier">1.00x</p>
+            </div>
+        </div>
+        
+        <div id="banana-container">
+            <div id="banana" title="Cliquez pour gagner des bananes!"></div>
+        </div>
+        
+        <div class="tab-container">
+            <div class="tab-buttons">
                         <button class="tab-btn active" data-tab="upgrades">
-                            <i class="fas fa-arrow-up"></i> Améliorations
-                        </button>
+                    <i class="fas fa-arrow-up"></i> Améliorations
+                </button>
                         <button class="tab-btn" data-tab="achievements">
-                            <i class="fas fa-trophy"></i> Succès
-                        </button>
+                    <i class="fas fa-trophy"></i> Succès
+                </button>
                         <button class="tab-btn" data-tab="prestige">
-                            <i class="fas fa-redo"></i> Prestige
-                        </button>
-                    </div>
-                    
-                    <div id="upgrades" class="tab-content active">
+                    <i class="fas fa-redo"></i> Prestige
+                </button>
+            </div>
+            
+            <div id="upgrades" class="tab-content active">
                         <div id="production-upgrades"></div>
-                    </div>
-                    
+                            </div>
+                            
                     <div id="achievements" class="tab-content">
                         <div id="achievements-container"></div>
-                    </div>
-                    
+                            </div>
+                            
                     <div id="prestige" class="tab-content">
                         <button class="btn" id="prestige-btn">
                             <i class="fas fa-redo"></i> Prestige
-                        </button>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            
+                    
             <!-- Autres jeux à venir -->
             <div id="snake" class="game-content" style="display: none;">
                 <h2>Snake</h2>
                 <p>Le jeu Snake sera bientôt disponible !</p>
                 <div class="game-placeholder" style="background: #4CAF50; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
                     <i class="fas fa-code"></i> En développement
-                </div>
-            </div>
-            
+                        </div>
+                    </div>
+                    
             <div id="tetris" class="game-content" style="display: none;">
                 <h2>Tetris</h2>
                 <p>Le jeu Tetris sera bientôt disponible !</p>
                 <div class="game-placeholder" style="background: #2196F3; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
                     <i class="fas fa-code"></i> En développement
-                </div>
-            </div>
-            
+                                </div>
+                            </div>
+                            
             <div id="memory" class="game-content" style="display: none;">
                 <h2>Memory</h2>
                 <p>Le jeu Memory sera bientôt disponible !</p>
                 <div class="game-placeholder" style="background: #9C27B0; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
                     <i class="fas fa-code"></i> En développement
-                </div>
-            </div>
-            
+                        </div>
+                    </div>
+                    
             <div id="flappy" class="game-content" style="display: none;">
                 <h2>Flappy Bird</h2>
                 <p>Le jeu Flappy Bird sera bientôt disponible !</p>
                 <div class="game-placeholder" style="background: #FF5722; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
                     <i class="fas fa-code"></i> En développement
-                </div>
+                                </div>
             </div>
         </div>
         
@@ -663,9 +663,8 @@
             }
             
             // Initialiser le jeu si c'est Banana Clicker
-            if (gameId === 'banana-clicker' && typeof initGame === 'function') {
-                // Vérifier si le jeu est déjà initialisé
-                if (!window.gameInitialized) {
+            if (gameId === 'banana-clicker') {
+                if (typeof initGame === 'function' && !window.gameInitialized) {
                     initGame();
                     window.gameInitialized = true;
                 }
