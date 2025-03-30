@@ -21,7 +21,7 @@ const gameState = {
     prestige: 0,
     goldenBananas: 0,
     lastUpdate: Date.now(),
-    version: "1.4.0",
+    version: "1.5.0",
     // Nouvelles propriétés pour l'authentification et le premium
     user: null,
     isPremium: false,
@@ -359,37 +359,82 @@ function checkAchievements() {
 
 // Fonction pour mettre à jour l'affichage des améliorations de production
 function updateProductionUpgrades() {
-    productionUpgrades.forEach(upgrade => {
+    const container = document.getElementById('production-upgrades');
+    if (!container) {
+        console.error("Conteneur des améliorations de production non trouvé");
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    // Filtrer les améliorations débloquées
+    const unlockedUpgrades = productionUpgrades.filter(upgrade => 
+        gameState.bananas >= upgrade.unlockAt || (gameState.upgrades[upgrade.id] && gameState.upgrades[upgrade.id].owned > 0)
+    );
+    
+    unlockedUpgrades.forEach(upgrade => {
         const owned = gameState.upgrades[upgrade.id]?.owned || 0;
         const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, owned));
         
-        const costElement = document.getElementById(`${upgrade.id}-cost`);
-        const ownedElement = document.getElementById(`${upgrade.id}-owned`);
-        const btnElement = document.getElementById(`${upgrade.id}-btn`);
+        const upgradeDiv = document.createElement('div');
+        upgradeDiv.className = 'upgrade-item';
+        upgradeDiv.innerHTML = `
+            <div class="upgrade-icon"><i class="${upgrade.icon}"></i></div>
+            <div class="upgrade-info">
+                <h4>${upgrade.name} <span class="upgrade-owned" id="${upgrade.id}-owned">${owned}</span></h4>
+                <p>${upgrade.desc}</p>
+                <p class="upgrade-bps">+${upgrade.bps} bananes/sec chacun</p>
+            </div>
+            <div class="upgrade-cost">
+                <button class="upgrade-btn" id="${upgrade.id}-btn" data-id="${upgrade.id}">
+                    <span class="cost" id="${upgrade.id}-cost">${formatNumber(cost)}</span>
+                    <i class="fas fa-shopping-cart"></i>
+                </button>
+            </div>
+        `;
         
-        if (costElement) costElement.textContent = formatNumber(cost);
-        if (ownedElement) ownedElement.textContent = owned;
-        if (btnElement) btnElement.disabled = gameState.bananas < cost;
+        container.appendChild(upgradeDiv);
+        
+        // Ajouter l'écouteur d'événement
+        const button = document.getElementById(`${upgrade.id}-btn`);
+        if (button) {
+            button.addEventListener('click', () => buyUpgrade(upgrade.id));
+        }
     });
 }
 
 // Fonction pour mettre à jour l'affichage des succès
 function updateAchievements() {
+    const container = document.getElementById('achievements-container');
+    if (!container) {
+        console.error("Conteneur des succès non trouvé");
+        return;
+    }
+    
+    container.innerHTML = '';
+    
     achievementsData.forEach(ach => {
-        const achieved = gameState.achievements[ach.id] || gameState.bananas >= ach.threshold;
+        const achieved = gameState.achievements[ach.id] || false;
         const progress = Math.min(100, (gameState.bananas / ach.threshold) * 100);
         
-        const achElement = document.getElementById(ach.id);
-        if (achElement) {
-            if (achieved) {
-                achElement.classList.add('unlocked');
-            }
-            
-            const progressBar = achElement.querySelector('.achievement-progress-bar');
-            if (progressBar) {
-                progressBar.style.width = `${progress}%`;
-            }
-        }
+        const achievementDiv = document.createElement('div');
+        achievementDiv.className = `achievement-item ${achieved ? 'unlocked' : ''}`;
+        achievementDiv.id = ach.id;
+        achievementDiv.innerHTML = `
+            <div class="achievement-icon"><i class="${ach.icon}"></i></div>
+            <div class="achievement-info">
+                <h4>${ach.name}</h4>
+                <p>${ach.desc}</p>
+                <div class="achievement-progress">
+                    <div class="achievement-progress-bar" style="width: ${progress}%"></div>
+                </div>
+            </div>
+            <div class="achievement-reward">
+                ${ach.reward > 0 ? `+${formatNumber(ach.reward)}` : 'Prestige'}
+            </div>
+        `;
+        
+        container.appendChild(achievementDiv);
     });
 }
 
@@ -622,19 +667,34 @@ function loadPlayerData() {
             
             // Migration des versions si nécessaire
             if (!parsed.version || parsed.version !== gameState.version) {
+                console.log(`Migration depuis la version ${parsed.version || 'inconnue'} vers ${gameState.version}`);
                 parsed.version = gameState.version;
             }
             
-            // Mettre à jour uniquement les données du joueur
+            // Mettre à jour l'état du jeu
             Object.assign(gameState, parsed);
-            
-            updateDisplay();
-            showNotification('Données chargées avec succès!', 'success');
+            console.log("Données chargées depuis le stockage local");
         } catch (e) {
             console.error("Erreur lors du chargement des données:", e);
-            showNotification("Erreur lors du chargement des données", 'error');
         }
+    } else {
+        console.log("Aucune donnée sauvegardée trouvée, initialisation avec les valeurs par défaut");
     }
+    
+    // Initialiser les améliorations si ce n'est pas déjà fait
+    if (!gameState.upgrades || Object.keys(gameState.upgrades).length === 0) {
+        gameState.upgrades = {};
+        
+        // Initialiser les améliorations de base
+        productionUpgrades.forEach(upgrade => {
+            if (upgrade.unlockAt === 0) {
+                gameState.upgrades[upgrade.id] = { owned: 0 };
+            }
+        });
+    }
+    
+    // Mettre à jour l'interface
+    updateDisplay();
 }
 
 // Initialiser le jeu
@@ -642,20 +702,31 @@ function initGame() {
     console.log("Initialisation du jeu en cours...");
     
     // Vérifier si on est sur la page de jeu Banana Clicker
-    if (!document.getElementById('banana-clicker')) {
+    const bananaClicker = document.getElementById('banana-clicker');
+    if (!bananaClicker) {
         console.log("Page Banana Clicker non trouvée, initialisation annulée");
-        return;
+        return false;
     }
     
     // Vérifier si le jeu est déjà initialisé
     if (window.gameInitialized) {
         console.log("Le jeu est déjà initialisé");
-        return;
+        return true;
     }
     
     try {
+        // Vérifier si les éléments essentiels existent
+        if (!document.getElementById('banana') || !document.getElementById('counter')) {
+            console.error("Éléments DOM essentiels non trouvés");
+            return false;
+        }
+        
         // Initialiser l'authentification
-        initAuth();
+        if (typeof initAuth === 'function') {
+            initAuth();
+        } else {
+            console.warn("Fonction initAuth non disponible");
+        }
         
         // Initialiser les données du jeu
         initializeGameData();
@@ -687,9 +758,53 @@ function initGame() {
         window.gameInitialized = true;
         
         console.log("Jeu initialisé avec succès");
+        return true;
     } catch (error) {
         console.error("Erreur lors de l'initialisation du jeu:", error);
+        return false;
     }
+}
+
+// Initialisation des données du jeu
+function initializeGameData() {
+    console.log("Initialisation des données du jeu");
+    
+    // Charger les données si disponibles
+    const savedData = localStorage.getItem('gameHubSave');
+    if (savedData) {
+        try {
+            const parsed = JSON.parse(savedData);
+            
+            // Migration des versions si nécessaire
+            if (!parsed.version || parsed.version !== gameState.version) {
+                console.log(`Migration depuis la version ${parsed.version || 'inconnue'} vers ${gameState.version}`);
+                parsed.version = gameState.version;
+            }
+            
+            // Mettre à jour l'état du jeu
+            Object.assign(gameState, parsed);
+            console.log("Données chargées depuis le stockage local");
+        } catch (e) {
+            console.error("Erreur lors du chargement des données:", e);
+        }
+    } else {
+        console.log("Aucune donnée sauvegardée trouvée, initialisation avec les valeurs par défaut");
+    }
+    
+    // Initialiser les améliorations si ce n'est pas déjà fait
+    if (!gameState.upgrades || Object.keys(gameState.upgrades).length === 0) {
+        gameState.upgrades = {};
+        
+        // Initialiser les améliorations de base
+        productionUpgrades.forEach(upgrade => {
+            if (upgrade.unlockAt === 0) {
+                gameState.upgrades[upgrade.id] = { owned: 0 };
+            }
+        });
+    }
+    
+    // Mettre à jour l'interface
+    updateDisplay();
 }
 
 // Gestion du classement
@@ -1458,28 +1573,65 @@ function handleSpacebar(event) {
     }
 }
 
-// Modification de la fonction setupEventListeners
-const originalSetupEventListeners = setupEventListeners;
-setupEventListeners = function() {
-    originalSetupEventListeners();
+// Configurer les écouteurs d'événements
+function setupEventListeners() {
+    // Écouteur pour le clic sur la banane
+    const bananaElement = document.getElementById('banana');
+    if (bananaElement) {
+        bananaElement.addEventListener('click', handleClick);
+    } else {
+        console.error("Élément banana non trouvé");
+    }
+    
+    // Écouteur pour le bouton de prestige
+    const prestigeButton = document.getElementById('prestige-btn');
+    if (prestigeButton) {
+        prestigeButton.addEventListener('click', handlePrestige);
+    }
+    
+    // Écouteur pour le changement de thème
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+    
+    // Écouteurs pour les onglets
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            openTab(btn.dataset.tab);
+        });
+    });
     
     // Événements de connexion
-    document.getElementById('playOffline').addEventListener('click', () => {
-        document.getElementById('authContainer').style.display = 'none';
-        document.querySelector('.game-container').style.display = 'flex';
-    });
+    const playOfflineBtn = document.getElementById('playOffline');
+    if (playOfflineBtn) {
+        playOfflineBtn.addEventListener('click', () => {
+            document.getElementById('authContainer').style.display = 'none';
+            document.querySelector('.game-container').style.display = 'flex';
+        });
+    }
     
-    document.getElementById('logoutBtn').addEventListener('click', handleSignOut);
-    document.getElementById('premiumBtn').addEventListener('click', () => {
-        document.getElementById('premiumModal').classList.add('show');
-    });
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleSignOut);
+    }
     
-    document.getElementById('redeemCode').addEventListener('click', () => {
-        const code = document.getElementById('premiumCode').value;
-        if (redeemPremiumCode(code)) {
-            document.getElementById('premiumCode').value = '';
-        }
-    });
+    const premiumBtn = document.getElementById('premiumBtn');
+    if (premiumBtn) {
+        premiumBtn.addEventListener('click', () => {
+            document.getElementById('premiumModal').classList.add('show');
+        });
+    }
+    
+    const redeemCodeBtn = document.getElementById('redeemCode');
+    if (redeemCodeBtn) {
+        redeemCodeBtn.addEventListener('click', () => {
+            const code = document.getElementById('premiumCode').value;
+            if (redeemPremiumCode(code)) {
+                document.getElementById('premiumCode').value = '';
+            }
+        });
+    }
     
     // Fermeture des modales
     document.querySelectorAll('.modal .btn-secondary').forEach(btn => {
@@ -1490,7 +1642,7 @@ setupEventListeners = function() {
     
     // Ajout de l'écouteur pour la touche espace
     document.addEventListener('keydown', handleSpacebar);
-};
+}
 
 // Fonction pour gérer la synchronisation des données et les conflits
 function manageSynchronization() {
@@ -1719,10 +1871,18 @@ window.loadBananaClicker = function() {
     
     // S'assurer que le DOM est complètement chargé
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initGame);
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM chargé, initialisation du jeu");
+            initGame();
+        });
         console.log("DOM encore en chargement, planification de l'initialisation");
     } else {
-        initGame();
+        console.log("DOM déjà chargé, initialisation du jeu maintenant");
+        const success = initGame();
+        if (!success) {
+            console.error("Échec de l'initialisation du jeu. Nouvel essai dans 500ms...");
+            setTimeout(initGame, 500);
+        }
     }
 };
 
@@ -1804,4 +1964,127 @@ function setupPlatformEvents() {
     
     // Sauvegarder périodiquement
     setInterval(saveGame, config.platform.saveInterval);
+}
+
+// Fonction pour acheter une amélioration
+function buyUpgrade(upgradeId) {
+    const upgrade = productionUpgrades.find(u => u.id === upgradeId);
+    if (!upgrade) return;
+    
+    // Vérifier si l'amélioration existe dans l'état du jeu
+    if (!gameState.upgrades[upgradeId]) {
+        gameState.upgrades[upgradeId] = { owned: 0 };
+    }
+    
+    const owned = gameState.upgrades[upgradeId].owned;
+    const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, owned));
+    
+    // Vérifier si le joueur a assez de bananes
+    if (gameState.bananas < cost) {
+        showNotification("Pas assez de bananes!", true);
+        return;
+    }
+    
+    // Acheter l'amélioration
+    gameState.bananas -= cost;
+    gameState.upgrades[upgradeId].owned++;
+    
+    // Jouer le son d'amélioration
+    if (upgradeSound) {
+        upgradeSound.currentTime = 0;
+        upgradeSound.play().catch(e => console.error("Erreur de lecture audio:", e));
+    }
+    
+    // Mettre à jour l'affichage
+    updateBPS();
+    updateDisplay();
+    
+    // Afficher la notification
+    showNotification(`Amélioration achetée: ${upgrade.name}`, false);
+}
+
+// Fonction pour gérer le prestige
+function handlePrestige() {
+    // Vérifier si le joueur a assez de bananes pour le prestige
+    if (gameState.bananas < config.prestigeThreshold) {
+        showNotification(`Vous avez besoin de ${formatNumber(config.prestigeThreshold)} bananes pour effectuer un prestige!`, true);
+        return;
+    }
+    
+    // Calculer les bananes dorées gagnées
+    const goldenBananas = Math.floor(Math.sqrt(gameState.bananas / 10000));
+    
+    // Confirmation
+    if (!confirm(`Êtes-vous sûr de vouloir effectuer un prestige? Vous gagnerez ${goldenBananas} bananes dorées, mais vous perdrez toutes vos bananes et améliorations!`)) {
+        return;
+    }
+    
+    // Effectuer le prestige
+    gameState.goldenBananas += goldenBananas;
+    gameState.prestige++;
+    
+    // Réinitialiser les stats
+    gameState.bananas = 0;
+    gameState.bananasPerSecond = 0;
+    gameState.upgrades = {};
+    
+    // Initialiser les améliorations de base
+    productionUpgrades.forEach(upgrade => {
+        if (upgrade.unlockAt === 0) {
+            gameState.upgrades[upgrade.id] = { owned: 0 };
+        }
+    });
+    
+    // Jouer le son de prestige
+    if (prestigeSound) {
+        prestigeSound.currentTime = 0;
+        prestigeSound.play().catch(e => console.error("Erreur de lecture audio:", e));
+    }
+    
+    // Mettre à jour l'affichage
+    updateDisplay();
+    renderProductionUpgrades();
+    renderAchievements();
+    
+    // Afficher la notification
+    showNotification(`Prestige effectué! +${goldenBananas} bananes dorées`, false);
+}
+
+// Fonction pour changer le thème
+function toggleTheme() {
+    const body = document.body;
+    const isDark = body.getAttribute('data-theme') === 'dark';
+    
+    if (isDark) {
+        body.removeAttribute('data-theme');
+        document.getElementById('themeToggle').innerHTML = '<i class="fas fa-moon"></i>';
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+    }
+}
+
+// Fonction pour activer un code premium
+function redeemPremiumCode(code) {
+    if (!code) {
+        showNotification("Veuillez entrer un code premium", true);
+        return false;
+    }
+    
+    code = code.toUpperCase();
+    
+    if (config.premiumCodes[code]) {
+        gameState.isPremium = true;
+        gameState.premiumBenefits = config.premiumCodes[code];
+        
+        // Mettre à jour l'interface
+        updateBPS();
+        updateDisplay();
+        
+        showNotification("Code premium activé! Profitez de vos avantages.", false);
+        return true;
+    } else {
+        showNotification("Code premium invalide.", true);
+        return false;
+    }
 }
