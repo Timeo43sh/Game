@@ -70,7 +70,7 @@ const productionUpgrades = [
         desc: 'Un petit singe qui travaille pour vous', 
         baseCost: 15, 
         bps: 0.2,
-        icon: 'fas fa-monkey',
+        icon: 'fas fa-paw',
         unlockAt: 0
     },
     { 
@@ -79,7 +79,7 @@ const productionUpgrades = [
         desc: 'Elle a des recettes secrètes pour faire pousser les bananes', 
         baseCost: 100, 
         bps: 1,
-        icon: 'fas fa-grandma',
+        icon: 'fas fa-user',
         unlockAt: 50
     },
     { 
@@ -124,7 +124,7 @@ const productionUpgrades = [
         desc: 'Importez des bananes d\'autres dimensions', 
         baseCost: 250000, 
         bps: 500,
-        icon: 'fas fa-portal-enter',
+        icon: 'fas fa-rocket',
         unlockAt: 100000
     },
     { 
@@ -142,7 +142,7 @@ const productionUpgrades = [
         desc: 'Vénérez le dieu suprême de la banane', 
         baseCost: 5000000, 
         bps: 10000,
-        icon: 'fas fa-place-of-worship',
+        icon: 'fas fa-church',
         unlockAt: 2000000
     },
     { 
@@ -196,7 +196,7 @@ const achievementsData = [
         desc: 'Atteignez 100,000 bananes', 
         threshold: 100000, 
         reward: 5000,
-        icon: 'fas fa-god'
+        icon: 'fas fa-sun'
     },
     { 
         id: 'ach-1M', 
@@ -637,20 +637,48 @@ function loadPlayerData() {
     }
 }
 
-// Modification de la fonction initGame
-const originalInitGame = initGame;
-initGame = function() {
-    initAuth();
-    originalInitGame();
-    initAdminPanel();
-};
-
-// Modification de la fonction saveGame pour inclure la synchronisation
-const originalSaveGame = saveGame;
-saveGame = function() {
-    originalSaveGame();
-    syncPlayerData();
-};
+// Initialiser le jeu
+function initGame() {
+    // Vérifier si on est sur la page de jeu Banana Clicker
+    if (document.getElementById('banana-clicker')) {
+        // Vérifier si le jeu est déjà initialisé
+        if (window.gameInitialized) {
+            return;
+        }
+        
+        // Initialiser l'authentification
+        initAuth();
+        
+        // Initialiser les données du jeu
+        initializeGameData();
+        
+        // Initialiser l'interface
+        renderProductionUpgrades();
+        renderAchievements();
+        setupEventListeners();
+        updateDisplay();
+        
+        // Initialiser le panneau d'administration
+        initAdminPanel();
+        
+        // Démarrer la boucle de jeu
+        if (!window.gameLoopRunning) {
+            window.gameLoopRunning = true;
+            gameLoop();
+        }
+        
+        // Vérifier l'état de l'authentification
+        checkAuthState();
+        
+        // Marquer le jeu comme initialisé
+        window.gameInitialized = true;
+        
+        // Configurer les événements de la plateforme
+        setupPlatformEvents();
+        
+        console.log("Jeu initialisé avec succès");
+    }
+}
 
 // Gestion du classement
 function updateLeaderboard() {
@@ -1673,34 +1701,16 @@ function saveToCloud() {
     }
 }
 
-// Démarrer le jeu
-initGame();
-
-// Gestion des événements pour la plateforme
-function setupPlatformEvents() {
-    // Gérer la navigation entre les jeux
-    const navLinks = document.querySelectorAll('.platform-nav a');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const gameId = this.getAttribute('data-game');
-            if (gameId) {
-                loadGame(gameId);
-            } else {
-                showHub();
-            }
-        });
-    });
-    
-    // Sauvegarder périodiquement
-    setInterval(saveGame, config.platform.saveInterval);
-}
-
 // Démarrer automatiquement le jeu si on est sur la page de jeu
 if (document.getElementById('banana-clicker')) {
     // Initialiser seulement si on est directement sur la page de jeu
     if (!window.location.hash.includes('hub')) {
-        initGame();
+        // Attendre que le DOM soit complètement chargé
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGame);
+        } else {
+            initGame();
+        }
     }
 }
 
@@ -1719,6 +1729,9 @@ function saveGame() {
     if (config.platform.cloudSync && gameState.user) {
         saveToCloud();
     }
+    
+    // Synchroniser les données du joueur
+    syncPlayerData();
 }
 
 // Mise à jour de l'affichage
@@ -1758,4 +1771,24 @@ function updateDisplay() {
     
     // Mettre à jour la section prestige
     updatePrestigeSection();
+}
+
+// Gestion des événements pour la plateforme
+function setupPlatformEvents() {
+    // Gérer la navigation entre les jeux
+    const navLinks = document.querySelectorAll('.platform-nav a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const gameId = this.getAttribute('data-game');
+            if (gameId) {
+                loadGame(gameId);
+            } else {
+                showHub();
+            }
+        });
+    });
+    
+    // Sauvegarder périodiquement
+    setInterval(saveGame, config.platform.saveInterval);
 }
