@@ -19,6 +19,8 @@
             --card-bg: #242430;
             --text: #FFFFFF;
             --text-secondary: #B0B0B0;
+            --golden: #FFD700;
+            --prestige: #9C27B0;
         }
 
         * {
@@ -502,9 +504,22 @@
             text-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
+        .click-effect.special {
+            animation: floatAway 1.5s forwards, pulse 0.5s infinite alternate;
+            z-index: 101;
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-shadow: 0 0 10px gold;
+        }
+
         @keyframes floatAway {
             0% { transform: translateY(0) rotate(0deg); opacity: 1; }
             100% { transform: translateY(-100px) rotate(20deg); opacity: 0; }
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
         }
 
         #banana-counter {
@@ -588,6 +603,78 @@
         .banana-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .banana-tab-buttons {
+            display: flex;
+            border-bottom: 2px solid var(--secondary);
+            margin-bottom: 20px;
+        }
+
+        .banana-tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: relative;
+        }
+
+        .banana-tab-btn.active {
+            color: var(--accent);
+        }
+
+        .banana-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+        }
+
+        .banana-tab-content {
+            display: none;
+        }
+
+        .banana-tab-content.active {
+            display: block;
+        }
+
+        .prestige-section {
+            background: rgba(156, 39, 176, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid var(--prestige);
+        }
+
+        .prestige-btn {
+            background: var(--prestige);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .prestige-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .prestige-info {
+            margin-bottom: 15px;
+        }
+
+        .golden-banana {
+            color: var(--golden);
+            font-weight: 600;
         }
 
         /* Responsive */
@@ -806,15 +893,48 @@
                         <div class="stat-label">Multiplicateur</div>
                         <div class="stat-value" id="banana-multiplier">1x</div>
                     </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Bananes dorées</div>
+                        <div class="stat-value golden-banana" id="banana-golden">0</div>
+                    </div>
                 </div>
                 
-                <h3>Améliorations</h3>
-                <div class="banana-upgrades" id="banana-upgrades-container">
-                    <!-- Les améliorations seront ajoutées dynamiquement -->
+                <div class="banana-tab-buttons">
+                    <button class="banana-tab-btn active" onclick="openBananaTab('upgrades')">Améliorations</button>
+                    <button class="banana-tab-btn" onclick="openBananaTab('prestige')">Prestige</button>
+                </div>
+                
+                <div id="banana-upgrades-tab" class="banana-tab-content active">
+                    <h3>Améliorations de production</h3>
+                    <div class="banana-upgrades" id="banana-upgrades-container">
+                        <!-- Les améliorations seront ajoutées dynamiquement -->
+                    </div>
+                    
+                    <h3 style="margin-top: 20px;">Améliorations spéciales</h3>
+                    <div class="banana-upgrades" id="banana-special-upgrades-container">
+                        <!-- Les améliorations spéciales seront ajoutées dynamiquement -->
+                    </div>
+                </div>
+                
+                <div id="banana-prestige-tab" class="banana-tab-content">
+                    <div class="prestige-section">
+                        <h3>Système de Prestige</h3>
+                        <p class="prestige-info">
+                            Effectuez un prestige pour réinitialiser votre progression et gagner des <span class="golden-banana">Bananes Dorées</span> qui donnent des bonus permanents!
+                        </p>
+                        <p id="prestige-requirement">Vous avez besoin d'au moins 1,000,000 bananes pour effectuer un prestige.</p>
+                        <p id="prestige-reward">Vous obtiendrez 0 Bananes Dorées</p>
+                        <button class="prestige-btn" id="prestige-btn" disabled>PRESTIGE</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
+    <audio id="upgradeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3"></audio>
+    <audio id="specialSound" src="https://assets.mixkit.co/sfx/preview/mixkit-extra-bonus-in-a-video-game-2045.mp3"></audio>
+    <audio id="prestigeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
 
     <script>
         // Gestion des vues de jeu
@@ -841,6 +961,18 @@
             document.querySelectorAll('.game-view').forEach(view => {
                 view.style.display = 'none';
             });
+        }
+
+        function openBananaTab(tabId) {
+            document.querySelectorAll('#banana-clicker-game .banana-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('#banana-clicker-game .banana-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelector(`#banana-clicker-game .banana-tab-btn[onclick="openBananaTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(`banana-${tabId}-tab`).classList.add('active');
         }
 
         // Jeu Click Color
@@ -954,7 +1086,6 @@
             
             // Événements
             colorDisplay.addEventListener('click', handleClick);
-            document.getElementById('color-display').addEventListener('click', handleClick);
             window.resetClickColor = resetGame;
             window.changeColorMode = changeMode;
             
@@ -964,451 +1095,431 @@
 
         // Jeu Tetris
         function initTetris() {
-            document.addEventListener('DOMContentLoaded', () => {
-                // Éléments du DOM
-                const canvas = document.getElementById('tetris-board');
-                const ctx = canvas.getContext('2d');
-                const nextPieceEl = document.getElementById('next-piece');
-                const scoreDisplay = document.getElementById('tetris-score-display');
-                const levelDisplay = document.getElementById('tetris-level-display');
-                const finalScoreDisplay = document.getElementById('tetris-final-score');
-                const gameOverScreen = document.getElementById('tetris-game-over');
-                const startScreen = document.getElementById('tetris-start-screen');
-                const startBtn = document.getElementById('tetris-start-btn');
-                const restartBtn = document.getElementById('tetris-restart-btn');
-                const pauseBtn = document.getElementById('tetris-pause-btn');
-                const newGameBtn = document.getElementById('tetris-new-game-btn');
+            // Éléments du DOM
+            const canvas = document.getElementById('tetris-board');
+            const ctx = canvas.getContext('2d');
+            const nextPieceEl = document.getElementById('next-piece');
+            const scoreDisplay = document.getElementById('tetris-score-display');
+            const levelDisplay = document.getElementById('tetris-level-display');
+            const finalScoreDisplay = document.getElementById('tetris-final-score');
+            const gameOverScreen = document.getElementById('tetris-game-over');
+            const startScreen = document.getElementById('tetris-start-screen');
+            const startBtn = document.getElementById('tetris-start-btn');
+            const restartBtn = document.getElementById('tetris-restart-btn');
+            const pauseBtn = document.getElementById('tetris-pause-btn');
+            const newGameBtn = document.getElementById('tetris-new-game-btn');
+            
+            // Configuration du jeu
+            const blockSize = 30;
+            const cols = canvas.width / blockSize;
+            const rows = canvas.height / blockSize;
+            
+            // Variables du jeu
+            let board = Array(rows).fill().map(() => Array(cols).fill(0));
+            let currentPiece = null;
+            let nextPiece = null;
+            let piecePos = { x: 0, y: 0 };
+            let score = 0;
+            let level = 1;
+            let lines = 0;
+            let dropCounter = 0;
+            let dropInterval = 1000;
+            let lastTime = 0;
+            let animationId = null;
+            let isPaused = false;
+            let gameOver = false;
+            let gameStarted = false;
+            
+            // Pièces du Tetris
+            const pieces = [
+                { 
+                    shape: [[1, 1, 1, 1]], 
+                    color: '#00F0FF'
+                },
+                { 
+                    shape: [[1, 0, 0], [1, 1, 1]], 
+                    color: '#0000FF'
+                },
+                { 
+                    shape: [[0, 0, 1], [1, 1, 1]], 
+                    color: '#FF8000'
+                },
+                { 
+                    shape: [[1, 1], [1, 1]], 
+                    color: '#FFFF00'
+                },
+                { 
+                    shape: [[0, 1, 1], [1, 1, 0]], 
+                    color: '#00FF00'
+                },
+                { 
+                    shape: [[0, 1, 0], [1, 1, 1]], 
+                    color: '#8000FF'
+                },
+                { 
+                    shape: [[1, 1, 0], [0, 1, 1]], 
+                    color: '#FF0000'
+                }
+            ];
+            
+            // Obtenir une pièce aléatoire
+            function getRandomPiece() {
+                const piece = pieces[Math.floor(Math.random() * pieces.length)];
+                return {
+                    shape: piece.shape,
+                    color: piece.color
+                };
+            }
+            
+            // Dessiner le plateau
+            function drawBoard() {
+                // Fond
+                ctx.fillStyle = '#1A1A23';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // Configuration du jeu
-                const blockSize = 30;
-                const cols = 10;
-                const rows = 20;
-                
-                // Variables du jeu
-                let board = [];
-                let currentPiece = null;
-                let nextPiece = null;
-                let piecePos = { x: 0, y: 0 };
-                let score = 0;
-                let level = 1;
-                let lines = 0;
-                let dropCounter = 0;
-                let dropInterval = 1000;
-                let lastTime = 0;
-                let animationId = null;
-                let isPaused = false;
-                let gameOver = false;
-                let gameStarted = false;
-                
-                // Pièces du Tetris
-                const pieces = [
-                    { 
-                        shape: [[1, 1, 1, 1]], 
-                        className: 'piece-I',
-                        color: '#00F0FF'
-                    },
-                    { 
-                        shape: [[1, 0, 0], [1, 1, 1]], 
-                        className: 'piece-J',
-                        color: '#0000FF'
-                    },
-                    { 
-                        shape: [[0, 0, 1], [1, 1, 1]], 
-                        className: 'piece-L',
-                        color: '#FF8000'
-                    },
-                    { 
-                        shape: [[1, 1], [1, 1]], 
-                        className: 'piece-O',
-                        color: '#FFFF00'
-                    },
-                    { 
-                        shape: [[0, 1, 1], [1, 1, 0]], 
-                        className: 'piece-S',
-                        color: '#00FF00'
-                    },
-                    { 
-                        shape: [[0, 1, 0], [1, 1, 1]], 
-                        className: 'piece-T',
-                        color: '#8000FF'
-                    },
-                    { 
-                        shape: [[1, 1, 0], [0, 1, 1]], 
-                        className: 'piece-Z',
-                        color: '#FF0000'
+                // Grille
+                ctx.strokeStyle = '#2B2B36';
+                ctx.lineWidth = 1;
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
                     }
-                ];
-                
-                // Initialisation du jeu
-                function init() {
-                    // Réinitialiser l'état du jeu
-                    board = Array.from({ length: rows }, () => Array(cols).fill(0));
-                    score = 0;
-                    level = 1;
-                    lines = 0;
-                    dropInterval = 1000;
-                    dropCounter = 0;
-                    gameOver = false;
-                    isPaused = false;
-                    gameStarted = true;
-                    
-                    // Créer les premières pièces
-                    currentPiece = getRandomPiece();
-                    nextPiece = getRandomPiece();
-                    spawnPiece();
-                    
-                    // Mettre à jour l'affichage
-                    updateScore();
-                    updateNextPiece();
-                    
-                    // Cacher les écrans
-                    startScreen.style.display = 'none';
-                    gameOverScreen.style.display = 'none';
-                    
-                    // Démarrer la boucle de jeu
-                    lastTime = performance.now();
-                    if (animationId) cancelAnimationFrame(animationId);
-                    animationId = requestAnimationFrame(gameLoop);
                 }
                 
-                // Obtenir une pièce aléatoire
-                function getRandomPiece() {
-                    const index = Math.floor(Math.random() * pieces.length);
-                    return {
-                        shape: pieces[index].shape,
-                        className: pieces[index].className,
-                        color: pieces[index].color
-                    };
-                }
-                
-                // Faire apparaître une nouvelle pièce
-                function spawnPiece() {
-                    currentPiece = nextPiece;
-                    nextPiece = getRandomPiece();
-                    piecePos.x = Math.floor(cols / 2) - Math.floor(currentPiece.shape[0].length / 2);
-                    piecePos.y = 0;
-                    
-                    // Vérifier le game over
-                    if (collision()) {
-                        gameOver = true;
-                        finalScoreDisplay.textContent = `Score: ${score}`;
-                        gameOverScreen.style.display = 'flex';
-                    }
-                    
-                    updateNextPiece();
-                }
-                
-                // Dessiner le plateau
-                function drawBoard() {
-                    // Fond
-                    ctx.fillStyle = '#1A1A23';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Grille
-                    ctx.strokeStyle = '#2B2B36';
-                    ctx.lineWidth = 1;
-                    for (let y = 0; y < rows; y++) {
-                        for (let x = 0; x < cols; x++) {
-                            ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
+                // Pièces placées
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        if (board[y][x]) {
+                            drawBlock(x, y, board[y][x]);
                         }
                     }
-                    
-                    // Pièces placées
-                    for (let y = 0; y < rows; y++) {
-                        for (let x = 0; x < cols; x++) {
-                            if (board[y][x]) {
-                                drawBlock(x, y, board[y][x]);
-                            }
-                        }
-                    }
-                    
-                    // Pièce courante
-                    if (currentPiece) {
-                        currentPiece.shape.forEach((row, y) => {
-                            row.forEach((value, x) => {
-                                if (value) {
-                                    drawBlock(
-                                        piecePos.x + x,
-                                        piecePos.y + y,
-                                        currentPiece.color
-                                    );
-                                }
-                            });
-                        });
-                    }
                 }
                 
-                // Dessiner un bloc
-                function drawBlock(x, y, color) {
-                    // Bloc principal
-                    ctx.fillStyle = color;
-                    ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
-                    
-                    // Effet 3D
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-                    ctx.fillRect(x * blockSize, y * blockSize, blockSize, 3);
-                    ctx.fillRect(x * blockSize, y * blockSize, 3, blockSize);
-                    
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-                    ctx.fillRect(x * blockSize + 3, y * blockSize + blockSize - 3, blockSize - 3, 3);
-                    ctx.fillRect(x * blockSize + blockSize - 3, y * blockSize + 3, 3, blockSize - 6);
-                    
-                    // Bordure
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-                    ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
-                }
-                
-                // Mettre à jour l'affichage de la prochaine pièce
-                function updateNextPiece() {
-                    nextPieceEl.innerHTML = '';
-                    
-                    if (!nextPiece) return;
-                    
-                    const pieceWidth = nextPiece.shape[0].length * 20;
-                    const pieceHeight = nextPiece.shape.length * 20;
-                    const offsetX = (120 - pieceWidth) / 2;
-                    const offsetY = (120 - pieceHeight) / 2;
-                    
-                    const pieceDiv = document.createElement('div');
-                    pieceDiv.style.position = 'relative';
-                    pieceDiv.style.width = `${pieceWidth}px`;
-                    pieceDiv.style.height = `${pieceHeight}px`;
-                    
-                    nextPiece.shape.forEach((row, y) => {
-                        row.forEach((value, x) => {
-                            if (value) {
-                                const block = document.createElement('div');
-                                block.style.position = 'absolute';
-                                block.style.left = `${x * 20}px`;
-                                block.style.top = `${y * 20}px`;
-                                block.style.width = '20px';
-                                block.style.height = '20px';
-                                block.style.backgroundColor = nextPiece.color;
-                                block.style.borderRadius = '3px';
-                                block.style.boxShadow = 'inset 0 0 0 1px rgba(255,255,255,0.2)';
-                                pieceDiv.appendChild(block);
-                            }
-                        });
-                    });
-                    
-                    nextPieceEl.appendChild(pieceDiv);
-                }
-                
-                // Vérifier les collisions
-                function collision() {
-                    for (let y = 0; y < currentPiece.shape.length; y++) {
-                        for (let x = 0; x < currentPiece.shape[y].length; x++) {
-                            if (currentPiece.shape[y][x]) {
-                                const boardX = piecePos.x + x;
-                                const boardY = piecePos.y + y;
-                                
-                                if (
-                                    boardX < 0 ||
-                                    boardX >= cols ||
-                                    boardY >= rows ||
-                                    (boardY >= 0 && board[boardY][boardX])
-                                ) {
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                    return false;
-                }
-                
-                // Rotation de la pièce
-                function rotatePiece() {
-                    if (isPaused || !gameStarted) return;
-                    
-                    const originalShape = currentPiece.shape;
-                    const rows = currentPiece.shape.length;
-                    const cols = currentPiece.shape[0].length;
-                    const newShape = Array.from({ length: cols }, () => Array(rows).fill(0));
-                    
-                    for (let y = 0; y < rows; y++) {
-                        for (let x = 0; x < cols; x++) {
-                            newShape[x][rows - 1 - y] = currentPiece.shape[y][x];
-                        }
-                    }
-                    
-                    currentPiece.shape = newShape;
-                    
-                    if (collision()) {
-                        currentPiece.shape = originalShape;
-                    }
-                }
-                
-                // Fusionner la pièce avec le plateau
-                function merge() {
+                // Pièce courante
+                if (currentPiece) {
                     currentPiece.shape.forEach((row, y) => {
                         row.forEach((value, x) => {
                             if (value) {
-                                const boardY = piecePos.y + y;
-                                const boardX = piecePos.x + x;
-                                if (boardY >= 0) {
-                                    board[boardY][boardX] = currentPiece.color;
-                                }
+                                drawBlock(
+                                    piecePos.x + x,
+                                    piecePos.y + y,
+                                    currentPiece.color
+                                );
                             }
                         });
                     });
                 }
+            }
+            
+            // Dessiner un bloc
+            function drawBlock(x, y, color) {
+                ctx.fillStyle = color;
+                ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
                 
-                // Supprimer les lignes complètes
-                function clearLines() {
-                    let linesCleared = 0;
-                    
-                    for (let y = rows - 1; y >= 0; y--) {
-                        if (board[y].every(cell => cell !== 0)) {
-                            board.splice(y, 1);
-                            board.unshift(Array(cols).fill(0));
-                            linesCleared++;
-                            y++;
+                // Effet 3D
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(x * blockSize, y * blockSize, blockSize, 3);
+                ctx.fillRect(x * blockSize, y * blockSize, 3, blockSize);
+                
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.fillRect(x * blockSize + 3, y * blockSize + blockSize - 3, blockSize - 3, 3);
+                ctx.fillRect(x * blockSize + blockSize - 3, y * blockSize + 3, 3, blockSize - 6);
+                
+                // Bordure
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
+            }
+            
+            // Mettre à jour l'affichage de la prochaine pièce
+            function updateNextPiece() {
+                nextPieceEl.innerHTML = '';
+                
+                if (!nextPiece) return;
+                
+                const pieceDiv = document.createElement('div');
+                pieceDiv.style.width = '120px';
+                pieceDiv.style.height = '120px';
+                pieceDiv.style.position = 'relative';
+                
+                nextPiece.shape.forEach((row, y) => {
+                    row.forEach((value, x) => {
+                        if (value) {
+                            const block = document.createElement('div');
+                            block.style.position = 'absolute';
+                            block.style.left = `${x * 30}px`;
+                            block.style.top = `${y * 30}px`;
+                            block.style.width = '30px';
+                            block.style.height = '30px';
+                            block.style.backgroundColor = nextPiece.color;
+                            block.style.borderRadius = '3px';
+                            pieceDiv.appendChild(block);
+                        }
+                    });
+                });
+                
+                nextPieceEl.appendChild(pieceDiv);
+            }
+            
+            // Vérifier les collisions
+            function collision() {
+                for (let y = 0; y < currentPiece.shape.length; y++) {
+                    for (let x = 0; x < currentPiece.shape[y].length; x++) {
+                        if (currentPiece.shape[y][x]) {
+                            const boardX = piecePos.x + x;
+                            const boardY = piecePos.y + y;
+                            
+                            if (
+                                boardX < 0 ||
+                                boardX >= cols ||
+                                boardY >= rows ||
+                                (boardY >= 0 && board[boardY][boardX])
+                            ) {
+                                return true;
+                            }
                         }
                     }
-                    
-                    if (linesCleared > 0) {
-                        // Calcul du score
-                        const points = [0, 40, 100, 300, 1200][linesCleared] * level;
-                        score += points;
-                        lines += linesCleared;
-                        
-                        // Augmentation du niveau
-                        level = Math.floor(lines / 10) + 1;
-                        dropInterval = Math.max(100, 1000 - (level - 1) * 100);
-                        
-                        updateScore();
+                }
+                return false;
+            }
+            
+            // Rotation de la pièce
+            function rotatePiece() {
+                if (isPaused || !gameStarted) return;
+                
+                const originalShape = currentPiece.shape;
+                const rows = currentPiece.shape.length;
+                const cols = currentPiece.shape[0].length;
+                const newShape = Array(cols).fill().map(() => Array(rows).fill(0));
+                
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        newShape[x][rows - 1 - y] = currentPiece.shape[y][x];
                     }
                 }
                 
-                // Mettre à jour le score
-                function updateScore() {
-                    scoreDisplay.textContent = score;
-                    levelDisplay.textContent = `Niveau: ${level}`;
-                }
+                currentPiece.shape = newShape;
                 
-                // Déplacement de la pièce
-                function movePiece(dx, dy) {
-                    if (isPaused || !gameStarted) return false;
-                    
-                    piecePos.x += dx;
-                    piecePos.y += dy;
-                    
-                    if (collision()) {
-                        piecePos.x -= dx;
-                        piecePos.y -= dy;
-                        
-                        if (dy === 1) {
-                            merge();
-                            clearLines();
-                            spawnPiece();
+                if (collision()) {
+                    currentPiece.shape = originalShape;
+                }
+            }
+            
+            // Fusionner la pièce avec le plateau
+            function merge() {
+                currentPiece.shape.forEach((row, y) => {
+                    row.forEach((value, x) => {
+                        if (value) {
+                            const boardY = piecePos.y + y;
+                            const boardX = piecePos.x + x;
+                            if (boardY >= 0) {
+                                board[boardY][boardX] = currentPiece.color;
+                            }
                         }
-                        
-                        return false;
+                    });
+                });
+            }
+            
+            // Supprimer les lignes complètes
+            function clearLines() {
+                let linesCleared = 0;
+                
+                for (let y = rows - 1; y >= 0; y--) {
+                    if (board[y].every(cell => cell !== 0)) {
+                        board.splice(y, 1);
+                        board.unshift(Array(cols).fill(0));
+                        linesCleared++;
+                        y++;
                     }
-                    
-                    return true;
                 }
                 
-                // Tomber rapidement
-                function hardDrop() {
-                    if (isPaused || !gameStarted) return;
+                if (linesCleared > 0) {
+                    // Calcul du score
+                    const points = [0, 40, 100, 300, 1200][linesCleared] * level;
+                    score += points;
+                    lines += linesCleared;
                     
-                    while (movePiece(0, 1)) {}
+                    // Augmentation du niveau
+                    level = Math.floor(lines / 10) + 1;
+                    dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+                    
+                    updateScore();
                 }
+            }
+            
+            // Mettre à jour le score
+            function updateScore() {
+                scoreDisplay.textContent = score;
+                levelDisplay.textContent = `Niveau: ${level}`;
+            }
+            
+            // Déplacement de la pièce
+            function movePiece(dx, dy) {
+                if (isPaused || !gameStarted) return false;
                 
-                // Boucle de jeu principale
-                function gameLoop(timestamp) {
-                    if (gameOver) return;
-                    if (isPaused) {
-                        animationId = requestAnimationFrame(gameLoop);
-                        return;
+                piecePos.x += dx;
+                piecePos.y += dy;
+                
+                if (collision()) {
+                    piecePos.x -= dx;
+                    piecePos.y -= dy;
+                    
+                    if (dy === 1) {
+                        merge();
+                        clearLines();
+                        spawnPiece();
                     }
                     
-                    const deltaTime = timestamp - lastTime;
-                    lastTime = timestamp;
-                    
-                    dropCounter += deltaTime;
-                    if (dropCounter > dropInterval) {
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            // Faire apparaître une nouvelle pièce
+            function spawnPiece() {
+                currentPiece = nextPiece;
+                nextPiece = getRandomPiece();
+                piecePos.x = Math.floor(cols / 2) - Math.floor(currentPiece.shape[0].length / 2);
+                piecePos.y = 0;
+                
+                // Vérifier le game over
+                if (collision()) {
+                    gameOver = true;
+                    finalScoreDisplay.textContent = `Score: ${score}`;
+                    gameOverScreen.style.display = 'flex';
+                }
+                
+                updateNextPiece();
+            }
+            
+            // Tomber rapidement
+            function hardDrop() {
+                if (isPaused || !gameStarted) return;
+                
+                while (movePiece(0, 1)) {}
+            }
+            
+            // Basculer pause
+            function togglePause() {
+                if (!gameStarted || gameOver) return;
+                
+                isPaused = !isPaused;
+                pauseBtn.textContent = isPaused ? 'REPRENDRE' : 'PAUSE';
+                
+                if (!isPaused) {
+                    lastTime = performance.now();
+                    gameLoop();
+                }
+            }
+            
+            // Boucle de jeu principale
+            function gameLoop(time = 0) {
+                if (gameOver) return;
+                if (isPaused) {
+                    animationId = requestAnimationFrame(gameLoop);
+                    return;
+                }
+                
+                const deltaTime = time - lastTime;
+                lastTime = time;
+                
+                dropCounter += deltaTime;
+                if (dropCounter > dropInterval) {
+                    movePiece(0, 1);
+                    dropCounter = 0;
+                }
+                
+                drawBoard();
+                animationId = requestAnimationFrame(gameLoop);
+            }
+            
+            // Gestion des touches
+            document.addEventListener('keydown', e => {
+                if (!gameStarted && e.key === 'Enter') {
+                    startGame();
+                    return;
+                }
+                
+                if (gameOver && e.key === 'Enter') {
+                    startGame();
+                    return;
+                }
+                
+                if (!gameStarted || gameOver) return;
+                
+                switch (e.key) {
+                    case 'ArrowLeft':
+                        movePiece(-1, 0);
+                        break;
+                    case 'ArrowRight':
+                        movePiece(1, 0);
+                        break;
+                    case 'ArrowDown':
                         movePiece(0, 1);
                         dropCounter = 0;
-                    }
-                    
-                    drawBoard();
-                    animationId = requestAnimationFrame(gameLoop);
+                        break;
+                    case 'ArrowUp':
+                        rotatePiece();
+                        break;
+                    case ' ':
+                        hardDrop();
+                        break;
+                    case 'p':
+                    case 'P':
+                        togglePause();
+                        break;
                 }
-                
-                // Gestion des touches
-                document.addEventListener('keydown', e => {
-                    if (!gameStarted && e.key === 'Enter') {
-                        init();
-                        return;
-                    }
-                    
-                    if (gameOver && e.key === 'Enter') {
-                        init();
-                        return;
-                    }
-                    
-                    if (!gameStarted || gameOver) return;
-                    
-                    switch (e.key) {
-                        case 'ArrowLeft':
-                            movePiece(-1, 0);
-                            break;
-                        case 'ArrowRight':
-                            movePiece(1, 0);
-                            break;
-                        case 'ArrowDown':
-                            movePiece(0, 1);
-                            dropCounter = 0;
-                            break;
-                        case 'ArrowUp':
-                            rotatePiece();
-                            break;
-                        case ' ':
-                            hardDrop();
-                            break;
-                        case 'p':
-                        case 'P':
-                            togglePause();
-                            break;
-                    }
-                });
-                
-                // Basculer pause
-                function togglePause() {
-                    if (!gameStarted || gameOver) return;
-                    
-                    isPaused = !isPaused;
-                    pauseBtn.textContent = isPaused ? 'REPRENDRE' : 'PAUSE';
-                    
-                    if (!isPaused) {
-                        lastTime = performance.now();
-                        animationId = requestAnimationFrame(gameLoop);
-                    }
-                }
-                
-                // Événements des boutons
-                startBtn.addEventListener('click', init);
-                restartBtn.addEventListener('click', init);
-                pauseBtn.addEventListener('click', togglePause);
-                newGameBtn.addEventListener('click', () => {
-                    if (animationId) cancelAnimationFrame(animationId);
-                    init();
-                });
-                
-                // Dessiner l'écran de démarrage
-                drawBoard();
             });
+            
+            // Démarrer une nouvelle partie
+            function startGame() {
+                board = Array(rows).fill().map(() => Array(cols).fill(0));
+                score = 0;
+                level = 1;
+                lines = 0;
+                dropInterval = 1000;
+                dropCounter = 0;
+                gameOver = false;
+                isPaused = false;
+                gameStarted = true;
+                
+                currentPiece = getRandomPiece();
+                nextPiece = getRandomPiece();
+                spawnPiece();
+                
+                updateScore();
+                updateNextPiece();
+                
+                startScreen.style.display = 'none';
+                gameOverScreen.style.display = 'none';
+                
+                lastTime = performance.now();
+                if (animationId) cancelAnimationFrame(animationId);
+                gameLoop();
+            }
+            
+            // Événements des boutons
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', togglePause);
+            newGameBtn.addEventListener('click', startGame);
+            
+            // Dessiner l'écran de démarrage
+            drawBoard();
         }
 
         // Jeu Banana Clicker
         function initBananaClicker() {
             // Variables du jeu
-            let bananas = 0;
-            let totalClicks = 0;
-            let bananasPerSecond = 0;
-            let multiplier = 1;
+            let gameState = {
+                bananas: 0,
+                totalClicks: 0,
+                bananasPerSecond: 0,
+                multiplier: 1,
+                goldenBananas: 0,
+                upgrades: {},
+                lastUpdate: Date.now()
+            };
             
             // Améliorations disponibles
             const upgrades = [
@@ -1418,7 +1529,7 @@
                     description: 'Un petit singe qui travaille pour vous', 
                     baseCost: 15, 
                     bps: 0.2,
-                    owned: 0
+                    icon: 'fas fa-monkey'
                 },
                 { 
                     id: 'farm', 
@@ -1426,7 +1537,7 @@
                     description: 'Une plantation de bananes basique', 
                     baseCost: 100, 
                     bps: 1,
-                    owned: 0
+                    icon: 'fas fa-tractor'
                 },
                 { 
                     id: 'factory', 
@@ -1434,7 +1545,7 @@
                     description: 'Transforme les bananes en produits dérivés', 
                     baseCost: 500, 
                     bps: 4,
-                    owned: 0
+                    icon: 'fas fa-industry'
                 },
                 { 
                     id: 'plantation', 
@@ -1442,7 +1553,7 @@
                     description: 'Dominez le marché de la banane', 
                     baseCost: 3000, 
                     bps: 10,
-                    owned: 0
+                    icon: 'fas fa-globe-americas'
                 },
                 { 
                     id: 'research', 
@@ -1450,7 +1561,35 @@
                     description: 'Bananes génétiquement modifiées', 
                     baseCost: 10000, 
                     bps: 25,
-                    owned: 0
+                    icon: 'fas fa-flask'
+                },
+                { 
+                    id: 'portal', 
+                    name: 'Portail Bananier', 
+                    description: 'Importez des bananes d\'autres dimensions', 
+                    baseCost: 50000, 
+                    bps: 100,
+                    icon: 'fas fa-portal-enter'
+                }
+            ];
+            
+            // Améliorations spéciales
+            const specialUpgrades = [
+                {
+                    id: 'multiplier',
+                    name: 'Multiplicateur',
+                    description: 'Augmente la valeur de chaque clic de 0.1x',
+                    baseCost: 1000,
+                    maxLevel: 10,
+                    icon: 'fas fa-times-circle'
+                },
+                {
+                    id: 'click-power',
+                    name: 'Puissance de Clic',
+                    description: 'Double occasionnellement les bananes gagnées par clic',
+                    baseCost: 5000,
+                    maxLevel: 5,
+                    icon: 'fas fa-bolt'
                 }
             ];
             
@@ -1460,27 +1599,25 @@
             const bananaBps = document.getElementById('banana-bps');
             const totalClicksElement = document.getElementById('banana-total-clicks');
             const multiplierElement = document.getElementById('banana-multiplier');
+            const goldenBananasElement = document.getElementById('banana-golden');
             const upgradesContainer = document.getElementById('banana-upgrades-container');
+            const specialUpgradesContainer = document.getElementById('banana-special-upgrades-container');
+            const prestigeBtn = document.getElementById('prestige-btn');
+            const prestigeRequirement = document.getElementById('prestige-requirement');
+            const prestigeReward = document.getElementById('prestige-reward');
             
-            // Charger la sauvegarde si elle existe
+            // Charger la sauvegarde
             function loadSave() {
                 const save = localStorage.getItem('bananaClickerSave');
                 if (save) {
                     const data = JSON.parse(save);
-                    bananas = data.bananas || 0;
-                    totalClicks = data.totalClicks || 0;
-                    bananasPerSecond = data.bananasPerSecond || 0;
-                    multiplier = data.multiplier || 1;
+                    gameState = {
+                        ...gameState,
+                        ...data,
+                        lastUpdate: Date.now()
+                    };
                     
-                    if (data.upgrades) {
-                        data.upgrades.forEach(savedUpgrade => {
-                            const upgrade = upgrades.find(u => u.id === savedUpgrade.id);
-                            if (upgrade) {
-                                upgrade.owned = savedUpgrade.owned || 0;
-                            }
-                        });
-                    }
-                    
+                    // Mise à jour des BPS après chargement
                     updateBananasPerSecond();
                     updateDisplay();
                 }
@@ -1488,64 +1625,122 @@
             
             // Sauvegarder le jeu
             function saveGame() {
-                const save = {
-                    bananas,
-                    totalClicks,
-                    bananasPerSecond,
-                    multiplier,
-                    upgrades: upgrades.map(upgrade => ({
-                        id: upgrade.id,
-                        owned: upgrade.owned
-                    }))
-                };
-                localStorage.setItem('bananaClickerSave', JSON.stringify(save));
+                localStorage.setItem('bananaClickerSave', JSON.stringify({
+                    ...gameState,
+                    lastUpdate: Date.now()
+                }));
             }
             
             // Mettre à jour l'affichage
             function updateDisplay() {
-                bananaCounter.textContent = `${Math.floor(bananas)} bananes`;
-                bananaBps.textContent = `${bananasPerSecond.toFixed(1)} bananes/seconde`;
-                totalClicksElement.textContent = totalClicks;
-                multiplierElement.textContent = `${multiplier.toFixed(1)}x`;
+                bananaCounter.textContent = `${formatNumber(gameState.bananas)} bananes`;
+                bananaBps.textContent = `${gameState.bananasPerSecond.toFixed(1)} bananes/seconde`;
+                totalClicksElement.textContent = gameState.totalClicks;
+                multiplierElement.textContent = `${gameState.multiplier.toFixed(1)}x`;
+                goldenBananasElement.textContent = gameState.goldenBananas;
                 
                 // Mettre à jour les boutons d'amélioration
                 upgrades.forEach(upgrade => {
                     const btn = document.getElementById(`${upgrade.id}-btn`);
                     if (btn) {
                         const cost = getUpgradeCost(upgrade);
-                        btn.disabled = bananas < cost;
+                        btn.disabled = gameState.bananas < cost;
                     }
                 });
+                
+                // Mettre à jour les boutons d'améliorations spéciales
+                specialUpgrades.forEach(upgrade => {
+                    const btn = document.getElementById(`special-${upgrade.id}-btn`);
+                    if (btn) {
+                        const cost = getSpecialUpgradeCost(upgrade);
+                        const level = gameState.upgrades[upgrade.id]?.level || 0;
+                        btn.disabled = gameState.bananas < cost || level >= upgrade.maxLevel;
+                        btn.textContent = level >= upgrade.maxLevel ? 'MAX' : `Améliorer (${formatNumber(cost)})`;
+                    }
+                });
+                
+                // Mettre à jour le bouton de prestige
+                const canPrestige = gameState.bananas >= 1000000;
+                prestigeBtn.disabled = !canPrestige;
+                prestigeRequirement.textContent = canPrestige 
+                    ? 'Vous pouvez effectuer un prestige!' 
+                    : 'Vous avez besoin d\'au moins 1,000,000 bananes pour effectuer un prestige.';
+                
+                const goldenBananasEarned = Math.floor(gameState.bananas / 1000000);
+                prestigeReward.textContent = `Vous obtiendrez ${goldenBananasEarned} Bananes Dorées`;
+            }
+            
+            // Formater les grands nombres
+            function formatNumber(num) {
+                if (num >= 1000000) {
+                    return (num / 1000000).toFixed(1) + 'M';
+                }
+                if (num >= 1000) {
+                    return (num / 1000).toFixed(1) + 'K';
+                }
+                return num.toString();
             }
             
             // Calculer le coût d'une amélioration
             function getUpgradeCost(upgrade) {
-                return Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.owned));
+                const owned = gameState.upgrades[upgrade.id]?.owned || 0;
+                return Math.floor(upgrade.baseCost * Math.pow(1.15, owned));
+            }
+            
+            // Calculer le coût d'une amélioration spéciale
+            function getSpecialUpgradeCost(upgrade) {
+                const level = gameState.upgrades[upgrade.id]?.level || 0;
+                return upgrade.baseCost * Math.pow(2, level);
             }
             
             // Mettre à jour les bananes par seconde
             function updateBananasPerSecond() {
-                bananasPerSecond = upgrades.reduce((total, upgrade) => {
-                    return total + (upgrade.bps * upgrade.owned);
+                gameState.bananasPerSecond = upgrades.reduce((total, upgrade) => {
+                    const owned = gameState.upgrades[upgrade.id]?.owned || 0;
+                    return total + (upgrade.bps * owned);
                 }, 0);
             }
             
             // Gérer le clic sur la banane
             function handleBananaClick() {
-                bananas += multiplier;
-                totalClicks++;
+                let gain = gameState.multiplier;
                 
-                // Effet visuel
-                const clickEffect = document.createElement('div');
-                clickEffect.className = 'click-effect';
-                clickEffect.textContent = `+${multiplier.toFixed(1)}`;
-                clickEffect.style.left = `${Math.random() * 100 + 50}px`;
-                clickEffect.style.color = `hsl(${Math.random() * 60 + 30}, 100%, 50%)`;
-                document.getElementById('banana-container').appendChild(clickEffect);
+                // Chance de coup critique
+                const clickPowerLevel = gameState.upgrades['click-power']?.level || 0;
+                if (clickPowerLevel > 0 && Math.random() < 0.1 * clickPowerLevel) {
+                    gain *= 2;
+                    
+                    // Effet spécial
+                    const clickEffect = document.createElement('div');
+                    clickEffect.className = 'click-effect special';
+                    clickEffect.textContent = `CRITIQUE! +${gain.toFixed(1)}`;
+                    clickEffect.style.left = `${Math.random() * 100 + 50}px`;
+                    clickEffect.style.color = 'gold';
+                    document.getElementById('banana-container').appendChild(clickEffect);
+                    
+                    setTimeout(() => {
+                        clickEffect.remove();
+                    }, 2000);
+                    
+                    playSound(specialSound);
+                } else {
+                    // Effet normal
+                    const clickEffect = document.createElement('div');
+                    clickEffect.className = 'click-effect';
+                    clickEffect.textContent = `+${gain.toFixed(1)}`;
+                    clickEffect.style.left = `${Math.random() * 100 + 50}px`;
+                    clickEffect.style.color = `hsl(${Math.random() * 60 + 30}, 100%, 50%)`;
+                    document.getElementById('banana-container').appendChild(clickEffect);
+                    
+                    setTimeout(() => {
+                        clickEffect.remove();
+                    }, 1500);
+                    
+                    playSound(clickSound);
+                }
                 
-                setTimeout(() => {
-                    clickEffect.remove();
-                }, 1500);
+                gameState.bananas += gain;
+                gameState.totalClicks++;
                 
                 updateDisplay();
                 saveGame();
@@ -1558,18 +1753,74 @@
                 
                 const cost = getUpgradeCost(upgrade);
                 
-                if (bananas >= cost) {
-                    bananas -= cost;
-                    upgrade.owned++;
+                if (gameState.bananas >= cost) {
+                    gameState.bananas -= cost;
+                    
+                    if (!gameState.upgrades[upgrade.id]) {
+                        gameState.upgrades[upgrade.id] = { owned: 0 };
+                    }
+                    
+                    gameState.upgrades[upgrade.id].owned++;
                     
                     updateBananasPerSecond();
                     updateDisplay();
                     saveGame();
+                    playSound(upgradeSound);
+                }
+            }
+            
+            // Acheter une amélioration spéciale
+            function buySpecialUpgrade(upgradeId) {
+                const upgrade = specialUpgrades.find(u => u.id === upgradeId);
+                if (!upgrade) return;
+                
+                const cost = getSpecialUpgradeCost(upgrade);
+                const level = gameState.upgrades[upgrade.id]?.level || 0;
+                
+                if (level >= upgrade.maxLevel) return;
+                
+                if (gameState.bananas >= cost) {
+                    gameState.bananas -= cost;
                     
-                    // Effet spécial pour les premières améliorations
-                    if (upgrade.owned === 1) {
-                        multiplier += 0.1;
+                    if (!gameState.upgrades[upgrade.id]) {
+                        gameState.upgrades[upgrade.id] = { level: 0 };
                     }
+                    
+                    gameState.upgrades[upgrade.id].level++;
+                    
+                    // Appliquer l'effet de l'amélioration
+                    if (upgradeId === 'multiplier') {
+                        gameState.multiplier += 0.1;
+                    }
+                    
+                    updateDisplay();
+                    saveGame();
+                    playSound(upgradeSound);
+                }
+            }
+            
+            // Effectuer un prestige
+            function prestige() {
+                if (gameState.bananas < 1000000) return;
+                
+                const goldenBananasEarned = Math.floor(gameState.bananas / 1000000);
+                
+                if (confirm(`Voulez-vous vraiment effectuer un prestige? Vous obtiendrez ${goldenBananasEarned} Bananes Dorées mais perdrez toutes vos bananes et améliorations.`)) {
+                    gameState.goldenBananas += goldenBananasEarned;
+                    gameState.bananas = 0;
+                    gameState.totalClicks = 0;
+                    gameState.bananasPerSecond = 0;
+                    gameState.multiplier = 1 + (gameState.goldenBananas * 0.1); // Bonus de prestige
+                    gameState.upgrades = {};
+                    
+                    updateBananasPerSecond();
+                    updateDisplay();
+                    saveGame();
+                    playSound(prestigeSound);
+                    
+                    // Re-rendre les améliorations
+                    renderUpgrades();
+                    renderSpecialUpgrades();
                 }
             }
             
@@ -1578,15 +1829,21 @@
                 upgradesContainer.innerHTML = '';
                 
                 upgrades.forEach(upgrade => {
+                    const owned = gameState.upgrades[upgrade.id]?.owned || 0;
                     const cost = getUpgradeCost(upgrade);
+                    
                     const upgradeElement = document.createElement('div');
                     upgradeElement.className = 'banana-upgrade';
                     upgradeElement.innerHTML = `
-                        <h4 class="banana-upgrade-title">${upgrade.name}</h4>
+                        <h4 class="banana-upgrade-title"><i class="${upgrade.icon}"></i> ${upgrade.name}</h4>
                         <p class="banana-upgrade-desc">${upgrade.description}</p>
                         <div class="banana-upgrade-info">
-                            <span class="banana-upgrade-cost">Coût: ${Math.floor(cost)}</span>
-                            <span class="banana-upgrade-owned">Possédés: ${upgrade.owned}</span>
+                            <span class="banana-upgrade-cost">Coût: ${formatNumber(cost)}</span>
+                            <span class="banana-upgrade-owned">Possédés: ${owned}</span>
+                        </div>
+                        <div class="banana-upgrade-info">
+                            <span>Production: +${upgrade.bps}/s</span>
+                            <span>Total: +${(upgrade.bps * owned).toFixed(1)}/s</span>
                         </div>
                         <button id="${upgrade.id}-btn" class="banana-btn" onclick="buyBananaUpgrade('${upgrade.id}')">
                             Acheter
@@ -1597,14 +1854,44 @@
                 });
             }
             
+            // Générer les améliorations spéciales
+            function renderSpecialUpgrades() {
+                specialUpgradesContainer.innerHTML = '';
+                
+                specialUpgrades.forEach(upgrade => {
+                    const level = gameState.upgrades[upgrade.id]?.level || 0;
+                    const cost = getSpecialUpgradeCost(upgrade);
+                    const maxed = level >= upgrade.maxLevel;
+                    
+                    const upgradeElement = document.createElement('div');
+                    upgradeElement.className = 'banana-upgrade';
+                    upgradeElement.innerHTML = `
+                        <h4 class="banana-upgrade-title"><i class="${upgrade.icon}"></i> ${upgrade.name} <small>Niv. ${level}/${upgrade.maxLevel}</small></h4>
+                        <p class="banana-upgrade-desc">${upgrade.description}</p>
+                        ${maxed ? `
+                            <button class="banana-btn" disabled>MAX</button>
+                        ` : `
+                            <div class="banana-upgrade-info">
+                                <span class="banana-upgrade-cost">Coût: ${formatNumber(cost)}</span>
+                            </div>
+                            <button id="special-${upgrade.id}-btn" class="banana-btn" onclick="buyBananaSpecialUpgrade('${upgrade.id}')">
+                                Améliorer
+                            </button>
+                        `}
+                    `;
+                    
+                    specialUpgradesContainer.appendChild(upgradeElement);
+                });
+            }
+            
             // Boucle de jeu pour les gains passifs
             function gameLoop() {
                 const now = Date.now();
-                const delta = (now - lastUpdate) / 1000; // en secondes
-                lastUpdate = now;
+                const deltaTime = (now - gameState.lastUpdate) / 1000; // en secondes
+                gameState.lastUpdate = now;
                 
-                if (bananasPerSecond > 0) {
-                    bananas += bananasPerSecond * delta;
+                if (gameState.bananasPerSecond > 0) {
+                    gameState.bananas += gameState.bananasPerSecond * deltaTime;
                     updateDisplay();
                 }
                 
@@ -1616,14 +1903,23 @@
                 requestAnimationFrame(gameLoop);
             }
             
-            // Exposer la fonction d'achat au scope global
+            // Jouer un son
+            function playSound(sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log("Le son n'a pas pu être joué:", e));
+            }
+            
+            // Exposer les fonctions au scope global
             window.buyBananaUpgrade = buyUpgrade;
+            window.buyBananaSpecialUpgrade = buySpecialUpgrade;
+            window.prestigeBananaClicker = prestige;
             
             // Initialiser le jeu
-            let lastUpdate = Date.now();
             loadSave();
             renderUpgrades();
+            renderSpecialUpgrades();
             bananaElement.addEventListener('click', handleBananaClick);
+            prestigeBtn.addEventListener('click', prestige);
             gameLoop();
         }
     </script>
