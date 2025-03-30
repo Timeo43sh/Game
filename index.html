@@ -663,10 +663,8 @@
             }
             
             // Initialiser le jeu si c'est Banana Clicker
-            if (gameId === 'banana-clicker') {
-                if (typeof initGame === 'function' && !window.gameInitialized) {
-                    initGame();
-                }
+            if (gameId === 'banana-clicker' && typeof window.loadBananaClicker === 'function') {
+                window.loadBananaClicker();
             }
         }
         

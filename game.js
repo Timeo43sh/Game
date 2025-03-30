@@ -639,13 +639,21 @@ function loadPlayerData() {
 
 // Initialiser le jeu
 function initGame() {
+    console.log("Initialisation du jeu en cours...");
+    
     // Vérifier si on est sur la page de jeu Banana Clicker
-    if (document.getElementById('banana-clicker')) {
-        // Vérifier si le jeu est déjà initialisé
-        if (window.gameInitialized) {
-            return;
-        }
-        
+    if (!document.getElementById('banana-clicker')) {
+        console.log("Page Banana Clicker non trouvée, initialisation annulée");
+        return;
+    }
+    
+    // Vérifier si le jeu est déjà initialisé
+    if (window.gameInitialized) {
+        console.log("Le jeu est déjà initialisé");
+        return;
+    }
+    
+    try {
         // Initialiser l'authentification
         initAuth();
         
@@ -659,7 +667,9 @@ function initGame() {
         updateDisplay();
         
         // Initialiser le panneau d'administration
-        initAdminPanel();
+        if (typeof initAdminPanel === 'function') {
+            initAdminPanel();
+        }
         
         // Démarrer la boucle de jeu
         if (!window.gameLoopRunning) {
@@ -670,13 +680,15 @@ function initGame() {
         // Vérifier l'état de l'authentification
         checkAuthState();
         
-        // Marquer le jeu comme initialisé
-        window.gameInitialized = true;
-        
         // Configurer les événements de la plateforme
         setupPlatformEvents();
         
+        // Marquer le jeu comme initialisé
+        window.gameInitialized = true;
+        
         console.log("Jeu initialisé avec succès");
+    } catch (error) {
+        console.error("Erreur lors de l'initialisation du jeu:", error);
     }
 }
 
@@ -1701,22 +1713,23 @@ function saveToCloud() {
     }
 }
 
-// Démarrer automatiquement le jeu si on est sur la page de jeu
-if (document.getElementById('banana-clicker')) {
-    // Initialiser seulement si on est directement sur la page de jeu
-    if (!window.location.hash.includes('hub')) {
-        // Attendre que le DOM soit complètement chargé
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initGame);
-        } else {
-            initGame();
-        }
-    }
-}
-
 // Exposer les fonctions nécessaires pour la plateforme
-window.loadBananaClicker = initGame;
+window.loadBananaClicker = function() {
+    console.log("Chargement de Banana Clicker demandé");
+    
+    // S'assurer que le DOM est complètement chargé
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGame);
+        console.log("DOM encore en chargement, planification de l'initialisation");
+    } else {
+        initGame();
+    }
+};
+
 window.saveBananaClicker = saveGame;
+
+// Ne pas démarrer automatiquement le jeu maintenant
+// Cela sera fait par loadGame dans index.html
 
 // Fonction pour sauvegarder le jeu
 function saveGame() {
