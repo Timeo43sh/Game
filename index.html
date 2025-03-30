@@ -1951,8 +1951,8 @@
                 {
                     id: 'banana-king',
                     name: 'Roi des Bananes',
-                    description: 'Atteignez 1 milliard de bananes',
-                    condition: () => gameState.bananas >= 100000000,
+                    description: 'Atteignez 1 million de bananes',
+                    condition: () => gameState.bananas >= 1000000,
                     reward: 'Débloquez le prestige!',
                     icon: 'fas fa-chess-king'
                 },
@@ -2051,11 +2051,11 @@
                 });
                 
                 // Mettre à jour le bouton de prestige
-                const canPrestige = gameState.bananas >= 1000000;
+                const canPrestige = gameState.bananas >= 100000000;
                 prestigeBtn.disabled = !canPrestige;
                 prestigeRequirement.textContent = canPrestige 
                     ? 'Vous pouvez effectuer un prestige!' 
-                    : 'Vous avez besoin d\'au moins 1,000,000 bananes pour effectuer un prestige.';
+                    : 'Vous avez besoin d\'au moins 1,000,000,000 bananes pour effectuer un prestige.';
                 
                 const goldenBananasEarned = Math.floor(Math.sqrt(gameState.bananas / 1000000)); // Formule améliorée
                 prestigeReward.textContent = `Vous obtiendrez ${goldenBananasEarned} Bananes Dorées`;
