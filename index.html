@@ -3,393 +3,1629 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Hub - Plateforme de Jeux</title>
+    <title>Arcade Hub - Mini Jeux</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        :root {
+            --primary: #FF2D75;
+            --secondary: #2B2B36;
+            --dark: #1A1A23;
+            --light: #F0F0F0;
+            --accent: #00D1FF;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --danger: #F44336;
+            --card-bg: #242430;
+            --text: #FFFFFF;
+            --text-secondary: #B0B0B0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--secondary);
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .game-card-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .game-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .game-card:hover .game-card-overlay {
+            opacity: 1;
+        }
+
+        .play-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .play-button:hover {
+            transform: scale(1.05);
+        }
+
+        .game-card-content {
+            padding: 20px;
+        }
+
+        .game-card-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .game-card-description {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .game-card-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .game-card-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .tag-action {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tag-puzzle {
+            background: var(--accent);
+            color: var(--dark);
+        }
+
+        .tag-idle {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .game-view {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--dark);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--secondary);
+        }
+
+        .game-title {
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        .back-button {
+            background: var(--secondary);
+            color: var(--text);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .game-container {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Styles spécifiques pour Click Color */
+        #click-color-game {
+            text-align: center;
+        }
+
+        #color-display {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #color-display:active {
+            transform: scale(0.98);
+        }
+
+        #color-value {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-family: monospace;
+            background: var(--secondary);
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        #click-counter {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        .color-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: var(--secondary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            min-width: 100px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .color-controls {
+            margin-top: 20px;
+        }
+
+        .color-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .color-button:hover {
+            background: #ff1a6b;
+        }
+
+        /* Styles pour Tetris */
+        #tetris-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        #tetris-board {
+            border: 3px solid var(--secondary);
+            background: var(--dark);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+
+        #tetris-side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 200px;
+        }
+
+        .tetris-panel {
+            background: var(--secondary);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .tetris-panel-title {
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        #next-piece-container {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        #next-piece {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        #tetris-score-display {
+            font-size: 2rem;
+            text-align: center;
+            margin: 15px 0;
+            color: var(--light);
+            font-weight: 700;
+        }
+
+        #tetris-level-display {
+            font-size: 1.2rem;
+            text-align: center;
+            color: var(--accent);
+        }
+
+        .tetris-btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .tetris-btn:hover {
+            background: #ff1a6b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(255, 45, 117, 0.3);
+        }
+
+        .tetris-btn:active {
+            transform: translateY(0);
+        }
+
+        #tetris-start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 35, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            border-radius: 8px;
+        }
+
+        #tetris-game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 26, 35, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 15;
+            border-radius: 8px;
+        }
+
+        .tetris-screen-title {
+            color: var(--primary);
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 15px rgba(255, 45, 117, 0.5);
+            font-weight: 800;
+        }
+
+        .tetris-screen-subtitle {
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+        }
+
+        .tetris-controls-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .tetris-controls-list li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tetris-key {
+            display: inline-block;
+            background: var(--secondary);
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-right: 10px;
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Couleurs des pièces Tetris */
+        .piece-I { background-color: #00F0FF; }
+        .piece-J { background-color: #0000FF; }
+        .piece-L { background-color: #FF8000; }
+        .piece-O { background-color: #FFFF00; }
+        .piece-S { background-color: #00FF00; }
+        .piece-T { background-color: #8000FF; }
+        .piece-Z { background-color: #FF0000; }
+
+        /* Styles pour Banana Clicker */
+        #banana-clicker-game {
+            text-align: center;
+        }
+
+        #banana {
+            width: 220px;
+            height: 220px;
+            cursor: pointer;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%23FFC107" d="M85 25c-5-15-25-15-30 0-5-15-25-15-30 0-5 15 0 35 15 50 15 15 35 20 50 15 15-5 20-25 15-40-5-15-15-20-20-25z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            transition: transform 0.1s;
+            filter: drop-shadow(0 10px 20px rgba(255,160,0,0.4));
+            margin: 0 auto 20px;
+        }
+
+        #banana:active {
+            transform: scale(0.92);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .click-effect {
+            position: absolute;
+            font-size: 1.8rem;
+            animation: floatAway 1.5s forwards;
+            z-index: 100;
+            pointer-events: none;
+            font-weight: 700;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        @keyframes floatAway {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(20deg); opacity: 0; }
+        }
+
+        #banana-counter {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--warning);
+        }
+
+        #banana-bps {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .banana-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .banana-upgrades {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .banana-upgrade {
+            background: var(--secondary);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--warning);
+        }
+
+        .banana-upgrade-title {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+
+        .banana-upgrade-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .banana-upgrade-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .banana-upgrade-cost {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .banana-upgrade-owned {
+            color: var(--success);
+        }
+
+        .banana-btn {
+            background: var(--warning);
+            color: var(--dark);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .banana-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .banana-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-card-image {
+                height: 150px;
+            }
+            
+            #color-display {
+                width: 200px;
+                height: 200px;
+            }
+            
+            #tetris-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            #tetris-side-panel {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Overlay de connexion (visible seulement si non connecté) -->
-    <div id="authContainer" class="auth-container">
-        <div class="auth-box">
-            <h2>Connectez-vous pour sauvegarder votre progression</h2>
-            <p>Utilisez votre compte Google pour sauvegarder votre jeu en ligne et continuer sur n'importe quel appareil.</p>
-            
-            <!-- Bouton de connexion Google -->
-            <div id="g_id_onload"
-                 data-client_id="501175363576-8lcgi4qd45qh4n317csi3lkm5j3tsuf8.apps.googleusercontent.com"
-                 data-context="signin"
-                 data-ux_mode="popup"
-                 data-callback="handleGoogleSignIn"
-                 data-auto_prompt="false">
-            </div>
-
-            <div class="g_id_signin"
-                 data-type="standard"
-                 data-shape="pill"
-                 data-theme="outline"
-                 data-text="signin_with"
-                 data-size="large"
-                 data-logo_alignment="left">
-            </div>
-            
-            <p style="margin-top: 1rem; font-size: 0.9rem;">
-                <button id="playOffline" class="logout-btn">Jouer hors ligne</button>
-            </p>
-        </div>
-    </div>
-
     <div class="container">
         <header>
-            <div class="header-left">
-                <button class="theme-toggle" id="themeToggle" title="Changer de thème">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <h1>Game Hub</h1>
-            </div>
-            <!-- Section profil utilisateur -->
-            <div id="userProfile" class="user-profile">
-                <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
-                <span id="userName" class="user-name">Non connecté</span>
-                <button id="logoutBtn" class="logout-btn" style="display: none;">Déconnexion</button>
-                <button id="premiumBtn" class="premium-btn" style="display: none;"><i class="fas fa-crown"></i> Premium</button>
-                <button id="adminBtn" class="admin-btn" style="display: none;"><i class="fas fa-tools"></i> Admin</button>
-            </div>
+            <div class="logo">Arcade Hub</div>
+            <div class="tagline">Collection de mini-jeux</div>
         </header>
 
-        <!-- Navigation de la plateforme -->
-        <nav class="platform-nav">
-            <ul>
-                <li><a href="#" class="active" onclick="showHub()"><i class="fas fa-home"></i>Accueil</a></li>
-                <li><a href="#" data-game="banana-clicker"><i class="fas fa-hand-point-up"></i>Banana Clicker</a></li>
-                <li><a href="#" data-game="snake"><i class="fas fa-dragon"></i>Snake</a></li>
-                <li><a href="#" data-game="tetris"><i class="fas fa-th-large"></i>Tetris</a></li>
-                <li><a href="#" data-game="memory"><i class="fas fa-brain"></i>Memory</a></li>
-                <li><a href="#" data-game="flappy"><i class="fas fa-feather-alt"></i>Flappy Bird</a></li>
-            </ul>
-        </nav>
+        <div class="game-grid">
+            <!-- Carte Click Color -->
+            <div class="game-card" onclick="openGame('click-color')">
+                <div class="game-card-image" style="background-color: #FF5733;">
+                    <div class="game-card-overlay">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i> Jouer
+                        </button>
+                    </div>
+                </div>
+                <div class="game-card-content">
+                    <h3 class="game-card-title">Click Color</h3>
+                    <p class="game-card-description">Cliquez sur la couleur affichée pour marquer des points. Simple mais addictif!</p>
+                    <div>
+                        <span class="game-card-tag tag-action">Action</span>
+                        <span class="game-card-tag tag-puzzle">Réflexe</span>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Hub de jeux -->
-        <div id="games-hub" class="games-hub">
-            <h2>Nos Jeux</h2>
-            <div class="games-grid">
-                <div class="game-card">
-                    <img src="images/banana-clicker.jpg" alt="Banana Clicker" onerror="this.src='https://via.placeholder.com/250x150/FFC107/FFFFFF?text=Banana+Clicker'">
-                    <div class="game-card-content">
-                        <h3>Banana Clicker</h3>
-                        <p>Cliquez pour récolter des bananes et bâtir votre empire de la banane!</p>
-                        <button class="btn" data-game="banana-clicker"><i class="fas fa-play"></i> Jouer</button>
+            <!-- Carte Tetris -->
+            <div class="game-card" onclick="openGame('tetris')">
+                <div class="game-card-image" style="background: linear-gradient(135deg, #00D1FF, #8000FF);">
+                    <div class="game-card-overlay">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i> Jouer
+                        </button>
                     </div>
                 </div>
-                <div class="game-card">
-                    <img src="images/snake.jpg" alt="Snake" onerror="this.src='https://via.placeholder.com/250x150/4CAF50/FFFFFF?text=Snake'">
-                    <div class="game-card-content">
-                        <h3>Snake</h3>
-                        <p>Le jeu classique du serpent qui grandit en mangeant des pommes.</p>
-                        <button class="btn" data-game="snake"><i class="fas fa-play"></i> Jouer</button>
+                <div class="game-card-content">
+                    <h3 class="game-card-title">Tetris</h3>
+                    <p class="game-card-description">Le jeu de puzzle classique avec des graphismes modernes. Faites des lignes pour marquer des points!</p>
+                    <div>
+                        <span class="game-card-tag tag-puzzle">Puzzle</span>
+                        <span class="game-card-tag tag-action">Classique</span>
                     </div>
                 </div>
-                <div class="game-card">
-                    <img src="images/tetris.jpg" alt="Tetris" onerror="this.src='https://via.placeholder.com/250x150/2196F3/FFFFFF?text=Tetris'">
-                    <div class="game-card-content">
-                        <h3>Tetris</h3>
-                        <p>Empilez des blocs et complétez des lignes dans ce jeu légendaire.</p>
-                        <button class="btn" data-game="tetris"><i class="fas fa-play"></i> Jouer</button>
+            </div>
+
+            <!-- Carte Banana Clicker -->
+            <div class="game-card" onclick="openGame('banana-clicker')">
+                <div class="game-card-image" style="background: linear-gradient(135deg, #FFC107, #FF5722);">
+                    <div class="game-card-overlay">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i> Jouer
+                        </button>
                     </div>
                 </div>
-                <div class="game-card">
-                    <img src="images/memory.jpg" alt="Memory" onerror="this.src='https://via.placeholder.com/250x150/9C27B0/FFFFFF?text=Memory'">
-                    <div class="game-card-content">
-                        <h3>Memory</h3>
-                        <p>Testez votre mémoire en trouvant les paires de cartes identiques.</p>
-                        <button class="btn" data-game="memory"><i class="fas fa-play"></i> Jouer</button>
-                    </div>
-                </div>
-                <div class="game-card">
-                    <img src="images/flappy.jpg" alt="Flappy Bird" onerror="this.src='https://via.placeholder.com/250x150/FF5722/FFFFFF?text=Flappy+Bird'">
-                    <div class="game-card-content">
-                        <h3>Flappy Bird</h3>
-                        <p>Faites voler l'oiseau à travers les obstacles. Simple mais addictif!</p>
-                        <button class="btn" data-game="flappy"><i class="fas fa-play"></i> Jouer</button>
+                <div class="game-card-content">
+                    <h3 class="game-card-title">Banana Clicker</h3>
+                    <p class="game-card-description">Cliquez pour collecter des bananes, débloquez des améliorations et construisez votre empire bananier!</p>
+                    <div>
+                        <span class="game-card-tag tag-idle">Incremental</span>
+                        <span class="game-card-tag tag-action">Clicker</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Conteneur pour les jeux -->
-        <div id="game-container" class="game-frame">
-            <button class="back-to-hub" onclick="showHub()"><i class="fas fa-arrow-left"></i> Retour à l'accueil</button>
+        <!-- Vue Click Color -->
+        <div id="click-color-view" class="game-view">
+            <div class="game-header">
+                <h2 class="game-title">Click Color</h2>
+                <button class="back-button" onclick="closeGame()">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </button>
+            </div>
             
-            <div id="banana-clicker" class="game-content">
-                <!-- Contenu de Banana Clicker -->
-                <div class="prestige-info">
-                    <i class="fas fa-trophy"></i> <span id="prestige-counter">0</span>
-                    <span class="golden"><i class="fas fa-star"></i> <span id="golden-bananas">0</span></span>
-                </div>
-        
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h2><i class="fas fa-apple-alt"></i> Bananes</h2>
-                        <p id="counter">0</p>
+            <div class="game-container" id="click-color-game">
+                <div id="click-counter">0</div>
+                <div id="color-display"></div>
+                <div id="color-value">#FFFFFF</div>
+                
+                <div class="color-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Meilleur score</div>
+                        <div class="stat-value" id="best-score">0</div>
                     </div>
-                    <div class="stat-card">
-                        <h2><i class="fas fa-bolt"></i> Bananes/Secondes</h2>
-                        <p id="bananas-per-second">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h2><i class="fas fa-hand-pointer"></i> Total Clics</h2>
-                        <p id="total-clicks">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h2><i class="fas fa-chart-line"></i> Multiplicateur</h2>
-                        <p id="multiplier">1.00x</p>
+                    <div class="stat-box">
+                        <div class="stat-label">Taux de réussite</div>
+                        <div class="stat-value" id="success-rate">0%</div>
                     </div>
                 </div>
-        
-                <div id="banana-container">
-                    <div id="banana" title="Cliquez pour gagner des bananes!" class="pulse"></div>
+                
+                <div class="color-controls">
+                    <button class="color-button" onclick="resetClickColor()">
+                        <i class="fas fa-redo"></i> Réinitialiser
+                    </button>
+                    <button class="color-button" onclick="changeColorMode('hex')">
+                        <i class="fas fa-hashtag"></i> Mode HEX
+                    </button>
+                    <button class="color-button" onclick="changeColorMode('rgb')">
+                        <i class="fas fa-palette"></i> Mode RGB
+                    </button>
                 </div>
-        
-                <div class="tab-container">
-                    <div class="tab-buttons">
-                        <button class="tab-btn active" data-tab="upgrades">
-                            <i class="fas fa-arrow-up"></i> Améliorations
-                        </button>
-                        <button class="tab-btn" data-tab="achievements">
-                            <i class="fas fa-trophy"></i> Succès
-                        </button>
-                        <button class="tab-btn" data-tab="prestige">
-                            <i class="fas fa-redo"></i> Prestige
-                        </button>
-                    </div>
-                    
-                    <div id="upgrades" class="tab-content active">
-                        <div id="production-upgrades"></div>
-                    </div>
+            </div>
+        </div>
+
+        <!-- Vue Tetris -->
+        <div id="tetris-view" class="game-view">
+            <div class="game-header">
+                <h2 class="game-title">Tetris</h2>
+                <button class="back-button" onclick="closeGame()">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </button>
+            </div>
+            
+            <div class="game-container">
+                <div id="tetris-container">
+                    <div id="tetris-main-game" style="position: relative;">
+                        <canvas id="tetris-board" width="300" height="600"></canvas>
+                        
+                        <div id="tetris-start-screen">
+                            <h1 class="tetris-screen-title">TETRIS</h1>
+                            <p class="tetris-screen-subtitle">Un jeu classique réinventé</p>
+                            <button id="tetris-start-btn" class="tetris-btn">COMMENCER</button>
                             
-                    <div id="achievements" class="tab-content">
-                        <div id="achievements-container"></div>
-                    </div>
-                            
-                    <div id="prestige" class="tab-content">
-                        <div class="prestige-info-box">
-                            <h3><i class="fas fa-info-circle"></i> Comment fonctionne le Prestige?</h3>
-                            <p>Le Prestige vous permet de recommencer le jeu avec un multiplicateur permanent de production.</p>
-                            <p>Vous devez atteindre <strong>1,000,000</strong> de bananes pour effectuer un Prestige.</p>
-                            <p>Vous obtiendrez des bananes dorées qui amélioreront votre production.</p>
+                            <ul class="tetris-controls-list">
+                                <li><span class="tetris-key">← →</span> Déplacer</li>
+                                <li><span class="tetris-key">↑</span> Tourner</li>
+                                <li><span class="tetris-key">↓</span> Descendre</li>
+                                <li><span class="tetris-key">Espace</span> Tomber</li>
+                                <li><span class="tetris-key">P</span> Pause</li>
+                            </ul>
                         </div>
-                        <button class="btn" id="prestige-btn">
-                            <i class="fas fa-redo"></i> Prestige
-                        </button>
+                        
+                        <div id="tetris-game-over">
+                            <h1 class="tetris-screen-title">GAME OVER</h1>
+                            <div class="tetris-screen-subtitle" id="tetris-final-score">Score: 0</div>
+                            <button id="tetris-restart-btn" class="tetris-btn">REJOUER</button>
+                        </div>
+                    </div>
+                    
+                    <div id="tetris-side-panel">
+                        <div class="tetris-panel">
+                            <h2 class="tetris-panel-title">Prochaine pièce</h2>
+                            <div id="next-piece-container">
+                                <div id="next-piece"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="tetris-panel">
+                            <h2 class="tetris-panel-title">Score</h2>
+                            <div id="tetris-score-display">0</div>
+                            <div id="tetris-level-display">Niveau: 1</div>
+                        </div>
+                        
+                        <div class="tetris-panel">
+                            <h2 class="tetris-panel-title">Contrôles</h2>
+                            <button id="tetris-pause-btn" class="tetris-btn">PAUSE</button>
+                            <button id="tetris-new-game-btn" class="tetris-btn">NOUVELLE PARTIE</button>
+                        </div>
                     </div>
                 </div>
             </div>
-                    
-            <!-- Autres jeux à venir -->
-            <div id="snake" class="game-content" style="display: none;">
-                <h2>Snake</h2>
-                <p>Le jeu Snake sera bientôt disponible !</p>
-                <div class="game-placeholder" style="background: #4CAF50; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                    <i class="fas fa-code"></i> En développement
-                </div>
-            </div>
-                    
-            <div id="tetris" class="game-content" style="display: none;">
-                <h2>Tetris</h2>
-                <p>Le jeu Tetris sera bientôt disponible !</p>
-                <div class="game-placeholder" style="background: #2196F3; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                    <i class="fas fa-code"></i> En développement
-                </div>
-            </div>
-                            
-            <div id="memory" class="game-content" style="display: none;">
-                <h2>Memory</h2>
-                <p>Le jeu Memory sera bientôt disponible !</p>
-                <div class="game-placeholder" style="background: #9C27B0; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                    <i class="fas fa-code"></i> En développement
-                </div>
-            </div>
-                    
-            <div id="flappy" class="game-content" style="display: none;">
-                <h2>Flappy Bird</h2>
-                <p>Le jeu Flappy Bird sera bientôt disponible !</p>
-                <div class="game-placeholder" style="background: #FF5722; height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
-                    <i class="fas fa-code"></i> En développement
-                </div>
-            </div>
         </div>
-        
-        <!-- Notification -->
-        <div id="notification" class="notification">
-            <i class="fas fa-check-circle"></i>
-            <div class="notification-content">Message de notification</div>
-        </div>
-        
-        <!-- Modals -->
-        <div id="premiumModal" class="modal">
-            <div class="modal-content">
-                <button class="btn-close" id="closePremiumModal"><i class="fas fa-times"></i></button>
-                <div class="modal-header">
-                    <h3 class="modal-title"><i class="fas fa-crown"></i> Activer le mode Premium</h3>
+
+        <!-- Vue Banana Clicker -->
+        <div id="banana-clicker-view" class="game-view">
+            <div class="game-header">
+                <h2 class="game-title">Banana Clicker</h2>
+                <button class="back-button" onclick="closeGame()">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </button>
+            </div>
+            
+            <div class="game-container" id="banana-clicker-game">
+                <div id="banana-counter">0 bananes</div>
+                <div id="banana-bps">0 bananes/seconde</div>
+                <div id="banana-container">
+                    <div id="banana" title="Cliquez pour gagner des bananes!"></div>
                 </div>
-                <div class="modal-body">
-                    <p>Entrez votre code premium pour activer les avantages exclusifs:</p>
-                    <ul>
-                        <li>Multiplicateur de production accru</li>
-                        <li>Nouvelles améliorations exclusives</li>
-                        <li>Thèmes et skins exclusifs</li>
-                    </ul>
-                    <div class="input-group" style="margin-top: 1rem;">
-                        <input type="text" id="premiumCode" placeholder="Entrez votre code premium">
+                
+                <div class="banana-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Total clics</div>
+                        <div class="stat-value" id="banana-total-clicks">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Multiplicateur</div>
+                        <div class="stat-value" id="banana-multiplier">1x</div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn-secondary" id="closePremiumBtn">Annuler</button>
-                    <button class="btn" id="redeemCode">Activer</button>
+                
+                <h3>Améliorations</h3>
+                <div class="banana-upgrades" id="banana-upgrades-container">
+                    <!-- Les améliorations seront ajoutées dynamiquement -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Sons -->
-    <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
-    <audio id="upgradeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3"></audio>
-    <audio id="achievementSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3"></audio>
-    <audio id="prestigeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
-    <audio id="specialSound" src="https://assets.mixkit.co/sfx/preview/mixkit-extra-bonus-in-a-video-game-2045.mp3"></audio>
-
     <script>
-        // Gestion du thème
-        document.getElementById('themeToggle').addEventListener('click', function() {
-            const body = document.body;
-            const isDark = body.getAttribute('data-theme') === 'dark';
+        // Gestion des vues de jeu
+        function openGame(gameId) {
+            document.querySelectorAll('.game-view').forEach(view => {
+                view.style.display = 'none';
+            });
+            document.getElementById(`${gameId}-view`).style.display = 'block';
             
-            if (isDark) {
-                body.removeAttribute('data-theme');
-                this.innerHTML = '<i class="fas fa-moon"></i>';
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                this.innerHTML = '<i class="fas fa-sun"></i>';
+            // Initialiser le jeu si ce n'est pas déjà fait
+            if (gameId === 'click-color' && !window.clickColorInitialized) {
+                initClickColor();
+                window.clickColorInitialized = true;
+            } else if (gameId === 'tetris' && !window.tetrisInitialized) {
+                initTetris();
+                window.tetrisInitialized = true;
+            } else if (gameId === 'banana-clicker' && !window.bananaClickerInitialized) {
+                initBananaClicker();
+                window.bananaClickerInitialized = true;
             }
-        });
-        
-        // Fonction pour la navigation entre les jeux
-        function showHub() {
-            document.getElementById('games-hub').style.display = 'block';
-            document.getElementById('game-container').classList.remove('active');
-            
-            // Mettre à jour la navigation
-            const navLinks = document.querySelectorAll('.platform-nav a');
-            navLinks.forEach(link => link.classList.remove('active'));
-            navLinks[0].classList.add('active');
         }
-        
-        function loadGame(gameId) {
-            // Masquer le hub
-            document.getElementById('games-hub').style.display = 'none';
-            document.getElementById('game-container').classList.add('active');
+
+        function closeGame() {
+            document.querySelectorAll('.game-view').forEach(view => {
+                view.style.display = 'none';
+            });
+        }
+
+        // Jeu Click Color
+        function initClickColor() {
+            const colorDisplay = document.getElementById('color-display');
+            const colorValue = document.getElementById('color-value');
+            const clickCounter = document.getElementById('click-counter');
+            const bestScore = document.getElementById('best-score');
+            const successRate = document.getElementById('success-rate');
             
-            // Masquer tous les jeux
-            const gameContents = document.querySelectorAll('.game-content');
-            gameContents.forEach(game => game.style.display = 'none');
+            let score = 0;
+            let best = localStorage.getItem('clickColorBestScore') || 0;
+            let totalClicks = 0;
+            let successfulClicks = 0;
+            let colorMode = 'hex'; // 'hex' ou 'rgb'
             
-            // Afficher le jeu sélectionné
-            document.getElementById(gameId).style.display = 'block';
+            bestScore.textContent = best;
             
-            // Mettre à jour la navigation
-            const navLinks = document.querySelectorAll('.platform-nav a');
-            navLinks.forEach(link => link.classList.remove('active'));
-            
-            // Trouver et activer le lien du jeu sélectionné
-            navLinks.forEach(link => {
-                if (link.getAttribute('data-game') === gameId) {
-                    link.classList.add('active');
+            function getRandomColor() {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
                 }
-            });
-            
-            // Initialiser le jeu si c'est Banana Clicker
-            if (gameId === 'banana-clicker' && typeof window.loadBananaClicker === 'function') {
-                window.loadBananaClicker();
+                return color;
             }
-        }
-        
-        // Gestion des onglets dans Banana Clicker
-        function openTab(tabId) {
-            // Masquer tous les onglets
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
             
-            // Désactiver tous les boutons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            function getRandomRGB() {
+                const r = Math.floor(Math.random() * 256);
+                const g = Math.floor(Math.random() * 256);
+                const b = Math.floor(Math.random() * 256);
+                return `rgb(${r}, ${g}, ${b})`;
+            }
             
-            // Activer l'onglet sélectionné
-            document.getElementById(tabId).classList.add('active');
+            function updateColor() {
+                if (colorMode === 'hex') {
+                    const color = getRandomColor();
+                    colorDisplay.style.backgroundColor = color;
+                    colorValue.textContent = color;
+                } else {
+                    const color = getRandomRGB();
+                    colorDisplay.style.backgroundColor = color;
+                    colorValue.textContent = color;
+                }
+            }
             
-            // Activer le bouton correspondant
-            document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
-        }
-        
-        // Gestion du mode hors ligne
-        function playOffline() {
-            document.getElementById('authContainer').style.display = 'none';
-            document.querySelector('.game-container').style.display = 'flex';
-        }
-        
-        // Gestion des modals
-        function closeModals() {
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.classList.remove('show');
-            });
-        }
-        
-        // Ajouter des écouteurs d'événements pour les onglets et la navigation
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser les onglets
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    openTab(this.dataset.tab);
-                });
-            });
+            function handleClick() {
+                totalClicks++;
+                const currentColor = colorDisplay.style.backgroundColor;
+                const displayedValue = colorValue.textContent;
+                
+                let isCorrect = false;
+                
+                if (colorMode === 'hex') {
+                    // Convertir la couleur RGB affichée en HEX pour comparaison
+                    const rgbToHex = (rgb) => {
+                        const values = rgb.match(/\d+/g);
+                        const hex = values.map(v => {
+                            const val = parseInt(v);
+                            return val.toString(16).padStart(2, '0');
+                        });
+                        return `#${hex.join('').toUpperCase()}`;
+                    };
+                    
+                    const actualHex = rgbToHex(currentColor);
+                    isCorrect = actualHex === displayedValue;
+                } else {
+                    // En mode RGB, on compare directement
+                    isCorrect = currentColor === displayedValue;
+                }
+                
+                if (isCorrect) {
+                    score++;
+                    successfulClicks++;
+                    clickCounter.textContent = score;
+                    colorDisplay.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        colorDisplay.style.transform = 'scale(1)';
+                    }, 100);
+                    
+                    if (score > best) {
+                        best = score;
+                        bestScore.textContent = best;
+                        localStorage.setItem('clickColorBestScore', best);
+                    }
+                } else {
+                    score = 0;
+                    clickCounter.textContent = score;
+                }
+                
+                // Mettre à jour le taux de réussite
+                const rate = Math.round((successfulClicks / totalClicks) * 100);
+                successRate.textContent = `${rate}%`;
+                
+                updateColor();
+            }
             
-            // Initialiser la navigation
-            document.querySelectorAll('.platform-nav a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const gameId = this.getAttribute('data-game');
-                    if (gameId) {
-                        loadGame(gameId);
-                    } else {
-                        showHub();
+            function resetGame() {
+                score = 0;
+                totalClicks = 0;
+                successfulClicks = 0;
+                clickCounter.textContent = score;
+                successRate.textContent = '0%';
+                updateColor();
+            }
+            
+            function changeMode(mode) {
+                colorMode = mode;
+                resetGame();
+            }
+            
+            // Événements
+            colorDisplay.addEventListener('click', handleClick);
+            document.getElementById('color-display').addEventListener('click', handleClick);
+            window.resetClickColor = resetGame;
+            window.changeColorMode = changeMode;
+            
+            // Démarrer le jeu
+            updateColor();
+        }
+
+        // Jeu Tetris
+        function initTetris() {
+            document.addEventListener('DOMContentLoaded', () => {
+                // Éléments du DOM
+                const canvas = document.getElementById('tetris-board');
+                const ctx = canvas.getContext('2d');
+                const nextPieceEl = document.getElementById('next-piece');
+                const scoreDisplay = document.getElementById('tetris-score-display');
+                const levelDisplay = document.getElementById('tetris-level-display');
+                const finalScoreDisplay = document.getElementById('tetris-final-score');
+                const gameOverScreen = document.getElementById('tetris-game-over');
+                const startScreen = document.getElementById('tetris-start-screen');
+                const startBtn = document.getElementById('tetris-start-btn');
+                const restartBtn = document.getElementById('tetris-restart-btn');
+                const pauseBtn = document.getElementById('tetris-pause-btn');
+                const newGameBtn = document.getElementById('tetris-new-game-btn');
+                
+                // Configuration du jeu
+                const blockSize = 30;
+                const cols = 10;
+                const rows = 20;
+                
+                // Variables du jeu
+                let board = [];
+                let currentPiece = null;
+                let nextPiece = null;
+                let piecePos = { x: 0, y: 0 };
+                let score = 0;
+                let level = 1;
+                let lines = 0;
+                let dropCounter = 0;
+                let dropInterval = 1000;
+                let lastTime = 0;
+                let animationId = null;
+                let isPaused = false;
+                let gameOver = false;
+                let gameStarted = false;
+                
+                // Pièces du Tetris
+                const pieces = [
+                    { 
+                        shape: [[1, 1, 1, 1]], 
+                        className: 'piece-I',
+                        color: '#00F0FF'
+                    },
+                    { 
+                        shape: [[1, 0, 0], [1, 1, 1]], 
+                        className: 'piece-J',
+                        color: '#0000FF'
+                    },
+                    { 
+                        shape: [[0, 0, 1], [1, 1, 1]], 
+                        className: 'piece-L',
+                        color: '#FF8000'
+                    },
+                    { 
+                        shape: [[1, 1], [1, 1]], 
+                        className: 'piece-O',
+                        color: '#FFFF00'
+                    },
+                    { 
+                        shape: [[0, 1, 1], [1, 1, 0]], 
+                        className: 'piece-S',
+                        color: '#00FF00'
+                    },
+                    { 
+                        shape: [[0, 1, 0], [1, 1, 1]], 
+                        className: 'piece-T',
+                        color: '#8000FF'
+                    },
+                    { 
+                        shape: [[1, 1, 0], [0, 1, 1]], 
+                        className: 'piece-Z',
+                        color: '#FF0000'
+                    }
+                ];
+                
+                // Initialisation du jeu
+                function init() {
+                    // Réinitialiser l'état du jeu
+                    board = Array.from({ length: rows }, () => Array(cols).fill(0));
+                    score = 0;
+                    level = 1;
+                    lines = 0;
+                    dropInterval = 1000;
+                    dropCounter = 0;
+                    gameOver = false;
+                    isPaused = false;
+                    gameStarted = true;
+                    
+                    // Créer les premières pièces
+                    currentPiece = getRandomPiece();
+                    nextPiece = getRandomPiece();
+                    spawnPiece();
+                    
+                    // Mettre à jour l'affichage
+                    updateScore();
+                    updateNextPiece();
+                    
+                    // Cacher les écrans
+                    startScreen.style.display = 'none';
+                    gameOverScreen.style.display = 'none';
+                    
+                    // Démarrer la boucle de jeu
+                    lastTime = performance.now();
+                    if (animationId) cancelAnimationFrame(animationId);
+                    animationId = requestAnimationFrame(gameLoop);
+                }
+                
+                // Obtenir une pièce aléatoire
+                function getRandomPiece() {
+                    const index = Math.floor(Math.random() * pieces.length);
+                    return {
+                        shape: pieces[index].shape,
+                        className: pieces[index].className,
+                        color: pieces[index].color
+                    };
+                }
+                
+                // Faire apparaître une nouvelle pièce
+                function spawnPiece() {
+                    currentPiece = nextPiece;
+                    nextPiece = getRandomPiece();
+                    piecePos.x = Math.floor(cols / 2) - Math.floor(currentPiece.shape[0].length / 2);
+                    piecePos.y = 0;
+                    
+                    // Vérifier le game over
+                    if (collision()) {
+                        gameOver = true;
+                        finalScoreDisplay.textContent = `Score: ${score}`;
+                        gameOverScreen.style.display = 'flex';
+                    }
+                    
+                    updateNextPiece();
+                }
+                
+                // Dessiner le plateau
+                function drawBoard() {
+                    // Fond
+                    ctx.fillStyle = '#1A1A23';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Grille
+                    ctx.strokeStyle = '#2B2B36';
+                    ctx.lineWidth = 1;
+                    for (let y = 0; y < rows; y++) {
+                        for (let x = 0; x < cols; x++) {
+                            ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
+                        }
+                    }
+                    
+                    // Pièces placées
+                    for (let y = 0; y < rows; y++) {
+                        for (let x = 0; x < cols; x++) {
+                            if (board[y][x]) {
+                                drawBlock(x, y, board[y][x]);
+                            }
+                        }
+                    }
+                    
+                    // Pièce courante
+                    if (currentPiece) {
+                        currentPiece.shape.forEach((row, y) => {
+                            row.forEach((value, x) => {
+                                if (value) {
+                                    drawBlock(
+                                        piecePos.x + x,
+                                        piecePos.y + y,
+                                        currentPiece.color
+                                    );
+                                }
+                            });
+                        });
+                    }
+                }
+                
+                // Dessiner un bloc
+                function drawBlock(x, y, color) {
+                    // Bloc principal
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+                    
+                    // Effet 3D
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                    ctx.fillRect(x * blockSize, y * blockSize, blockSize, 3);
+                    ctx.fillRect(x * blockSize, y * blockSize, 3, blockSize);
+                    
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                    ctx.fillRect(x * blockSize + 3, y * blockSize + blockSize - 3, blockSize - 3, 3);
+                    ctx.fillRect(x * blockSize + blockSize - 3, y * blockSize + 3, 3, blockSize - 6);
+                    
+                    // Bordure
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                    ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
+                }
+                
+                // Mettre à jour l'affichage de la prochaine pièce
+                function updateNextPiece() {
+                    nextPieceEl.innerHTML = '';
+                    
+                    if (!nextPiece) return;
+                    
+                    const pieceWidth = nextPiece.shape[0].length * 20;
+                    const pieceHeight = nextPiece.shape.length * 20;
+                    const offsetX = (120 - pieceWidth) / 2;
+                    const offsetY = (120 - pieceHeight) / 2;
+                    
+                    const pieceDiv = document.createElement('div');
+                    pieceDiv.style.position = 'relative';
+                    pieceDiv.style.width = `${pieceWidth}px`;
+                    pieceDiv.style.height = `${pieceHeight}px`;
+                    
+                    nextPiece.shape.forEach((row, y) => {
+                        row.forEach((value, x) => {
+                            if (value) {
+                                const block = document.createElement('div');
+                                block.style.position = 'absolute';
+                                block.style.left = `${x * 20}px`;
+                                block.style.top = `${y * 20}px`;
+                                block.style.width = '20px';
+                                block.style.height = '20px';
+                                block.style.backgroundColor = nextPiece.color;
+                                block.style.borderRadius = '3px';
+                                block.style.boxShadow = 'inset 0 0 0 1px rgba(255,255,255,0.2)';
+                                pieceDiv.appendChild(block);
+                            }
+                        });
+                    });
+                    
+                    nextPieceEl.appendChild(pieceDiv);
+                }
+                
+                // Vérifier les collisions
+                function collision() {
+                    for (let y = 0; y < currentPiece.shape.length; y++) {
+                        for (let x = 0; x < currentPiece.shape[y].length; x++) {
+                            if (currentPiece.shape[y][x]) {
+                                const boardX = piecePos.x + x;
+                                const boardY = piecePos.y + y;
+                                
+                                if (
+                                    boardX < 0 ||
+                                    boardX >= cols ||
+                                    boardY >= rows ||
+                                    (boardY >= 0 && board[boardY][boardX])
+                                ) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    return false;
+                }
+                
+                // Rotation de la pièce
+                function rotatePiece() {
+                    if (isPaused || !gameStarted) return;
+                    
+                    const originalShape = currentPiece.shape;
+                    const rows = currentPiece.shape.length;
+                    const cols = currentPiece.shape[0].length;
+                    const newShape = Array.from({ length: cols }, () => Array(rows).fill(0));
+                    
+                    for (let y = 0; y < rows; y++) {
+                        for (let x = 0; x < cols; x++) {
+                            newShape[x][rows - 1 - y] = currentPiece.shape[y][x];
+                        }
+                    }
+                    
+                    currentPiece.shape = newShape;
+                    
+                    if (collision()) {
+                        currentPiece.shape = originalShape;
+                    }
+                }
+                
+                // Fusionner la pièce avec le plateau
+                function merge() {
+                    currentPiece.shape.forEach((row, y) => {
+                        row.forEach((value, x) => {
+                            if (value) {
+                                const boardY = piecePos.y + y;
+                                const boardX = piecePos.x + x;
+                                if (boardY >= 0) {
+                                    board[boardY][boardX] = currentPiece.color;
+                                }
+                            }
+                        });
+                    });
+                }
+                
+                // Supprimer les lignes complètes
+                function clearLines() {
+                    let linesCleared = 0;
+                    
+                    for (let y = rows - 1; y >= 0; y--) {
+                        if (board[y].every(cell => cell !== 0)) {
+                            board.splice(y, 1);
+                            board.unshift(Array(cols).fill(0));
+                            linesCleared++;
+                            y++;
+                        }
+                    }
+                    
+                    if (linesCleared > 0) {
+                        // Calcul du score
+                        const points = [0, 40, 100, 300, 1200][linesCleared] * level;
+                        score += points;
+                        lines += linesCleared;
+                        
+                        // Augmentation du niveau
+                        level = Math.floor(lines / 10) + 1;
+                        dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+                        
+                        updateScore();
+                    }
+                }
+                
+                // Mettre à jour le score
+                function updateScore() {
+                    scoreDisplay.textContent = score;
+                    levelDisplay.textContent = `Niveau: ${level}`;
+                }
+                
+                // Déplacement de la pièce
+                function movePiece(dx, dy) {
+                    if (isPaused || !gameStarted) return false;
+                    
+                    piecePos.x += dx;
+                    piecePos.y += dy;
+                    
+                    if (collision()) {
+                        piecePos.x -= dx;
+                        piecePos.y -= dy;
+                        
+                        if (dy === 1) {
+                            merge();
+                            clearLines();
+                            spawnPiece();
+                        }
+                        
+                        return false;
+                    }
+                    
+                    return true;
+                }
+                
+                // Tomber rapidement
+                function hardDrop() {
+                    if (isPaused || !gameStarted) return;
+                    
+                    while (movePiece(0, 1)) {}
+                }
+                
+                // Boucle de jeu principale
+                function gameLoop(timestamp) {
+                    if (gameOver) return;
+                    if (isPaused) {
+                        animationId = requestAnimationFrame(gameLoop);
+                        return;
+                    }
+                    
+                    const deltaTime = timestamp - lastTime;
+                    lastTime = timestamp;
+                    
+                    dropCounter += deltaTime;
+                    if (dropCounter > dropInterval) {
+                        movePiece(0, 1);
+                        dropCounter = 0;
+                    }
+                    
+                    drawBoard();
+                    animationId = requestAnimationFrame(gameLoop);
+                }
+                
+                // Gestion des touches
+                document.addEventListener('keydown', e => {
+                    if (!gameStarted && e.key === 'Enter') {
+                        init();
+                        return;
+                    }
+                    
+                    if (gameOver && e.key === 'Enter') {
+                        init();
+                        return;
+                    }
+                    
+                    if (!gameStarted || gameOver) return;
+                    
+                    switch (e.key) {
+                        case 'ArrowLeft':
+                            movePiece(-1, 0);
+                            break;
+                        case 'ArrowRight':
+                            movePiece(1, 0);
+                            break;
+                        case 'ArrowDown':
+                            movePiece(0, 1);
+                            dropCounter = 0;
+                            break;
+                        case 'ArrowUp':
+                            rotatePiece();
+                            break;
+                        case ' ':
+                            hardDrop();
+                            break;
+                        case 'p':
+                        case 'P':
+                            togglePause();
+                            break;
                     }
                 });
+                
+                // Basculer pause
+                function togglePause() {
+                    if (!gameStarted || gameOver) return;
+                    
+                    isPaused = !isPaused;
+                    pauseBtn.textContent = isPaused ? 'REPRENDRE' : 'PAUSE';
+                    
+                    if (!isPaused) {
+                        lastTime = performance.now();
+                        animationId = requestAnimationFrame(gameLoop);
+                    }
+                }
+                
+                // Événements des boutons
+                startBtn.addEventListener('click', init);
+                restartBtn.addEventListener('click', init);
+                pauseBtn.addEventListener('click', togglePause);
+                newGameBtn.addEventListener('click', () => {
+                    if (animationId) cancelAnimationFrame(animationId);
+                    init();
+                });
+                
+                // Dessiner l'écran de démarrage
+                drawBoard();
             });
+        }
+
+        // Jeu Banana Clicker
+        function initBananaClicker() {
+            // Variables du jeu
+            let bananas = 0;
+            let totalClicks = 0;
+            let bananasPerSecond = 0;
+            let multiplier = 1;
             
-            // Boutons de lancement de jeu dans les cartes
-            document.querySelectorAll('.game-card .btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const gameId = this.getAttribute('data-game');
-                    if (gameId) {
-                        loadGame(gameId);
+            // Améliorations disponibles
+            const upgrades = [
+                { 
+                    id: 'monkey', 
+                    name: 'Singe Assistant', 
+                    description: 'Un petit singe qui travaille pour vous', 
+                    baseCost: 15, 
+                    bps: 0.2,
+                    owned: 0
+                },
+                { 
+                    id: 'farm', 
+                    name: 'Ferme Bananière', 
+                    description: 'Une plantation de bananes basique', 
+                    baseCost: 100, 
+                    bps: 1,
+                    owned: 0
+                },
+                { 
+                    id: 'factory', 
+                    name: 'Usine de Bananes', 
+                    description: 'Transforme les bananes en produits dérivés', 
+                    baseCost: 500, 
+                    bps: 4,
+                    owned: 0
+                },
+                { 
+                    id: 'plantation', 
+                    name: 'Plantation Géante', 
+                    description: 'Dominez le marché de la banane', 
+                    baseCost: 3000, 
+                    bps: 10,
+                    owned: 0
+                },
+                { 
+                    id: 'research', 
+                    name: 'Laboratoire de Recherche', 
+                    description: 'Bananes génétiquement modifiées', 
+                    baseCost: 10000, 
+                    bps: 25,
+                    owned: 0
+                }
+            ];
+            
+            // Éléments du DOM
+            const bananaElement = document.getElementById('banana');
+            const bananaCounter = document.getElementById('banana-counter');
+            const bananaBps = document.getElementById('banana-bps');
+            const totalClicksElement = document.getElementById('banana-total-clicks');
+            const multiplierElement = document.getElementById('banana-multiplier');
+            const upgradesContainer = document.getElementById('banana-upgrades-container');
+            
+            // Charger la sauvegarde si elle existe
+            function loadSave() {
+                const save = localStorage.getItem('bananaClickerSave');
+                if (save) {
+                    const data = JSON.parse(save);
+                    bananas = data.bananas || 0;
+                    totalClicks = data.totalClicks || 0;
+                    bananasPerSecond = data.bananasPerSecond || 0;
+                    multiplier = data.multiplier || 1;
+                    
+                    if (data.upgrades) {
+                        data.upgrades.forEach(savedUpgrade => {
+                            const upgrade = upgrades.find(u => u.id === savedUpgrade.id);
+                            if (upgrade) {
+                                upgrade.owned = savedUpgrade.owned || 0;
+                            }
+                        });
+                    }
+                    
+                    updateBananasPerSecond();
+                    updateDisplay();
+                }
+            }
+            
+            // Sauvegarder le jeu
+            function saveGame() {
+                const save = {
+                    bananas,
+                    totalClicks,
+                    bananasPerSecond,
+                    multiplier,
+                    upgrades: upgrades.map(upgrade => ({
+                        id: upgrade.id,
+                        owned: upgrade.owned
+                    }))
+                };
+                localStorage.setItem('bananaClickerSave', JSON.stringify(save));
+            }
+            
+            // Mettre à jour l'affichage
+            function updateDisplay() {
+                bananaCounter.textContent = `${Math.floor(bananas)} bananes`;
+                bananaBps.textContent = `${bananasPerSecond.toFixed(1)} bananes/seconde`;
+                totalClicksElement.textContent = totalClicks;
+                multiplierElement.textContent = `${multiplier.toFixed(1)}x`;
+                
+                // Mettre à jour les boutons d'amélioration
+                upgrades.forEach(upgrade => {
+                    const btn = document.getElementById(`${upgrade.id}-btn`);
+                    if (btn) {
+                        const cost = getUpgradeCost(upgrade);
+                        btn.disabled = bananas < cost;
                     }
                 });
-            });
+            }
             
-            // Gestion des modals
-            document.querySelectorAll('.btn-close, .btn-secondary').forEach(btn => {
-                btn.addEventListener('click', closeModals);
-            });
+            // Calculer le coût d'une amélioration
+            function getUpgradeCost(upgrade) {
+                return Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.owned));
+            }
             
-            // Bouton jouer hors ligne
-            document.getElementById('playOffline').addEventListener('click', playOffline);
+            // Mettre à jour les bananes par seconde
+            function updateBananasPerSecond() {
+                bananasPerSecond = upgrades.reduce((total, upgrade) => {
+                    return total + (upgrade.bps * upgrade.owned);
+                }, 0);
+            }
             
-            // Initialiser la plateforme
-            showHub();
-        });
+            // Gérer le clic sur la banane
+            function handleBananaClick() {
+                bananas += multiplier;
+                totalClicks++;
+                
+                // Effet visuel
+                const clickEffect = document.createElement('div');
+                clickEffect.className = 'click-effect';
+                clickEffect.textContent = `+${multiplier.toFixed(1)}`;
+                clickEffect.style.left = `${Math.random() * 100 + 50}px`;
+                clickEffect.style.color = `hsl(${Math.random() * 60 + 30}, 100%, 50%)`;
+                document.getElementById('banana-container').appendChild(clickEffect);
+                
+                setTimeout(() => {
+                    clickEffect.remove();
+                }, 1500);
+                
+                updateDisplay();
+                saveGame();
+            }
+            
+            // Acheter une amélioration
+            function buyUpgrade(upgradeId) {
+                const upgrade = upgrades.find(u => u.id === upgradeId);
+                if (!upgrade) return;
+                
+                const cost = getUpgradeCost(upgrade);
+                
+                if (bananas >= cost) {
+                    bananas -= cost;
+                    upgrade.owned++;
+                    
+                    updateBananasPerSecond();
+                    updateDisplay();
+                    saveGame();
+                    
+                    // Effet spécial pour les premières améliorations
+                    if (upgrade.owned === 1) {
+                        multiplier += 0.1;
+                    }
+                }
+            }
+            
+            // Générer les cartes d'amélioration
+            function renderUpgrades() {
+                upgradesContainer.innerHTML = '';
+                
+                upgrades.forEach(upgrade => {
+                    const cost = getUpgradeCost(upgrade);
+                    const upgradeElement = document.createElement('div');
+                    upgradeElement.className = 'banana-upgrade';
+                    upgradeElement.innerHTML = `
+                        <h4 class="banana-upgrade-title">${upgrade.name}</h4>
+                        <p class="banana-upgrade-desc">${upgrade.description}</p>
+                        <div class="banana-upgrade-info">
+                            <span class="banana-upgrade-cost">Coût: ${Math.floor(cost)}</span>
+                            <span class="banana-upgrade-owned">Possédés: ${upgrade.owned}</span>
+                        </div>
+                        <button id="${upgrade.id}-btn" class="banana-btn" onclick="buyBananaUpgrade('${upgrade.id}')">
+                            Acheter
+                        </button>
+                    `;
+                    
+                    upgradesContainer.appendChild(upgradeElement);
+                });
+            }
+            
+            // Boucle de jeu pour les gains passifs
+            function gameLoop() {
+                const now = Date.now();
+                const delta = (now - lastUpdate) / 1000; // en secondes
+                lastUpdate = now;
+                
+                if (bananasPerSecond > 0) {
+                    bananas += bananasPerSecond * delta;
+                    updateDisplay();
+                }
+                
+                // Sauvegarder périodiquement
+                if (now % 30000 < 100) { // ~toutes les 30 secondes
+                    saveGame();
+                }
+                
+                requestAnimationFrame(gameLoop);
+            }
+            
+            // Exposer la fonction d'achat au scope global
+            window.buyBananaUpgrade = buyUpgrade;
+            
+            // Initialiser le jeu
+            let lastUpdate = Date.now();
+            loadSave();
+            renderUpgrades();
+            bananaElement.addEventListener('click', handleBananaClick);
+            gameLoop();
+        }
     </script>
-    <script src="game.js"></script>
 </body>
 </html>
