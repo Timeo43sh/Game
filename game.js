@@ -216,7 +216,7 @@ const bpsCounter = document.getElementById('bananas-per-second');
 const clickCounter = document.getElementById('total-clicks');
 const multiplierDisplay = document.getElementById('multiplier');
 const prestigeCounter = document.getElementById('prestige-counter');
-const goldenBananasCounter = document.getElementById('golden-bananas-counter');
+const goldenBananasCounter = document.getElementById('golden-bananas');
 const productionUpgradesContainer = document.getElementById('production-upgrades');
 const achievementsContainer = document.getElementById('achievements-container');
 const prestigeBtn = document.getElementById('prestige-btn');
@@ -231,7 +231,6 @@ const specialSound = document.getElementById('specialSound');
 
 // Éléments DOM supplémentaires
 const elements = {
-    ...elements,
     authContainer: document.getElementById('authContainer'),
     gameContainer: document.querySelector('.game-container'),
     premiumOverlay: document.querySelector('.premium-overlay'),
@@ -244,303 +243,279 @@ const elements = {
     premiumBtn: document.getElementById('premiumBtn'),
     redeemCodeBtn: document.getElementById('redeemCode'),
     premiumCodeInput: document.getElementById('premiumCode'),
-    leaderboardList: document.getElementById('leaderboardList')
+    leaderboardList: document.getElementById('leaderboardList'),
+    notificationElement: document.getElementById('notification'),
+    notificationContent: document.querySelector('.notification-content')
 };
 
-// Initialiser les structures de données du jeu
-function initializeGameData() {
-    // Initialiser les améliorations de production
-    productionUpgrades.forEach(upgrade => {
-        if (!gameState.upgrades[upgrade.id]) {
-            gameState.upgrades[upgrade.id] = { owned: 0 };
-        }
-    });
+// Fonction pour formater les nombres avec des séparateurs de milliers
+function formatNumber(num) {
+    return num.toLocaleString('fr-FR');
+}
+
+// Fonction pour afficher les notifications
+function showNotification(message, isError = false) {
+    const notification = document.getElementById('notification');
+    const notificationContent = notification.querySelector('.notification-content');
     
-    // Initialiser les succès
-    achievementsData.forEach(ach => {
-        if (gameState.achievements[ach.id] === undefined) {
-            gameState.achievements[ach.id] = false;
-        }
-    });
+    if (!notification || !notificationContent) return;
     
-    // Charger depuis le localStorage si disponible
-    const save = localStorage.getItem('gameHubSave');
-    if (save) {
-        try {
-            const parsed = JSON.parse(save);
-            
-            // Migration des versions si nécessaire
-            if (!parsed.version || parsed.version !== gameState.version) {
-                // Ajouter ici toute logique de migration si la structure change
-                parsed.version = gameState.version;
-                
-                // Si c'est une ancienne sauvegarde sans la plateforme
-                if (!parsed.platform) {
-                    parsed.platform = gameState.platform;
-                }
-            }
-            
-            // Fusionner avec l'état actuel
-            gameState = {
-                ...gameState,
-                ...parsed,
-                temporaryBoosts: {
-                    ...gameState.temporaryBoosts,
-                    ...(parsed.temporaryBoosts || {})
-                },
-                specialUpgrades: {
-                    ...gameState.specialUpgrades,
-                    ...(parsed.specialUpgrades || {})
-                },
-                prestigePowers: {
-                    ...gameState.prestigePowers,
-                    ...(parsed.prestigePowers || {})
-                },
-                platform: {
-                    ...gameState.platform,
-                    ...(parsed.platform || {})
-                }
-            };
-            
-            showNotification('Partie chargée avec succès!');
-            
-            // Mettre à jour le jeu actuel
-            gameState.platform.currentGame = 'banana-clicker';
-            gameState.platform.games['banana-clicker'].lastPlayed = Date.now();
-            
-            // Calculer les gains hors ligne
-            if (gameState.lastUpdate) {
-                const offlineTime = Date.now() - gameState.lastUpdate;
-                const offlineSeconds = offlineTime / 1000;
-                
-                if (gameState.bananasPerSecond > 0) {
-                    const offlineBananas = gameState.bananasPerSecond * offlineSeconds;
-                    gameState.bananas += offlineBananas;
-                    
-                    if (offlineSeconds > 5) {
-                        showNotification(`Bienvenue de retour! Vous avez gagné ${formatNumber(offlineBananas)} bananes pendant votre absence.`);
-                    }
-                }
-                
-                // Recyclage bananier
-                if (gameState.specialUpgrades.recycling.level > 0) {
-                    const recyclingInterval = 60;
-                    const recyclingTimes = Math.floor(offlineSeconds / recyclingInterval);
-                    
-                    if (recyclingTimes > 0) {
-                        const recycled = gameState.bananasPerSecond * 0.01 * gameState.specialUpgrades.recycling.level * recyclingTimes;
-                        gameState.bananas += recycled;
-                        showNotification(`Recyclage: +${formatNumber(recycled)} bananes recyclées`);
-                    }
-                }
-                
-                // Intérêts bananiers
-                if (gameState.prestigePowers.interest.level > 0) {
-                    const interestInterval = 3600;
-                    const interestTimes = Math.floor(offlineSeconds / interestInterval);
-                    
-                    if (interestTimes > 0) {
-                        const interest = gameState.bananas * 0.01 * gameState.prestigePowers.interest.level * interestTimes;
-                        gameState.bananas += interest;
-                        showNotification(`Intérêts: +${formatNumber(interest)} bananes accumulées`);
-                    }
-                }
-            }
-        } catch (e) {
-            console.error("Erreur lors du chargement de la sauvegarde:", e);
-            showNotification("Erreur lors du chargement de la sauvegarde", true);
+    // Définir le message
+    notificationContent.textContent = message;
+    
+    // Appliquer la classe d'erreur si nécessaire
+    if (isError) {
+        notification.classList.add('error');
+    } else {
+        notification.classList.remove('error');
+    }
+    
+    // Afficher la notification
+    notification.classList.add('show');
+    
+    // Masquer après 3 secondes
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
+// Fonction pour gérer le clic sur la banane
+function handleClick() {
+    // Augmenter le compteur de bananes
+    gameState.bananas++;
+    gameState.totalClicks++;
+    
+    // Jouer le son de clic
+    if (clickSound) {
+        clickSound.currentTime = 0;
+        clickSound.play().catch(e => console.error("Erreur de lecture audio:", e));
+    }
+    
+    // Vérifier les succès
+    checkAchievements();
+    
+    // Mettre à jour l'affichage
+    updateDisplay();
+}
+
+// Fonction pour calculer les bananes par seconde
+function updateBPS() {
+    let bps = 0;
+    
+    // Calculer la production de base des améliorations
+    for (const upgradeId in gameState.upgrades) {
+        const upgrade = productionUpgrades.find(u => u.id === upgradeId);
+        if (upgrade) {
+            bps += upgrade.bps * gameState.upgrades[upgradeId].owned;
         }
     }
+    
+    // Appliquer les multiplicateurs
+    const baseMultiplier = 1 + (gameState.prestige * 0.1) + (gameState.prestigePowers.prestigeMultiplier.level * 0.001);
+    let totalMultiplier = baseMultiplier;
+    
+    // Multiplicateur temporaire (Golden Minute)
+    if (gameState.temporaryBoosts.goldenMinute.active) {
+        totalMultiplier *= 2;
+    }
+    
+    // Multiplicateur premium
+    if (gameState.isPremium) {
+        totalMultiplier *= gameState.premiumBenefits.multiplier;
+        bps *= gameState.premiumBenefits.production;
+    }
+    
+    // Appliquer le multiplicateur total
+    bps *= totalMultiplier;
+    
+    // Mettre à jour l'état du jeu
+    gameState.bananasPerSecond = bps;
+    
+    return bps;
 }
 
-// Configurer les écouteurs d'événements
-function setupEventListeners() {
-    banana.addEventListener('click', handleClick);
-    
-    // Thème sombre/clair
-    themeToggleBtn.addEventListener('click', toggleTheme);
-    
-    // Boutons d'amélioration
-    document.getElementById('golden-minute-btn').addEventListener('click', activateGoldenMinute);
-    document.getElementById('banana-blast-btn').addEventListener('click', activateBananaBlast);
-    document.getElementById('random-multiplier-btn').addEventListener('click', buyRandomMultiplier);
-    document.getElementById('recycling-btn').addEventListener('click', buyRecycling);
-    document.getElementById('interest-btn').addEventListener('click', buyInterest);
-    document.getElementById('prestige-mult-btn').addEventListener('click', buyPrestigeMultiplier);
-    document.getElementById('prestige-btn').addEventListener('click', prestige);
-    
-    // Onglets
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            openTab(this.dataset.tab);
-        });
+// Fonction pour vérifier les succès
+function checkAchievements() {
+    achievementsData.forEach(ach => {
+        if (!gameState.achievements[ach.id] && gameState.bananas >= ach.threshold) {
+            gameState.achievements[ach.id] = true;
+            
+            // Ajouter la récompense
+            if (ach.reward > 0) {
+                gameState.bananas += ach.reward;
+            }
+            
+            // Jouer le son de succès
+            if (achievementSound) {
+                achievementSound.currentTime = 0;
+                achievementSound.play().catch(e => console.error("Erreur de lecture audio:", e));
+            }
+            
+            // Afficher la notification
+            showNotification(`Succès débloqué: ${ach.name}`, false);
+        }
     });
-    
-    // Sauvegarde quand l'onglet est fermé
-    window.addEventListener('beforeunload', saveGame);
 }
 
-// Rendre les améliorations de production
-function renderProductionUpgrades() {
-    productionUpgradesContainer.innerHTML = '';
-    
+// Fonction pour mettre à jour l'affichage des améliorations de production
+function updateProductionUpgrades() {
     productionUpgrades.forEach(upgrade => {
         const owned = gameState.upgrades[upgrade.id]?.owned || 0;
         const cost = Math.floor(upgrade.baseCost * Math.pow(1.15, owned));
-        const isLocked = gameState.bananas < upgrade.unlockAt;
         
-        const upgradeEl = document.createElement('div');
-        upgradeEl.className = `upgrade ${isLocked ? 'locked-upgrade' : ''}`;
-        upgradeEl.innerHTML = `
-            <h3><i class="${upgrade.icon}"></i> ${upgrade.name}</h3>
-            <p>${upgrade.desc}</p>
-            <div class="upgrade-info">
-                <span class="upgrade-cost">Coût: <span id="${upgrade.id}-cost">${formatNumber(cost)}</span> bananes</span>
-                <span class="upgrade-owned">Possédés: <span id="${upgrade.id}-owned">${owned}</span></span>
-            </div>
-            <p class="upgrade-bps">Production: +${formatNumber(upgrade.bps)} bananes/sec</p>
-            ${isLocked ? `
-                <div class="locked-label">Débloqué à ${formatNumber(upgrade.unlockAt)} bananes</div>
-                <button class="btn" disabled>
-                    <i class="fas fa-lock"></i> Verrouillé
-                </button>
-            ` : `
-                <button class="btn" id="${upgrade.id}-btn">
-                    <i class="fas fa-shopping-cart"></i> Acheter
-                </button>
-            `}
-        `;
+        const costElement = document.getElementById(`${upgrade.id}-cost`);
+        const ownedElement = document.getElementById(`${upgrade.id}-owned`);
+        const btnElement = document.getElementById(`${upgrade.id}-btn`);
         
-        productionUpgradesContainer.appendChild(upgradeEl);
-        
-        // Ajouter l'écouteur d'événement si débloqué
-        if (!isLocked) {
-            document.getElementById(`${upgrade.id}-btn`).addEventListener('click', () => buyProductionUpgrade(upgrade.id));
-        }
+        if (costElement) costElement.textContent = formatNumber(cost);
+        if (ownedElement) ownedElement.textContent = owned;
+        if (btnElement) btnElement.disabled = gameState.bananas < cost;
     });
 }
 
-// Rendre les succès
-function renderAchievements() {
-    achievementsContainer.innerHTML = '';
-    
+// Fonction pour mettre à jour l'affichage des succès
+function updateAchievements() {
     achievementsData.forEach(ach => {
-        const achieved = gameState.bananas >= ach.threshold;
+        const achieved = gameState.achievements[ach.id] || gameState.bananas >= ach.threshold;
         const progress = Math.min(100, (gameState.bananas / ach.threshold) * 100);
         
-        const achEl = document.createElement('div');
-        achEl.className = `achievement ${achieved ? 'unlocked' : ''}`;
-        achEl.id = ach.id;
-        achEl.innerHTML = `
-            <div class="achievement-icon">
-                <i class="${ach.icon}"></i>
-            </div>
-            <div class="achievement-text">
-                <h4>${ach.name}</h4>
-                <p>${ach.desc}</p>
-                ${ach.reward > 0 ? `<p class="achievement-reward">Récompense: +${formatNumber(ach.reward)} bananes</p>` : ''}
-                ${!achieved ? `
-                    <div class="achievement-progress">
-                        <div class="achievement-progress-bar" style="width: ${progress}%"></div>
-                    </div>
-                ` : ''}
-            </div>
-        `;
-        
-        achievementsContainer.appendChild(achEl);
+        const achElement = document.getElementById(ach.id);
+        if (achElement) {
+            if (achieved) {
+                achElement.classList.add('unlocked');
+            }
+            
+            const progressBar = achElement.querySelector('.achievement-progress-bar');
+            if (progressBar) {
+                progressBar.style.width = `${progress}%`;
+            }
+        }
     });
 }
 
-// Mise à jour de l'affichage
-function updateDisplay() {
-    // Bananes
-    counter.textContent = formatNumber(Math.floor(gameState.bananas));
-    
-    // Bananes par seconde
-    updateBPS();
-    bpsCounter.textContent = formatNumber(gameState.bananasPerSecond);
-    
-    // Clics
-    clickCounter.textContent = formatNumber(gameState.totalClicks);
-    
-    // Multiplicateur
-    const multiplier = 1 + (gameState.prestige * 0.1) + (gameState.prestigePowers.prestigeMultiplier.level * 0.001);
-    multiplierDisplay.textContent = multiplier.toFixed(3) + 'x';
-    
-    // Prestige
-    prestigeCounter.textContent = gameState.prestige;
-    goldenBananasCounter.textContent = formatNumber(gameState.goldenBananas);
-    
-    // Mettre à jour les améliorations de production
-    updateProductionUpgrades();
-    
-    // Mettre à jour les succès
-    updateAchievements();
-    
-    // Mettre à jour les boosters temporaires
-    updateTemporaryBoosts();
-    
-    // Mettre à jour les améliorations spéciales
-    updateSpecialUpgrades();
-    
-    // Mettre à jour les pouvoirs de prestige
-    updatePrestigePowers();
-    
-    // Mettre à jour la section prestige
-    updatePrestigeSection();
+// Fonction pour mettre à jour les boosters temporaires
+function updateTemporaryBoosts() {
+    // Cette fonction sera implémentée si nécessaire
+    console.log("Mise à jour des boosters temporaires");
 }
 
-// Initialiser le jeu
-function initGame() {
-    // Vérifier si on est sur la page de jeu Banana Clicker
-    if (document.getElementById('banana-clicker')) {
-        initializeGameData();
-        renderProductionUpgrades();
-        renderAchievements();
-        setupEventListeners();
-        updateDisplay();
-        
-        // Démarrer la boucle de jeu
-        if (!window.gameLoopRunning) {
-            window.gameLoopRunning = true;
-            gameLoop();
+// Fonction pour mettre à jour les améliorations spéciales
+function updateSpecialUpgrades() {
+    // Cette fonction sera implémentée si nécessaire
+    console.log("Mise à jour des améliorations spéciales");
+}
+
+// Fonction pour mettre à jour les pouvoirs de prestige
+function updatePrestigePowers() {
+    // Cette fonction sera implémentée si nécessaire
+    console.log("Mise à jour des pouvoirs de prestige");
+}
+
+// Fonction pour mettre à jour la section prestige
+function updatePrestigeSection() {
+    // Cette fonction sera implémentée si nécessaire
+    console.log("Mise à jour de la section prestige");
+}
+
+// Fonction pour vérifier l'état de l'authentification
+function checkAuthState() {
+    if (gameState.user) {
+        // L'utilisateur est connecté
+        if (elements.userName) {
+            elements.userName.textContent = gameState.user.name;
+        }
+        if (elements.logoutBtn) {
+            elements.logoutBtn.style.display = 'block';
+        }
+        if (elements.authContainer) {
+            elements.authContainer.style.display = 'none';
+        }
+        if (elements.gameContainer) {
+            elements.gameContainer.style.display = 'flex';
         }
         
-        // Vérifier l'authentification
-        checkAuthState();
-    }
-}
-
-// Basculer entre thème clair/sombre
-function toggleTheme() {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    
-    if (isDark) {
-        document.documentElement.removeAttribute('data-theme');
-        themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+        // Afficher le bouton admin si l'utilisateur est admin
+        if (gameState.user.isAdmin && elements.adminBtn) {
+            elements.adminBtn.style.display = 'block';
+        }
     } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        // L'utilisateur n'est pas connecté
+        if (elements.userName) {
+            elements.userName.textContent = 'Non connecté';
+        }
+        if (elements.logoutBtn) {
+            elements.logoutBtn.style.display = 'none';
+        }
+        if (elements.authContainer) {
+            elements.authContainer.style.display = 'flex';
+        }
+        if (elements.gameContainer) {
+            elements.gameContainer.style.display = 'none';
+        }
+        if (elements.adminBtn) {
+            elements.adminBtn.style.display = 'none';
+        }
     }
 }
 
-// Gestion des onglets
-function openTab(tabId) {
-    // Masquer tous les onglets
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
+// Fonction de boucle de jeu
+function gameLoop() {
+    const now = Date.now();
+    const elapsed = (now - gameState.lastUpdate) / 1000;
     
-    // Désactiver tous les boutons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
+    // Ajouter les bananes produites
+    gameState.bananas += gameState.bananasPerSecond * elapsed;
     
-    // Activer l'onglet sélectionné
-    document.getElementById(tabId).classList.add('active');
+    // Vérifier les boosters temporaires
+    if (gameState.temporaryBoosts.goldenMinute.active && now > gameState.temporaryBoosts.goldenMinute.endTime) {
+        gameState.temporaryBoosts.goldenMinute.active = false;
+        updateBPS();
+        showNotification("La Minute Dorée est terminée");
+    }
     
-    // Activer le bouton correspondant
-    document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+    // Recyclage automatique
+    if (gameState.specialUpgrades.recycling.level > 0) {
+        const recycleInterval = config.recyclingInterval * 1000; // en ms
+        const lastCollection = gameState.specialUpgrades.recycling.lastCollection || 0;
+        
+        if (now - lastCollection >= recycleInterval) {
+            const recycled = gameState.bananasPerSecond * 0.01 * gameState.specialUpgrades.recycling.level;
+            gameState.bananas += recycled;
+            gameState.specialUpgrades.recycling.lastCollection = now;
+            
+            if (recycled > 0) {
+                showNotification(`Recyclage: +${formatNumber(recycled)} bananes`);
+            }
+        }
+    }
+    
+    // Intérêts automatiques
+    if (gameState.prestigePowers.interest.level > 0) {
+        const interestInterval = config.interestInterval * 1000; // en ms
+        const lastInterest = gameState.prestigePowers.lastInterest || 0;
+        
+        if (now - lastInterest >= interestInterval) {
+            const interest = gameState.bananas * 0.01 * gameState.prestigePowers.interest.level;
+            gameState.bananas += interest;
+            gameState.prestigePowers.lastInterest = now;
+            
+            if (interest > 0) {
+                showNotification(`Intérêts: +${formatNumber(interest)} bananes`);
+            }
+        }
+    }
+    
+    // Vérifier les succès
+    checkAchievements();
+    
+    // Mise à jour de l'affichage
+    updateDisplay();
+    
+    // Mettre à jour le timestamp
+    gameState.lastUpdate = now;
+    
+    // Continuer la boucle
+    requestAnimationFrame(gameLoop);
 }
 
 // Initialisation de l'authentification
@@ -1732,3 +1707,55 @@ if (document.getElementById('banana-clicker')) {
 // Exposer les fonctions nécessaires pour la plateforme
 window.loadBananaClicker = initGame;
 window.saveBananaClicker = saveGame;
+
+// Fonction pour sauvegarder le jeu
+function saveGame() {
+    gameState.lastUpdate = Date.now();
+    
+    // Sauvegarder dans le localStorage
+    localStorage.setItem('gameHubSave', JSON.stringify(gameState));
+    
+    // Sauvegarder dans le cloud si configuré
+    if (config.platform.cloudSync && gameState.user) {
+        saveToCloud();
+    }
+}
+
+// Mise à jour de l'affichage
+function updateDisplay() {
+    // Bananes
+    counter.textContent = formatNumber(Math.floor(gameState.bananas));
+    
+    // Bananes par seconde
+    updateBPS();
+    bpsCounter.textContent = formatNumber(gameState.bananasPerSecond);
+    
+    // Clics
+    clickCounter.textContent = formatNumber(gameState.totalClicks);
+    
+    // Multiplicateur
+    const multiplier = 1 + (gameState.prestige * 0.1) + (gameState.prestigePowers.prestigeMultiplier.level * 0.001);
+    multiplierDisplay.textContent = multiplier.toFixed(3) + 'x';
+    
+    // Prestige
+    prestigeCounter.textContent = gameState.prestige;
+    goldenBananasCounter.textContent = formatNumber(gameState.goldenBananas);
+    
+    // Mettre à jour les améliorations de production
+    updateProductionUpgrades();
+    
+    // Mettre à jour les succès
+    updateAchievements();
+    
+    // Mettre à jour les boosters temporaires
+    updateTemporaryBoosts();
+    
+    // Mettre à jour les améliorations spéciales
+    updateSpecialUpgrades();
+    
+    // Mettre à jour les pouvoirs de prestige
+    updatePrestigePowers();
+    
+    // Mettre à jour la section prestige
+    updatePrestigeSection();
+}
