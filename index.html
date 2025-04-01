@@ -1509,6 +1509,173 @@
             width: 100%;
             transition: width 0.1s linear;
         }
+
+        /* Styles pour le jeu de Pong */
+        #pong-game {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .pong-canvas-container {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            margin: 20px auto;
+            background-color: var(--dark);
+            border: 3px solid var(--secondary);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #pong-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .pong-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .pong-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pong-btn:hover {
+            background: #ff1a6b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 45, 117, 0.3);
+        }
+
+        .pong-btn:active {
+            transform: translateY(0);
+        }
+
+        .pong-score-display {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 20px 0;
+        }
+
+        .pong-score-box {
+            background: var(--secondary);
+            padding: 15px 30px;
+            border-radius: 10px;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .pong-score-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .pong-score-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .pong-message {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 20px 0;
+            min-height: 30px;
+            color: var(--text);
+        }
+
+        .pong-info {
+            max-width: 500px;
+            margin: 20px auto;
+            background: var(--secondary);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .pong-info h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .pong-info p {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .pong-info ul {
+            text-align: left;
+            color: var(--text-secondary);
+            margin: 10px 0 10px 20px;
+        }
+
+        .pong-difficulty {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .pong-difficulty label {
+            color: var(--text-secondary);
+            margin-right: 10px;
+        }
+
+        .pong-difficulty select {
+            background: var(--secondary);
+            color: var(--text);
+            border: 1px solid var(--accent);
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .pong-paddle {
+            position: absolute;
+            width: 10px;
+            height: 80px;
+            background-color: white;
+            border-radius: 5px;
+        }
+
+        .pong-paddle.left {
+            left: 20px;
+        }
+
+        .pong-paddle.right {
+            right: 20px;
+        }
+
+        .pong-ball {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .pong-countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            color: white;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -1629,6 +1796,25 @@
                     <div>
                         <span class="game-card-tag tag-puzzle">Match-3</span>
                         <span class="game-card-tag tag-action">Puzzle</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carte Pong -->
+            <div class="game-card" onclick="openGame('pong')">
+                <div class="game-card-image" style="background: linear-gradient(135deg, #000000, #333333);">
+                    <div class="game-card-overlay">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i> Jouer
+                        </button>
+                    </div>
+                </div>
+                <div class="game-card-content">
+                    <h3 class="game-card-title">Pong</h3>
+                    <p class="game-card-description">Le classique jeu de tennis de table arcade! Contrôlez la raquette et évitez que la balle ne dépasse votre côté.</p>
+                    <div>
+                        <span class="game-card-tag tag-action">Arcade</span>
+                        <span class="game-card-tag tag-puzzle">Classique</span>
                     </div>
                 </div>
             </div>
@@ -1975,6 +2161,70 @@
             </div>
         </div>
     </div>
+    
+    <!-- Vue Pong -->
+    <div id="pong-view" class="game-view">
+        <div class="game-header">
+            <h2 class="game-title">Pong</h2>
+            <button class="back-button" onclick="closeGame()">
+                <i class="fas fa-arrow-left"></i> Retour
+            </button>
+        </div>
+        
+        <div class="game-container" id="pong-game">
+            <div class="pong-score-display">
+                <div class="pong-score-box">
+                    <div class="pong-score-label">Vous</div>
+                    <div class="pong-score-value" id="pong-player-score">0</div>
+                </div>
+                <div class="pong-score-box">
+                    <div class="pong-score-label">IA</div>
+                    <div class="pong-score-value" id="pong-ai-score">0</div>
+                </div>
+            </div>
+            
+            <div class="pong-message" id="pong-message">Utilisez les touches ↑/↓ ou la souris pour contrôler votre raquette</div>
+            
+            <div class="pong-canvas-container">
+                <div id="pong-game-container">
+                    <!-- Les éléments du jeu seront générés dynamiquement ici -->
+                </div>
+            </div>
+            
+            <div class="pong-difficulty">
+                <label for="pong-difficulty-select">Difficulté:</label>
+                <select id="pong-difficulty-select">
+                    <option value="easy">Facile</option>
+                    <option value="medium" selected>Moyen</option>
+                    <option value="hard">Difficile</option>
+                </select>
+            </div>
+            
+            <div class="pong-controls">
+                <button class="pong-btn" id="pong-start-btn">
+                    <i class="fas fa-play"></i> Commencer
+                </button>
+                <button class="pong-btn" id="pong-reset-btn">
+                    <i class="fas fa-redo"></i> Réinitialiser
+                </button>
+                <button class="pong-btn" id="pong-pause-btn">
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+            </div>
+            
+            <div class="pong-info">
+                <h3>Instructions</h3>
+                <p>Pong est un jeu de tennis de table simple où vous contrôlez la raquette de gauche.</p>
+                <ul>
+                    <li>Utilisez les touches flèches ↑/↓ pour déplacer votre raquette</li>
+                    <li>Vous pouvez aussi utiliser la souris en déplaçant le curseur verticalement</li>
+                    <li>Essayez de faire rebondir la balle et d'empêcher qu'elle ne dépasse votre côté</li>
+                    <li>Marquez des points quand l'IA manque la balle</li>
+                    <li>Premier à 10 points gagne la partie</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Gestion des vues de jeu
@@ -2003,6 +2253,9 @@
             } else if (gameId === 'sweet-match' && !window.sweetMatchInitialized) {
                 initSweetMatch();
                 window.sweetMatchInitialized = true;
+            } else if (gameId === 'pong' && !window.pongInitialized) {
+                initPong();
+                window.pongInitialized = true;
             }
         }
 
@@ -4920,6 +5173,537 @@
                 
                 messageElement.textContent = "Indice : essayez ces bonbons !";
             }
+        }
+
+        // Jeu de Pong
+        function initPong() {
+            // Éléments du DOM
+            const gameContainer = document.getElementById('pong-game-container');
+            const playerScoreElement = document.getElementById('pong-player-score');
+            const aiScoreElement = document.getElementById('pong-ai-score');
+            const messageElement = document.getElementById('pong-message');
+            const startBtn = document.getElementById('pong-start-btn');
+            const resetBtn = document.getElementById('pong-reset-btn');
+            const pauseBtn = document.getElementById('pong-pause-btn');
+            const difficultySelect = document.getElementById('pong-difficulty-select');
+            
+            // Configuration du jeu
+            const GAME_WIDTH = 600;
+            const GAME_HEIGHT = 400;
+            const PADDLE_WIDTH = 10;
+            const PADDLE_HEIGHT = 80;
+            const BALL_SIZE = 15;
+            const PADDLE_SPEED = 8;
+            const WINNING_SCORE = 10;
+            
+            // État du jeu
+            const gameState = {
+                playerScore: 0,
+                aiScore: 0,
+                paused: false,
+                gameStarted: false,
+                gameOver: false,
+                difficultyLevel: 'medium',
+                animationFrameId: null,
+                lastTime: 0,
+                countdownValue: 3,
+                countdownTimer: null,
+                keyStates: {
+                    ArrowUp: false,
+                    ArrowDown: false
+                }
+            };
+            
+            // Objets du jeu
+            const player = {
+                x: 20,
+                y: GAME_HEIGHT / 2 - PADDLE_HEIGHT / 2,
+                width: PADDLE_WIDTH,
+                height: PADDLE_HEIGHT,
+                speed: PADDLE_SPEED,
+                element: null
+            };
+            
+            const ai = {
+                x: GAME_WIDTH - 20 - PADDLE_WIDTH,
+                y: GAME_HEIGHT / 2 - PADDLE_HEIGHT / 2,
+                width: PADDLE_WIDTH,
+                height: PADDLE_HEIGHT,
+                speed: 0, // Sera défini en fonction de la difficulté
+                element: null
+            };
+            
+            const ball = {
+                x: GAME_WIDTH / 2 - BALL_SIZE / 2,
+                y: GAME_HEIGHT / 2 - BALL_SIZE / 2,
+                width: BALL_SIZE,
+                height: BALL_SIZE,
+                speedX: 0,
+                speedY: 0,
+                element: null
+            };
+            
+            // Initialiser le jeu
+            initializeGame();
+            setupEventListeners();
+            
+            // Initialiser les éléments du jeu
+            function initializeGame() {
+                // Configurer le conteneur de jeu
+                gameContainer.style.width = GAME_WIDTH + 'px';
+                gameContainer.style.height = GAME_HEIGHT + 'px';
+                gameContainer.style.position = 'relative';
+                gameContainer.innerHTML = '';
+                
+                // Créer les raquettes et la balle
+                createGameElements();
+                
+                // Réinitialiser les scores
+                resetScores();
+                
+                // Définir la difficulté
+                setDifficulty(difficultySelect.value);
+                
+                // Mettre à jour l'affichage
+                updateGameDisplay();
+            }
+            
+            // Créer les éléments du jeu
+            function createGameElements() {
+                // Créer la raquette du joueur
+                player.element = document.createElement('div');
+                player.element.className = 'pong-paddle left';
+                player.element.style.height = player.height + 'px';
+                player.element.style.width = player.width + 'px';
+                player.element.style.top = player.y + 'px';
+                player.element.style.left = player.x + 'px';
+                gameContainer.appendChild(player.element);
+                
+                // Créer la raquette de l'IA
+                ai.element = document.createElement('div');
+                ai.element.className = 'pong-paddle right';
+                ai.element.style.height = ai.height + 'px';
+                ai.element.style.width = ai.width + 'px';
+                ai.element.style.top = ai.y + 'px';
+                ai.element.style.right = (GAME_WIDTH - ai.x - ai.width) + 'px';
+                gameContainer.appendChild(ai.element);
+                
+                // Créer la balle
+                ball.element = document.createElement('div');
+                ball.element.className = 'pong-ball';
+                ball.element.style.width = ball.width + 'px';
+                ball.element.style.height = ball.height + 'px';
+                ball.element.style.top = ball.y + 'px';
+                ball.element.style.left = ball.x + 'px';
+                gameContainer.appendChild(ball.element);
+                
+                // Créer l'élément de compte à rebours
+                const countdown = document.createElement('div');
+                countdown.id = 'pong-countdown';
+                countdown.className = 'pong-countdown';
+                countdown.style.display = 'none';
+                gameContainer.appendChild(countdown);
+            }
+            
+            // Configurer les écouteurs d'événements
+            function setupEventListeners() {
+                // Contrôles clavier
+                window.addEventListener('keydown', handleKeyDown);
+                window.addEventListener('keyup', handleKeyUp);
+                
+                // Contrôle à la souris
+                gameContainer.addEventListener('mousemove', handleMouseMove);
+                
+                // Boutons de contrôle
+                startBtn.addEventListener('click', startGame);
+                resetBtn.addEventListener('click', resetGame);
+                pauseBtn.addEventListener('click', togglePause);
+                
+                // Sélecteur de difficulté
+                difficultySelect.addEventListener('change', function() {
+                    setDifficulty(this.value);
+                });
+            }
+            
+            // Gérer les événements clavier
+            function handleKeyDown(e) {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    gameState.keyStates[e.key] = true;
+                }
+            }
+            
+            function handleKeyUp(e) {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    gameState.keyStates[e.key] = false;
+                }
+            }
+            
+            // Gérer les mouvements de la souris
+            function handleMouseMove(e) {
+                if (!gameState.gameStarted || gameState.paused) return;
+                
+                const containerRect = gameContainer.getBoundingClientRect();
+                const relativeY = e.clientY - containerRect.top;
+                
+                // Limiter la position de la raquette à l'intérieur du conteneur
+                player.y = Math.max(0, Math.min(GAME_HEIGHT - player.height, relativeY - player.height / 2));
+                updatePaddlePosition(player);
+            }
+            
+            // Démarrer le jeu
+            function startGame() {
+                if (gameState.gameStarted || gameState.countdownTimer) return;
+                
+                // Réinitialiser la position de la balle
+                resetBallPosition();
+                
+                // Afficher le compte à rebours
+                const countdownElement = document.getElementById('pong-countdown');
+                countdownElement.style.display = 'block';
+                gameState.countdownValue = 3;
+                countdownElement.textContent = gameState.countdownValue;
+                
+                // Démarrer le compte à rebours
+                gameState.countdownTimer = setInterval(() => {
+                    gameState.countdownValue--;
+                    
+                    if (gameState.countdownValue > 0) {
+                        countdownElement.textContent = gameState.countdownValue;
+                    } else {
+                        clearInterval(gameState.countdownTimer);
+                        gameState.countdownTimer = null;
+                        countdownElement.style.display = 'none';
+                        
+                        // Commencer le jeu après le compte à rebours
+                        gameState.gameStarted = true;
+                        gameState.paused = false;
+                        gameState.gameOver = false;
+                        
+                        // Donner une vitesse initiale à la balle
+                        setInitialBallSpeed();
+                        
+                        // Démarrer la boucle de jeu
+                        if (!gameState.animationFrameId) {
+                            gameState.lastTime = performance.now();
+                            gameState.animationFrameId = requestAnimationFrame(gameLoop);
+                        }
+                        
+                        messageElement.textContent = "C'est parti!";
+                    }
+                }, 1000);
+            }
+            
+            // Réinitialiser le jeu
+            function resetGame() {
+                // Arrêter le jeu en cours
+                cancelAnimationFrame(gameState.animationFrameId);
+                gameState.animationFrameId = null;
+                
+                // Arrêter le compte à rebours s'il est en cours
+                if (gameState.countdownTimer) {
+                    clearInterval(gameState.countdownTimer);
+                    gameState.countdownTimer = null;
+                    document.getElementById('pong-countdown').style.display = 'none';
+                }
+                
+                // Réinitialiser l'état du jeu
+                gameState.gameStarted = false;
+                gameState.paused = false;
+                gameState.gameOver = false;
+                
+                // Réinitialiser les scores
+                resetScores();
+                
+                // Réinitialiser les positions
+                player.y = GAME_HEIGHT / 2 - player.height / 2;
+                ai.y = GAME_HEIGHT / 2 - ai.height / 2;
+                resetBallPosition();
+                
+                // Mettre à jour l'affichage
+                updateGameDisplay();
+                
+                messageElement.textContent = "Jeu réinitialisé. Appuyez sur Commencer pour jouer.";
+            }
+            
+            // Mettre le jeu en pause
+            function togglePause() {
+                if (!gameState.gameStarted || gameState.gameOver) return;
+                
+                gameState.paused = !gameState.paused;
+                
+                if (gameState.paused) {
+                    cancelAnimationFrame(gameState.animationFrameId);
+                    gameState.animationFrameId = null;
+                    messageElement.textContent = "Jeu en pause";
+                } else {
+                    gameState.lastTime = performance.now();
+                    gameState.animationFrameId = requestAnimationFrame(gameLoop);
+                    messageElement.textContent = "Jeu repris";
+                }
+            }
+            
+            // Définir la difficulté
+            function setDifficulty(level) {
+                gameState.difficultyLevel = level;
+                
+                switch (level) {
+                    case 'easy':
+                        ai.speed = PADDLE_SPEED * 0.6;
+                        break;
+                    case 'medium':
+                        ai.speed = PADDLE_SPEED * 0.8;
+                        break;
+                    case 'hard':
+                        ai.speed = PADDLE_SPEED * 1.1;
+                        break;
+                }
+                
+                messageElement.textContent = `Difficulté définie sur ${level}`;
+            }
+            
+            // Réinitialiser les scores
+            function resetScores() {
+                gameState.playerScore = 0;
+                gameState.aiScore = 0;
+                playerScoreElement.textContent = gameState.playerScore;
+                aiScoreElement.textContent = gameState.aiScore;
+            }
+            
+            // Réinitialiser la position de la balle
+            function resetBallPosition() {
+                ball.x = GAME_WIDTH / 2 - ball.width / 2;
+                ball.y = GAME_HEIGHT / 2 - ball.height / 2;
+                ball.speedX = 0;
+                ball.speedY = 0;
+                updateBallPosition();
+            }
+            
+            // Donner une vitesse initiale à la balle
+            function setInitialBallSpeed() {
+                // Direction aléatoire (gauche ou droite)
+                const direction = Math.random() > 0.5 ? 1 : -1;
+                
+                // Vitesse de base selon la difficulté
+                let baseSpeed = 5;
+                if (gameState.difficultyLevel === 'easy') {
+                    baseSpeed = 4;
+                } else if (gameState.difficultyLevel === 'hard') {
+                    baseSpeed = 6;
+                }
+                
+                ball.speedX = direction * baseSpeed;
+                
+                // Angle légèrement aléatoire pour la direction Y
+                ball.speedY = (Math.random() * 2 - 1) * 3;
+            }
+            
+            // Mettre à jour la position de la raquette
+            function updatePaddlePosition(paddle) {
+                paddle.element.style.top = paddle.y + 'px';
+            }
+            
+            // Mettre à jour la position de la balle
+            function updateBallPosition() {
+                ball.element.style.top = ball.y + 'px';
+                ball.element.style.left = ball.x + 'px';
+            }
+            
+            // Mettre à jour l'affichage du jeu
+            function updateGameDisplay() {
+                updatePaddlePosition(player);
+                updatePaddlePosition(ai);
+                updateBallPosition();
+            }
+            
+            // Vérifier et gérer les collisions
+            function checkCollisions() {
+                // Collision avec les bords haut/bas
+                if (ball.y <= 0 || ball.y + ball.height >= GAME_HEIGHT) {
+                    ball.speedY = -ball.speedY;
+                    
+                    // Ajuster la position pour éviter que la balle ne reste coincée
+                    if (ball.y <= 0) {
+                        ball.y = 0;
+                    } else {
+                        ball.y = GAME_HEIGHT - ball.height;
+                    }
+                }
+                
+                // Collision avec la raquette du joueur
+                if (
+                    ball.x <= player.x + player.width &&
+                    ball.x + ball.width >= player.x &&
+                    ball.y + ball.height >= player.y &&
+                    ball.y <= player.y + player.height
+                ) {
+                    // Rebondir la balle avec un angle basé sur l'endroit où elle frappe la raquette
+                    const hitPosition = (ball.y + ball.height / 2) - (player.y + player.height / 2);
+                    const normalizedHitPosition = hitPosition / (player.height / 2);
+                    
+                    // Ajuster la direction et la vitesse
+                    ball.speedX = -ball.speedX * 1.05; // Légère accélération à chaque rebond
+                    ball.speedY = normalizedHitPosition * 5;
+                    
+                    // Déplacer la balle hors de la collision
+                    ball.x = player.x + player.width;
+                }
+                
+                // Collision avec la raquette de l'IA
+                if (
+                    ball.x + ball.width >= ai.x &&
+                    ball.x <= ai.x + ai.width &&
+                    ball.y + ball.height >= ai.y &&
+                    ball.y <= ai.y + ai.height
+                ) {
+                    // Rebondir la balle avec un angle basé sur l'endroit où elle frappe la raquette
+                    const hitPosition = (ball.y + ball.height / 2) - (ai.y + ai.height / 2);
+                    const normalizedHitPosition = hitPosition / (ai.height / 2);
+                    
+                    // Ajuster la direction et la vitesse
+                    ball.speedX = -ball.speedX * 1.05; // Légère accélération à chaque rebond
+                    ball.speedY = normalizedHitPosition * 5;
+                    
+                    // Déplacer la balle hors de la collision
+                    ball.x = ai.x - ball.width;
+                }
+                
+                // La balle sort du côté gauche (point pour l'IA)
+                if (ball.x + ball.width < 0) {
+                    scorePoint('ai');
+                }
+                
+                // La balle sort du côté droit (point pour le joueur)
+                if (ball.x > GAME_WIDTH) {
+                    scorePoint('player');
+                }
+            }
+            
+            // Marquer un point
+            function scorePoint(scorer) {
+                if (scorer === 'player') {
+                    gameState.playerScore++;
+                    playerScoreElement.textContent = gameState.playerScore;
+                    messageElement.textContent = "Vous avez marqué un point!";
+                } else {
+                    gameState.aiScore++;
+                    aiScoreElement.textContent = gameState.aiScore;
+                    messageElement.textContent = "L'IA a marqué un point!";
+                }
+                
+                // Vérifier si la partie est gagnée
+                if (gameState.playerScore >= WINNING_SCORE || gameState.aiScore >= WINNING_SCORE) {
+                    gameOver();
+                } else {
+                    // Réinitialiser la balle pour le point suivant
+                    resetBallPosition();
+                    
+                    // Relancer la balle après un court délai
+                    gameState.gameStarted = false;
+                    setTimeout(() => {
+                        if (!gameState.gameOver) {
+                            gameState.gameStarted = true;
+                            setInitialBallSpeed();
+                        }
+                    }, 1000);
+                }
+            }
+            
+            // Fin de partie
+            function gameOver() {
+                gameState.gameOver = true;
+                gameState.gameStarted = false;
+                
+                cancelAnimationFrame(gameState.animationFrameId);
+                gameState.animationFrameId = null;
+                
+                if (gameState.playerScore >= WINNING_SCORE) {
+                    messageElement.textContent = "Félicitations! Vous avez gagné la partie!";
+                } else {
+                    messageElement.textContent = "L'IA a gagné la partie. Réessayez!";
+                }
+            }
+            
+            // Mettre à jour la position de l'IA
+            function updateAI(deltaTime) {
+                // L'IA suit la balle, mais avec un peu de retard et d'imprécision
+                const targetY = ball.y + ball.height / 2 - ai.height / 2;
+                
+                // Ajouter une imprécision basée sur la difficulté
+                let aiError = 0;
+                
+                if (gameState.difficultyLevel === 'easy') {
+                    aiError = (Math.random() - 0.5) * 50;
+                } else if (gameState.difficultyLevel === 'medium') {
+                    aiError = (Math.random() - 0.5) * 30;
+                } else {
+                    aiError = (Math.random() - 0.5) * 10;
+                }
+                
+                const aiTarget = targetY + aiError;
+                
+                // Déplacer la raquette de l'IA vers la cible
+                if (ai.y < aiTarget) {
+                    ai.y += ai.speed * deltaTime;
+                } else if (ai.y > aiTarget) {
+                    ai.y -= ai.speed * deltaTime;
+                }
+                
+                // S'assurer que l'IA reste dans les limites
+                ai.y = Math.max(0, Math.min(GAME_HEIGHT - ai.height, ai.y));
+                
+                updatePaddlePosition(ai);
+            }
+            
+            // Boucle principale du jeu
+            function gameLoop(timestamp) {
+                // Calculer le temps écoulé
+                const deltaTime = (timestamp - gameState.lastTime) / 16; // Normaliser à environ 60 FPS
+                gameState.lastTime = timestamp;
+                
+                if (gameState.gameStarted && !gameState.paused && !gameState.gameOver) {
+                    // Déplacer le joueur en fonction des touches pressées
+                    if (gameState.keyStates.ArrowUp) {
+                        player.y -= player.speed * deltaTime;
+                    }
+                    if (gameState.keyStates.ArrowDown) {
+                        player.y += player.speed * deltaTime;
+                    }
+                    
+                    // S'assurer que le joueur reste dans les limites
+                    player.y = Math.max(0, Math.min(GAME_HEIGHT - player.height, player.y));
+                    updatePaddlePosition(player);
+                    
+                    // Mettre à jour la position de l'IA
+                    updateAI(deltaTime);
+                    
+                    // Déplacer la balle
+                    ball.x += ball.speedX * deltaTime;
+                    ball.y += ball.speedY * deltaTime;
+                    updateBallPosition();
+                    
+                    // Vérifier les collisions
+                    checkCollisions();
+                }
+                
+                // Continuer la boucle de jeu
+                gameState.animationFrameId = requestAnimationFrame(gameLoop);
+            }
+            
+            // Nettoyer les ressources lorsque le jeu est fermé
+            function cleanup() {
+                cancelAnimationFrame(gameState.animationFrameId);
+                
+                if (gameState.countdownTimer) {
+                    clearInterval(gameState.countdownTimer);
+                }
+                
+                window.removeEventListener('keydown', handleKeyDown);
+                window.removeEventListener('keyup', handleKeyUp);
+                gameContainer.removeEventListener('mousemove', handleMouseMove);
+            }
+            
+            // Exposer la fonction de nettoyage au niveau global
+            window.cleanupPong = cleanup;
         }
     </script>
 </body>
