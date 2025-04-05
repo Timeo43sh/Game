@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Hub - Mini Jeux</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Arcade Hub</div>
+            <div class="tagline">Collection de mini-jeux</div>
+        </header>
+        
+        <div class="game-grid">
+            <!-- Carte Tetris -->
+            <div class="game-card" onclick="window.location.href='jeux/tetris.html'">
+                <div class="game-card-image" style="background: linear-gradient(135deg, #00D1FF, #8000FF);">
+                    <div class="game-card-overlay">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i> Jouer
+                        </button>
+                    </div>
+                </div>
+                <div class="game-card-content">
+                    <h3 class="game-card-title">Tetris</h3>
+                    <p class="game-card-description">Le jeu de puzzle classique avec des graphismes modernes. Faites des lignes pour marquer des points!</p>
+                    <div>
+                        <span class="game-card-tag tag-puzzle">Puzzle</span>
+                        <span class="game-card-tag tag-action">Classique</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carte Banana Clicker -->
+            <div class="game-card" onclick="window.location.href='jeux/banana-clicker.html'">
+                <div class="game-card-image" style="background: linear-gradient(135deg, #FFC107, #FF5722);">
+                    <div class="game-card-overlay">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i> Jouer
+                        </button>
+                    </div>
+                </div>
+                <div class="game-card-content">
+                    <h3 class="game-card-title">Banana Clicker</h3>
+                    <p class="game-card-description">Cliquez pour collecter des bananes, débloquez des améliorations et construisez votre empire bananier!</p>
+                    <div>
+                        <span class="game-card-tag tag-idle">Incremental</span>
+                        <span class="game-card-tag tag-action">Clicker</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carte Test de Réaction -->
+            <div class="game-card" onclick="window.location.href='jeux/reaction-test.html'">
+                <div class="game-card-image" style="background: linear-gradient(135deg, #4CAF50, #2196F3);">
+                    <div class="game-card-overlay">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i> Jouer
+                        </button>
+                    </div>
+                </div>
+                <div class="game-card-content">
+                    <h3 class="game-card-title">Test de Réaction</h3>
+                    <p class="game-card-description">Testez vos réflexes! Cliquez dès que la couleur change et découvrez votre temps de réaction.</p>
+                    <div>
+                        <span class="game-card-tag tag-action">Réflexe</span>
+                        <span class="game-card-tag tag-puzzle">Vitesse</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carte Blackjack -->
+            <div class="game-card" onclick="window.location.href='jeux/blackjack.html'">
+                <div class="game-card-image" style="background: linear-gradient(135deg, #0a7e07, #000000);">
+                    <div class="game-card-overlay">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i> Jouer
+                        </button>
+                    </div>
+                </div>
+                <div class="game-card-content">
+                    <h3 class="game-card-title">Blackjack</h3>
+                    <p class="game-card-description">Le célèbre jeu de cartes de casino. Battez le croupier en obtenant un score proche de 21 sans le dépasser!</p>
+                    <div>
+                        <span class="game-card-tag tag-puzzle">Cartes</span>
+                        <span class="game-card-tag tag-action">Casino</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carte Sweet Match -->
+            <div class="game-card" onclick="window.location.href='jeux/sweet-match.html'">
+                <div class="game-card-image" style="background: linear-gradient(135deg, #f44336, #9c27b0, #4caf50, #ffeb3b);">
+                    <div class="game-card-overlay">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i> Jouer
+                        </button>
+                    </div>
+                </div>
+                <div class="game-card-content">
+                    <h3 class="game-card-title">Sweet Match</h3>
+                    <p class="game-card-description">Alignez des bonbons colorés pour faire des combinaisons et marquer des points dans ce jeu inspiré de Candy Crush!</p>
+                    <div>
+                        <span class="game-card-tag tag-puzzle">Match-3</span>
+                        <span class="game-card-tag tag-action">Puzzle</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carte Quiz des Drapeaux -->
+            <div class="game-card" onclick="window.location.href='jeux/flag-quiz.html'">
+                <div class="game-card-image" style="background: linear-gradient(135deg, #3F51B5, #2196F3, #4CAF50, #FFC107);">
+                    <div class="game-card-overlay">
+                        <button class="play-button">
+                            <i class="fas fa-play"></i> Jouer
+                        </button>
+                    </div>
+                </div>
+                <div class="game-card-content">
+                    <h3 class="game-card-title">Quiz des Drapeaux</h3>
+                    <p class="game-card-description">Testez vos connaissances des drapeaux du monde entier avec ce quiz passionnant à plusieurs niveaux de difficulté!</p>
+                    <div>
+                        <span class="game-card-tag tag-puzzle">Quiz</span>
+                        <span class="game-card-tag tag-action">Éducatif</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2023 Arcade Hub - Tous droits réservés</p>
+        </footer>
+    </div>
+
+    <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
+    <audio id="upgradeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3"></audio>
+</body>
+</html> 

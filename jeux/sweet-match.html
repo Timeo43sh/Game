@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweet Match - Arcade Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* Styles pour Sweet Match */
+        #sweet-match-game {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .sweet-match-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 4px;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 1;
+            margin: 20px auto;
+            background-color: var(--secondary);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .sweet-cell {
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sweet-cell.selected {
+            transform: scale(0.9);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .sweet-cell.swapping {
+            z-index: 10;
+        }
+
+        .sweet-cell.matched {
+            opacity: 0.4;
+            transform: scale(0.8);
+        }
+
+        .sweet-candy {
+            width: 90%;
+            height: 90%;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .sweet-candy-red {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+        }
+
+        .sweet-candy-blue {
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+        }
+
+        .sweet-candy-green {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+        }
+
+        .sweet-candy-yellow {
+            background: linear-gradient(135deg, #ffeb3b, #fbc02d);
+        }
+
+        .sweet-candy-purple {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+        }
+
+        .sweet-candy-orange {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+
+        .sweet-match-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .sweet-stat {
+            background: var(--secondary);
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 120px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .sweet-stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .sweet-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .sweet-match-controls {
+            margin: 20px 0;
+        }
+
+        .sweet-match-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.2s;
+        }
+
+        .sweet-match-btn:hover {
+            background: #ff1a6b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 45, 117, 0.3);
+        }
+
+        #sweet-match-message {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 20px 0;
+            min-height: 30px;
+            color: var(--text);
+        }
+
+        .sweet-explosion {
+            position: absolute;
+            pointer-events: none;
+            z-index: 20;
+            animation: sweet-explode 0.5s forwards;
+        }
+
+        @keyframes sweet-explode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .sweet-match-progress {
+            width: 100%;
+            max-width: 500px;
+            height: 20px;
+            background-color: var(--secondary);
+            border-radius: 10px;
+            margin: 10px auto;
+            overflow: hidden;
+        }
+
+        .sweet-match-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .sweet-level-info {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Arcade Hub</div>
+            <nav class="main-nav">
+                <a href="../home.html">Accueil</a>
+            </nav>
+        </header>
+        
+        <div class="game-header">
+            <h2 class="game-title">Sweet Match</h2>
+        </div>
+        
+        <div class="game-container" id="sweet-match-game">
+            <div class="sweet-match-info">
+                <div class="sweet-stat">
+                    <div class="sweet-stat-label">Score</div>
+                    <div class="sweet-stat-value" id="sweet-score">0</div>
+                </div>
+                <div class="sweet-stat">
+                    <div class="sweet-stat-label">Meilleur score</div>
+                    <div class="sweet-stat-value" id="sweet-best-score">0</div>
+                </div>
+                <div class="sweet-stat">
+                    <div class="sweet-stat-label">Niveau</div>
+                    <div class="sweet-stat-value" id="sweet-level">1</div>
+                </div>
+                <div class="sweet-stat">
+                    <div class="sweet-stat-label">Mouvements</div>
+                    <div class="sweet-stat-value" id="sweet-moves">15</div>
+                </div>
+            </div>
+            
+            <div class="sweet-level-info">Objectif du niveau: <span id="sweet-level-target">1000</span> points</div>
+            
+            <div class="sweet-match-progress">
+                <div class="sweet-match-progress-bar" id="sweet-progress-bar"></div>
+            </div>
+            
+            <div id="sweet-match-message">Alignez 3 bonbons ou plus pour marquer des points!</div>
+            
+            <div class="sweet-match-board" id="sweet-match-board">
+                <!-- La grille sera générée dynamiquement en JavaScript -->
+            </div>
+            
+            <div class="sweet-match-controls">
+                <button class="sweet-match-btn" id="sweet-new-game-btn">
+                    <i class="fas fa-redo"></i> Nouvelle partie
+                </button>
+                <button class="sweet-match-btn" id="sweet-hint-btn">
+                    <i class="fas fa-lightbulb"></i> Indice
+                </button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2023 Arcade Hub - Tous droits réservés</p>
+        </footer>
+    </div>
+
+    <script>
+        // Ici viendra le code JavaScript pour Sweet Match
+        document.addEventListener('DOMContentLoaded', function() {
+            // Éléments du DOM
+            const board = document.getElementById('sweet-match-board');
+            const scoreElement = document.getElementById('sweet-score');
+            const bestScoreElement = document.getElementById('sweet-best-score');
+            const levelElement = document.getElementById('sweet-level');
+            const movesElement = document.getElementById('sweet-moves');
+            const messageElement = document.getElementById('sweet-match-message');
+            const progressBar = document.getElementById('sweet-progress-bar');
+            const levelTargetElement = document.getElementById('sweet-level-target');
+            const newGameBtn = document.getElementById('sweet-new-game-btn');
+            const hintBtn = document.getElementById('sweet-hint-btn');
+            
+            // Configuration du jeu
+            const BOARD_SIZE = 8;
+            const CANDY_TYPES = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+            const CANDY_EMOJIS = {
+                'red': '🍒',
+                'blue': '🫐',
+                'green': '🥝',
+                'yellow': '🍋',
+                'purple': '🍇',
+                'orange': '🍊'
+            };
+            
+            // État du jeu
+            const gameState = {
+                board: [],
+                selectedCell: null,
+                score: 0,
+                bestScore: localStorage.getItem('sweetMatchBestScore') ? parseInt(localStorage.getItem('sweetMatchBestScore')) : 0,
+                level: 1,
+                movesLeft: 15,
+                isSwapping: false,
+                isAnimating: false,
+                isGameOver: false,
+                targetScore: 1000
+            };
+            
+            // Fonctions de base du jeu seront implémentées ici
+            
+            // Initialisation
+            function init() {
+                // Afficher le meilleur score
+                bestScoreElement.textContent = gameState.bestScore;
+                levelTargetElement.textContent = gameState.targetScore;
+                
+                // Ajouter les écouteurs d'événements
+                newGameBtn.addEventListener('click', startNewGame);
+                hintBtn.addEventListener('click', showHint);
+                
+                // Création du plateau initial
+                createBoard();
+            }
+            
+            // Créer la grille de jeu (version simplifiée pour le squelette)
+            function createBoard() {
+                // Pour l'instant, on crée juste une grille vide
+                board.innerHTML = '';
+                gameState.board = [];
+                
+                // Initialiser le tableau board dans l'état du jeu
+                for (let row = 0; row < BOARD_SIZE; row++) {
+                    gameState.board[row] = [];
+                    for (let col = 0; col < BOARD_SIZE; col++) {
+                        const randomType = CANDY_TYPES[Math.floor(Math.random() * CANDY_TYPES.length)];
+                        gameState.board[row][col] = randomType;
+                    }
+                }
+                
+                // Créer visuellement les cellules
+                for (let row = 0; row < BOARD_SIZE; row++) {
+                    for (let col = 0; col < BOARD_SIZE; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'sweet-cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        cell.addEventListener('click', handleCellClick);
+                        
+                        const candy = document.createElement('div');
+                        const candyType = gameState.board[row][col];
+                        candy.className = `sweet-candy sweet-candy-${candyType}`;
+                        candy.textContent = CANDY_EMOJIS[candyType];
+                        
+                        cell.appendChild(candy);
+                        board.appendChild(cell);
+                    }
+                }
+                
+                // Réinitialiser l'état du jeu
+                gameState.score = 0;
+                gameState.movesLeft = 15;
+                gameState.isGameOver = false;
+                
+                // Mettre à jour l'affichage
+                updateUI();
+            }
+            
+            // Gérer le clic sur une cellule
+            function handleCellClick(event) {
+                if (gameState.isAnimating || gameState.isGameOver) return;
+                
+                const cell = event.currentTarget;
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                
+                // Si aucune cellule n'est sélectionnée, on sélectionne celle-ci
+                if (!gameState.selectedCell) {
+                    gameState.selectedCell = {row, col};
+                    cell.classList.add('selected');
+                    return;
+                }
+                
+                // Si on clique sur la cellule déjà sélectionnée, on la désélectionne
+                if (gameState.selectedCell.row === row && gameState.selectedCell.col === col) {
+                    gameState.selectedCell = null;
+                    cell.classList.remove('selected');
+                    return;
+                }
+                
+                // Vérifier si les cellules sont adjacentes
+                const rowDiff = Math.abs(gameState.selectedCell.row - row);
+                const colDiff = Math.abs(gameState.selectedCell.col - col);
+                
+                if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
+                    // Récupérer la cellule précédemment sélectionnée
+                    const prevSelectedCell = document.querySelector('.sweet-cell.selected');
+                    prevSelectedCell.classList.remove('selected');
+                    
+                    // Échanger les bonbons
+                    swapCandies(gameState.selectedCell.row, gameState.selectedCell.col, row, col);
+                    gameState.selectedCell = null;
+                } else {
+                    // Si les cellules ne sont pas adjacentes, on sélectionne la nouvelle cellule
+                    document.querySelector('.sweet-cell.selected').classList.remove('selected');
+                    gameState.selectedCell = {row, col};
+                    cell.classList.add('selected');
+                }
+            }
+            
+            // Échanger deux bonbons
+            function swapCandies(row1, col1, row2, col2) {
+                gameState.isAnimating = true;
+                gameState.movesLeft--;
+                
+                // Échanger dans le modèle de données
+                const temp = gameState.board[row1][col1];
+                gameState.board[row1][col1] = gameState.board[row2][col2];
+                gameState.board[row2][col2] = temp;
+                
+                // Mettre à jour visuellement
+                updateBoardVisual();
+                
+                // Vérifier s'il y a des correspondances
+                setTimeout(() => {
+                    const matches = findMatches();
+                    if (matches.length > 0) {
+                        removeMatches(matches);
+                        updateScore(matches.length);
+                    } else {
+                        // Pas de correspondance, remettre en arrière
+                        const tempReverse = gameState.board[row1][col1];
+                        gameState.board[row1][col1] = gameState.board[row2][col2];
+                        gameState.board[row2][col2] = tempReverse;
+                        updateBoardVisual();
+                        gameState.isAnimating = false;
+                    }
+                    
+                    // Vérifier si la partie est terminée
+                    checkGameOver();
+                    updateUI();
+                }, 300);
+            }
+            
+            // Mettre à jour l'affichage visuel du plateau
+            function updateBoardVisual() {
+                const cells = document.querySelectorAll('.sweet-cell');
+                cells.forEach(cell => {
+                    const row = parseInt(cell.dataset.row);
+                    const col = parseInt(cell.dataset.col);
+                    const candy = cell.querySelector('.sweet-candy');
+                    
+                    const candyType = gameState.board[row][col];
+                    candy.className = `sweet-candy sweet-candy-${candyType}`;
+                    candy.textContent = CANDY_EMOJIS[candyType];
+                });
+            }
+            
+            // Trouver toutes les correspondances sur le plateau
+            function findMatches() {
+                const matches = [];
+                
+                // Vérifier les correspondances horizontales
+                for (let row = 0; row < BOARD_SIZE; row++) {
+                    for (let col = 0; col < BOARD_SIZE - 2; col++) {
+                        const candy = gameState.board[row][col];
+                        if (candy === gameState.board[row][col+1] && 
+                            candy === gameState.board[row][col+2]) {
+                            
+                            // Déterminer la longueur du match
+                            let matchLength = 3;
+                            while (col + matchLength < BOARD_SIZE && 
+                                   gameState.board[row][col + matchLength] === candy) {
+                                matchLength++;
+                            }
+                            
+                            // Ajouter les cellules correspondantes
+                            for (let i = 0; i < matchLength; i++) {
+                                matches.push({row, col: col + i});
+                            }
+                            
+                            // Sauter les cellules déjà vérifiées
+                            col += matchLength - 1;
+                        }
+                    }
+                }
+                
+                // Vérifier les correspondances verticales
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    for (let row = 0; row < BOARD_SIZE - 2; row++) {
+                        const candy = gameState.board[row][col];
+                        if (candy === gameState.board[row+1][col] && 
+                            candy === gameState.board[row+2][col]) {
+                            
+                            // Déterminer la longueur du match
+                            let matchLength = 3;
+                            while (row + matchLength < BOARD_SIZE && 
+                                   gameState.board[row + matchLength][col] === candy) {
+                                matchLength++;
+                            }
+                            
+                            // Ajouter les cellules correspondantes
+                            for (let i = 0; i < matchLength; i++) {
+                                matches.push({row: row + i, col});
+                            }
+                            
+                            // Sauter les cellules déjà vérifiées
+                            row += matchLength - 1;
+                        }
+                    }
+                }
+                
+                return matches;
+            }
+            
+            // Supprimer les correspondances et faire tomber de nouveaux bonbons
+            function removeMatches(matches) {
+                // Marquer visuellement les correspondances
+                matches.forEach(match => {
+                    const cell = document.querySelector(`.sweet-cell[data-row="${match.row}"][data-col="${match.col}"]`);
+                    cell.classList.add('matched');
+                });
+                
+                // Attendre un peu pour l'animation
+                setTimeout(() => {
+                    // Supprimer les bonbons correspondants
+                    matches.forEach(match => {
+                        gameState.board[match.row][match.col] = null;
+                    });
+                    
+                    // Faire tomber les bonbons
+                    dropCandies();
+                    
+                    // Mettre à jour l'affichage
+                    updateBoardVisual();
+                    
+                    // Vérifier s'il y a de nouvelles correspondances
+                    setTimeout(() => {
+                        const newMatches = findMatches();
+                        if (newMatches.length > 0) {
+                            removeMatches(newMatches);
+                            updateScore(newMatches.length);
+                        } else {
+                            gameState.isAnimating = false;
+                        }
+                    }, 300);
+                }, 300);
+            }
+            
+            // Faire tomber les bonbons après la suppression des correspondances
+            function dropCandies() {
+                // Pour chaque colonne
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    // Compter les espaces vides et faire descendre les bonbons
+                    let emptySpaces = 0;
+                    
+                    for (let row = BOARD_SIZE - 1; row >= 0; row--) {
+                        if (gameState.board[row][col] === null) {
+                            emptySpaces++;
+                        } else if (emptySpaces > 0) {
+                            // Déplacer le bonbon vers le bas
+                            gameState.board[row + emptySpaces][col] = gameState.board[row][col];
+                            gameState.board[row][col] = null;
+                        }
+                    }
+                    
+                    // Remplir le haut avec de nouveaux bonbons
+                    for (let row = 0; row < emptySpaces; row++) {
+                        const randomType = CANDY_TYPES[Math.floor(Math.random() * CANDY_TYPES.length)];
+                        gameState.board[row][col] = randomType;
+                    }
+                }
+            }
+            
+            // Mettre à jour le score
+            function updateScore(matchCount) {
+                // Base de 10 points par bonbon, avec multiplicateur pour les grandes combinaisons
+                let points = matchCount * 10;
+                if (matchCount >= 4) points *= 1.5;
+                if (matchCount >= 5) points *= 2;
+                
+                gameState.score += Math.floor(points);
+                
+                // Mettre à jour l'affichage
+                updateUI();
+                
+                // Vérifier si le niveau est terminé
+                if (gameState.score >= gameState.targetScore) {
+                    levelUp();
+                }
+            }
+            
+            // Passer au niveau suivant
+            function levelUp() {
+                gameState.level++;
+                gameState.targetScore = Math.floor(gameState.targetScore * 1.5);
+                gameState.movesLeft += 5;
+                
+                messageElement.textContent = `Niveau ${gameState.level} ! Objectif: ${gameState.targetScore} points`;
+                levelTargetElement.textContent = gameState.targetScore;
+                
+                // Mettre à jour l'affichage
+                updateUI();
+            }
+            
+            // Vérifier si la partie est terminée
+            function checkGameOver() {
+                if (gameState.movesLeft <= 0) {
+                    gameState.isGameOver = true;
+                    
+                    // Mettre à jour le meilleur score si nécessaire
+                    if (gameState.score > gameState.bestScore) {
+                        gameState.bestScore = gameState.score;
+                        localStorage.setItem('sweetMatchBestScore', gameState.bestScore);
+                        bestScoreElement.textContent = gameState.bestScore;
+                        messageElement.textContent = "🏆 Nouveau record ! 🏆";
+                    } else {
+                        messageElement.textContent = "Partie terminée ! Plus de mouvements.";
+                    }
+                }
+            }
+            
+            // Mettre à jour l'interface utilisateur
+            function updateUI() {
+                scoreElement.textContent = gameState.score;
+                levelElement.textContent = gameState.level;
+                movesElement.textContent = gameState.movesLeft;
+                
+                // Mettre à jour la barre de progression
+                const progressPercent = Math.min(100, (gameState.score / gameState.targetScore) * 100);
+                progressBar.style.width = `${progressPercent}%`;
+            }
+            
+            // Démarrer une nouvelle partie
+            function startNewGame() {
+                console.log("Nouvelle partie démarrée");
+                createBoard();
+            }
+            
+            // Donner un indice
+            function showHint() {
+                console.log("Indice montré");
+                messageElement.textContent = "Cherchez des alignements possibles de 3 bonbons ou plus!";
+            }
+            
+            // Initialiser le jeu
+            init();
+            
+            // Exposer la fonction d'initialisation globalement pour être utilisée par openGame dans index.html
+            window.initSweetMatch = function() {
+                console.log("Sweet Match initialisé depuis openGame");
+                init();
+            };
+        });
+    </script>
+</body>
+</html> 

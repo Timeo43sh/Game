@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Réaction - Arcade Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* Styles spécifiques pour le Test de Réaction */
+        #reaction-game {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .reaction-test-area {
+            width: 100%;
+            height: 300px;
+            margin: 30px 0;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            background-color: var(--secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reaction-wait {
+            background-color: var(--secondary);
+        }
+
+        .reaction-ready {
+            background-color: var(--error);
+        }
+
+        .reaction-go {
+            background-color: var(--success);
+        }
+
+        .reaction-message {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--light);
+            margin-bottom: 20px;
+        }
+
+        .reaction-time {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .reaction-instruction {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .reaction-stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .reaction-stat {
+            background-color: var(--secondary);
+            padding: 15px 20px;
+            border-radius: 10px;
+            min-width: 150px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .reaction-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 10px 5px;
+        }
+
+        .reaction-btn:hover {
+            background: #ff1a6b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 45, 117, 0.3);
+        }
+
+        .reaction-btn:active {
+            transform: translateY(0);
+        }
+
+        .reaction-instructions {
+            max-width: 600px;
+            margin: 30px auto;
+            background: var(--secondary);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .reaction-instructions h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .reaction-instructions p {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .reaction-instructions ul {
+            text-align: left;
+            margin-left: 20px;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+
+        .reaction-instructions li {
+            margin-bottom: 5px;
+        }
+
+        /* Animation de particules */
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle-fade 1s forwards ease-out;
+        }
+
+        @keyframes particle-fade {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Arcade Hub</div>
+            <nav class="main-nav">
+                <a href="../home.html">Accueil</a>
+            </nav>
+        </header>
+        
+        <div class="game-header">
+            <h2 class="game-title">Test de Réaction</h2>
+        </div>
+        
+        <div class="game-container" id="reaction-game">
+            <div class="reaction-stats">
+                <div class="reaction-stat">
+                    <div class="stat-label">Dernier temps</div>
+                    <div class="stat-value" id="last-time">---</div>
+                </div>
+                <div class="reaction-stat">
+                    <div class="stat-label">Meilleur temps</div>
+                    <div class="stat-value" id="best-time">---</div>
+                </div>
+                <div class="reaction-stat">
+                    <div class="stat-label">Moyenne</div>
+                    <div class="stat-value" id="average-time">---</div>
+                </div>
+                <div class="reaction-stat">
+                    <div class="stat-label">Tests complétés</div>
+                    <div class="stat-value" id="tests-count">0</div>
+                </div>
+            </div>
+            
+            <div class="reaction-test-area" id="reaction-area">
+                <div class="reaction-message" id="reaction-message">Cliquez pour commencer</div>
+                <div class="reaction-time" id="reaction-time"></div>
+                <div class="reaction-instruction" id="reaction-instruction">Le test commencera après votre clic</div>
+            </div>
+            
+            <div class="reaction-controls">
+                <button class="reaction-btn" id="restart-btn">
+                    <i class="fas fa-redo"></i> Recommencer
+                </button>
+                <button class="reaction-btn" id="share-btn">
+                    <i class="fas fa-share-alt"></i> Partager
+                </button>
+            </div>
+            
+            <div class="reaction-instructions">
+                <h3>Comment ça marche</h3>
+                <p>Ce test mesure votre temps de réaction à un stimulus visuel.</p>
+                <ul>
+                    <li>Cliquez sur la zone pour commencer le test</li>
+                    <li>Attendez que la couleur change du gris au vert</li>
+                    <li>Cliquez aussi vite que possible quand vous voyez le vert</li>
+                    <li>Votre temps de réaction s'affichera en millisecondes</li>
+                    <li>Attention à ne pas cliquer trop tôt, cela invalidera le test!</li>
+                </ul>
+                <p>Des temps de réaction moyens:</p>
+                <ul>
+                    <li><strong>Excellent</strong>: moins de 200ms</li>
+                    <li><strong>Bon</strong>: 200-250ms</li>
+                    <li><strong>Moyen</strong>: 250-300ms</li>
+                    <li><strong>Normal</strong>: 300-350ms</li>
+                    <li><strong>Lent</strong>: plus de 350ms</li>
+                </ul>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2023 Arcade Hub - Tous droits réservés</p>
+        </footer>
+    </div>
+
+    <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
+    <audio id="successSound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3"></audio>
+    <audio id="errorSound" src="https://assets.mixkit.co/sfx/preview/mixkit-negative-tone-interface-tap-2301.mp3"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Éléments du DOM
+            const reactionArea = document.getElementById('reaction-area');
+            const reactionMessage = document.getElementById('reaction-message');
+            const reactionTime = document.getElementById('reaction-time');
+            const reactionInstruction = document.getElementById('reaction-instruction');
+            const lastTimeDisplay = document.getElementById('last-time');
+            const bestTimeDisplay = document.getElementById('best-time');
+            const averageTimeDisplay = document.getElementById('average-time');
+            const testsCountDisplay = document.getElementById('tests-count');
+            const restartBtn = document.getElementById('restart-btn');
+            const shareBtn = document.getElementById('share-btn');
+            const clickSound = document.getElementById('clickSound');
+            const successSound = document.getElementById('successSound');
+            const errorSound = document.getElementById('errorSound');
+            
+            // État du jeu
+            const gameState = {
+                status: 'waiting', // waiting, ready, clicked
+                startTime: null,
+                endTime: null,
+                timeout: null,
+                times: [],
+                bestTime: Infinity,
+                averageTime: 0,
+                testsCount: 0
+            };
+            
+            // Charger les données sauvegardées
+            function loadSavedData() {
+                const savedData = localStorage.getItem('reactionTestData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    gameState.times = data.times || [];
+                    gameState.bestTime = data.bestTime || Infinity;
+                    gameState.averageTime = data.averageTime || 0;
+                    gameState.testsCount = data.testsCount || 0;
+                    
+                    updateStats();
+                }
+            }
+            
+            // Sauvegarder les données
+            function saveData() {
+                const dataToSave = {
+                    times: gameState.times.slice(-10), // Garder seulement les 10 derniers temps
+                    bestTime: gameState.bestTime,
+                    averageTime: gameState.averageTime,
+                    testsCount: gameState.testsCount
+                };
+                
+                localStorage.setItem('reactionTestData', JSON.stringify(dataToSave));
+            }
+            
+            // Mettre à jour les statistiques
+            function updateStats() {
+                if (gameState.times.length > 0) {
+                    const lastTime = gameState.times[gameState.times.length - 1];
+                    lastTimeDisplay.textContent = lastTime + ' ms';
+                    
+                    if (gameState.bestTime !== Infinity) {
+                        bestTimeDisplay.textContent = gameState.bestTime + ' ms';
+                    }
+                    
+                    averageTimeDisplay.textContent = Math.round(gameState.averageTime) + ' ms';
+                }
+                
+                testsCountDisplay.textContent = gameState.testsCount;
+            }
+            
+            // Obtenir une attente aléatoire entre 2 et 6 secondes
+            function getRandomWait() {
+                return 2000 + Math.random() * 4000;
+            }
+            
+            // Commencer le test
+            function startTest() {
+                // Réinitialiser l'état
+                gameState.status = 'ready';
+                gameState.startTime = null;
+                gameState.endTime = null;
+                
+                // Mettre à jour l'interface
+                reactionArea.className = 'reaction-test-area reaction-wait';
+                reactionMessage.textContent = 'Attendez le vert...';
+                reactionTime.textContent = '';
+                reactionInstruction.textContent = 'Cliquez lorsque la couleur devient verte';
+                
+                // Définir un délai aléatoire
+                const waitTime = getRandomWait();
+                gameState.timeout = setTimeout(() => {
+                    if (gameState.status === 'ready') {
+                        gameState.status = 'waiting_click';
+                        gameState.startTime = Date.now();
+                        
+                        // Changer la couleur en vert
+                        reactionArea.className = 'reaction-test-area reaction-go';
+                        reactionMessage.textContent = 'CLIQUEZ MAINTENANT!';
+                        reactionInstruction.textContent = '';
+                    }
+                }, waitTime);
+            }
+            
+            // Gérer le clic sur la zone de test
+            function handleAreaClick() {
+                // Jouer le son
+                clickSound.currentTime = 0;
+                clickSound.play();
+                
+                switch (gameState.status) {
+                    case 'waiting': // Premier clic pour commencer
+                        startTest();
+                        break;
+                        
+                    case 'ready': // Clic trop tôt
+                        clearTimeout(gameState.timeout);
+                        
+                        errorSound.currentTime = 0;
+                        errorSound.play();
+                        
+                        reactionArea.className = 'reaction-test-area reaction-ready';
+                        reactionMessage.textContent = 'Trop tôt!';
+                        reactionTime.textContent = '';
+                        reactionInstruction.textContent = 'Cliquez pour réessayer';
+                        
+                        gameState.status = 'waiting';
+                        break;
+                        
+                    case 'waiting_click': // Clic après le vert (bon timing)
+                        gameState.endTime = Date.now();
+                        const reactionTimeMs = gameState.endTime - gameState.startTime;
+                        
+                        // Jouer le son de succès
+                        successSound.currentTime = 0;
+                        successSound.play();
+                        
+                        // Ajouter aux statistiques
+                        gameState.times.push(reactionTimeMs);
+                        gameState.testsCount++;
+                        
+                        // Mettre à jour le meilleur temps
+                        if (reactionTimeMs < gameState.bestTime) {
+                            gameState.bestTime = reactionTimeMs;
+                        }
+                        
+                        // Calculer la moyenne
+                        const sum = gameState.times.reduce((a, b) => a + b, 0);
+                        gameState.averageTime = sum / gameState.times.length;
+                        
+                        // Sauvegarder les données
+                        saveData();
+                        
+                        // Mettre à jour l'interface
+                        reactionArea.className = 'reaction-test-area';
+                        reactionMessage.textContent = 'Votre temps de réaction:';
+                        reactionTime.textContent = reactionTimeMs + ' ms';
+                        
+                        // Évaluer la performance
+                        let feedback = '';
+                        if (reactionTimeMs < 200) {
+                            feedback = 'Excellent!';
+                        } else if (reactionTimeMs < 250) {
+                            feedback = 'Très bon!';
+                        } else if (reactionTimeMs < 300) {
+                            feedback = 'Bon';
+                        } else if (reactionTimeMs < 350) {
+                            feedback = 'Moyen';
+                        } else {
+                            feedback = 'Peut mieux faire';
+                        }
+                        
+                        reactionInstruction.textContent = feedback + ' Cliquez pour réessayer';
+                        
+                        // Créer des particules pour la célébration
+                        createParticles();
+                        
+                        // Mettre à jour les statistiques
+                        updateStats();
+                        
+                        gameState.status = 'waiting';
+                        break;
+                }
+            }
+            
+            // Créer des particules pour l'effet de célébration
+            function createParticles() {
+                const colors = ['#ff4d4d', '#ffaf4d', '#ffff4d', '#4dff4d', '#4dffff', '#4d4dff', '#ff4dff'];
+                const numParticles = 30;
+                
+                for (let i = 0; i < numParticles; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    
+                    // Position aléatoire
+                    const x = Math.random() * reactionArea.offsetWidth;
+                    const y = Math.random() * reactionArea.offsetHeight;
+                    
+                    // Couleur aléatoire
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // Taille aléatoire
+                    const size = 5 + Math.random() * 10;
+                    
+                    // Direction aléatoire
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 50 + Math.random() * 100;
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.sin(angle) * distance;
+                    
+                    // Appliquer les styles
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    particle.style.backgroundColor = color;
+                    particle.style.width = size + 'px';
+                    particle.style.height = size + 'px';
+                    particle.style.setProperty('--tx', tx + 'px');
+                    particle.style.setProperty('--ty', ty + 'px');
+                    
+                    reactionArea.appendChild(particle);
+                    
+                    // Supprimer après l'animation
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 1000);
+                }
+            }
+            
+            // Partager les résultats
+            function shareResults() {
+                const text = `J'ai testé mon temps de réaction sur Arcade Hub!\n` +
+                      `Mon meilleur temps: ${gameState.bestTime !== Infinity ? gameState.bestTime + ' ms' : '---'}\n` +
+                      `Ma moyenne: ${Math.round(gameState.averageTime)} ms\n` +
+                      `Pouvez-vous faire mieux?`;
+                
+                // Essayer d'utiliser l'API de partage si disponible
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Mon temps de réaction',
+                        text: text
+                    }).catch(err => {
+                        // Fallback en cas d'erreur ou de refus
+                        copyToClipboard(text);
+                        alert('Résultats copiés dans le presse-papier!');
+                    });
+                } else {
+                    // Fallback pour les navigateurs sans API de partage
+                    copyToClipboard(text);
+                    alert('Résultats copiés dans le presse-papier!');
+                }
+            }
+            
+            // Copier du texte dans le presse-papier
+            function copyToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+            
+            // Gestionnaires d'événements
+            reactionArea.addEventListener('click', handleAreaClick);
+            restartBtn.addEventListener('click', function() {
+                gameState.status = 'waiting';
+                handleAreaClick();
+            });
+            shareBtn.addEventListener('click', shareResults);
+            
+            // Initialiser le jeu
+            loadSavedData();
+        });
+    </script>
+</body>
+</html> 

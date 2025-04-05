@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz des Drapeaux - Arcade Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* Styles pour le Quiz des Drapeaux */
+        #flag-quiz-game {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .flag-display {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 3/2;
+            margin: 20px auto;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .flag-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .flag-option {
+            background: var(--secondary);
+            color: var(--text);
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .flag-option:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 45, 117, 0.3);
+        }
+
+        .flag-option.correct {
+            background: var(--success);
+        }
+
+        .flag-option.incorrect {
+            background: var(--danger);
+        }
+
+        .flag-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .flag-quiz-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .flag-stat {
+            background: var(--secondary);
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 120px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .flag-stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .flag-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .flag-quiz-controls {
+            margin: 20px 0;
+        }
+
+        .flag-quiz-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.2s;
+        }
+
+        .flag-quiz-btn:hover {
+            background: #ff1a6b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 45, 117, 0.3);
+        }
+
+        #flag-quiz-message {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 20px 0;
+            min-height: 30px;
+            color: var(--text);
+        }
+
+        .flag-difficulty-selector {
+            margin: 20px 0;
+        }
+
+        .flag-difficulty-btn {
+            background: var(--secondary);
+            color: var(--text);
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .flag-difficulty-btn.active {
+            background: var(--primary);
+        }
+
+        .flag-progress {
+            width: 100%;
+            max-width: 600px;
+            height: 10px;
+            background: var(--secondary);
+            border-radius: 5px;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+
+        .flag-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 600px) {
+            .flag-options {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Nouveaux styles pour les améliorations */
+        .flag-input-container {
+            max-width: 600px;
+            margin: 20px auto;
+            position: relative;
+        }
+        
+        .flag-country-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--secondary);
+            background: var(--dark);
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .flag-country-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(255, 45, 117, 0.3);
+        }
+        
+        .flag-submit-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .flag-submit-btn:hover {
+            background: #ff1a6b;
+        }
+        
+        .flag-hint {
+            margin-top: 10px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .flag-hint-btn {
+            background: var(--secondary);
+            color: var(--text);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.2s;
+        }
+        
+        .flag-hint-btn:hover {
+            background: var(--accent);
+        }
+        
+        .flag-streak-indicator {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        
+        .streak-icon {
+            width: 15px;
+            height: 15px;
+            margin: 0 3px;
+            border-radius: 50%;
+            background: var(--secondary);
+        }
+        
+        .streak-icon.correct {
+            background: var(--success);
+        }
+        
+        .streak-icon.incorrect {
+            background: var(--danger);
+        }
+        
+        .flag-zoom-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .flag-zoom-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .flag-zoom-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .flag-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .flag-modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        
+        .flag-modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .flag-modal img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+        }
+        
+        /* Style pour le bouton de son */
+        .sound-toggle {
+            position: relative;
+            top: auto;
+            bottom: auto;
+            right: auto;
+            background: var(--secondary);
+            color: var(--text);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        
+        .sound-toggle:hover {
+            background: var(--primary);
+        }
+        
+        .game-header {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Arcade Hub</div>
+            <nav class="main-nav">
+                <a href="../home.html">Accueil</a>
+            </nav>
+        </header>
+
+        <div class="game-container">
+            <div class="game-header">
+                <h1 class="game-title">Quiz des Drapeaux</h1>
+            </div>
+
+            <div id="flag-quiz-game">
+                <div class="flag-quiz-info">
+                    <div class="flag-stat">
+                        <div class="flag-stat-label">Score</div>
+                        <div class="flag-stat-value" id="flag-score">0</div>
+                    </div>
+                    <div class="flag-stat">
+                        <div class="flag-stat-label">Question</div>
+                        <div class="flag-stat-value" id="flag-question-counter">0/0</div>
+                    </div>
+                    <div class="flag-stat">
+                        <div class="flag-stat-label">Précision</div>
+                        <div class="flag-stat-value" id="flag-accuracy">0%</div>
+                    </div>
+                    <div class="flag-stat">
+                        <div class="flag-stat-label">Série</div>
+                        <div class="flag-stat-value" id="flag-streak">0</div>
+                    </div>
+                </div>
+
+                <div class="flag-streak-indicator" id="flag-streak-indicator">
+                    <!-- Les indicateurs de série seront générés dynamiquement -->
+                </div>
+
+                <div class="flag-difficulty-selector">
+                    <button class="flag-difficulty-btn active" data-difficulty="easy">Facile</button>
+                    <button class="flag-difficulty-btn" data-difficulty="medium">Moyen</button>
+                    <button class="flag-difficulty-btn" data-difficulty="hard">Difficile</button>
+                    <button class="flag-difficulty-btn" data-difficulty="expert">Expert</button>
+                </div>
+
+                <div class="flag-progress">
+                    <div class="flag-progress-bar" id="flag-progress"></div>
+                </div>
+
+                <div id="flag-quiz-message">Choisissez une difficulté et cliquez sur Commencer</div>
+                
+                <div class="flag-zoom-container">
+                    <div class="flag-display" id="flag-display"></div>
+                    <button class="flag-zoom-btn" id="flag-zoom-btn">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                </div>
+                
+                <div class="flag-options" id="flag-options">
+                    <!-- Les options seront générées dynamiquement -->
+                </div>
+                
+                <div class="flag-input-container" id="flag-input-container" style="display: none;">
+                    <input type="text" class="flag-country-input" id="flag-country-input" placeholder="Entrez le nom du pays...">
+                    <button class="flag-submit-btn" id="flag-submit-btn">Valider</button>
+                    <div class="flag-hint" id="flag-hint">
+                        Besoin d'aide? <button class="flag-hint-btn" id="flag-hint-btn">Indice</button>
+                    </div>
+                </div>
+
+                <div class="flag-quiz-controls">
+                    <button class="flag-quiz-btn" id="flag-start-btn">Commencer</button>
+                    <button class="flag-quiz-btn" id="flag-next-btn" style="display: none;">Suivant</button>
+                    <button class="sound-toggle" id="sound-toggle">
+                        <i class="fas fa-volume-up" id="sound-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2023 Arcade Hub - Tous droits réservés</p>
+        </footer>
+    </div>
+    
+    <!-- Modal de zoom -->
+    <div class="flag-modal" id="flag-modal">
+        <div class="flag-modal-content">
+            <button class="flag-modal-close" id="flag-modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="flag-modal-img" src="" alt="Drapeau agrandi">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Éléments DOM
+            const flagDisplay = document.getElementById('flag-display');
+            const flagOptions = document.getElementById('flag-options');
+            const flagStartBtn = document.getElementById('flag-start-btn');
+            const flagNextBtn = document.getElementById('flag-next-btn');
+            const flagMessage = document.getElementById('flag-quiz-message');
+            const flagScore = document.getElementById('flag-score');
+            const flagQuestionCounter = document.getElementById('flag-question-counter');
+            const flagAccuracy = document.getElementById('flag-accuracy');
+            const flagProgress = document.getElementById('flag-progress');
+            const difficultyBtns = document.querySelectorAll('.flag-difficulty-btn');
+            // Nouveaux éléments DOM
+            const flagStreak = document.getElementById('flag-streak');
+            const flagStreakIndicator = document.getElementById('flag-streak-indicator');
+            const flagInputContainer = document.getElementById('flag-input-container');
+            const flagCountryInput = document.getElementById('flag-country-input');
+            const flagSubmitBtn = document.getElementById('flag-submit-btn');
+            const flagHintBtn = document.getElementById('flag-hint-btn');
+            const flagZoomBtn = document.getElementById('flag-zoom-btn');
+            const flagModal = document.getElementById('flag-modal');
+            const flagModalImg = document.getElementById('flag-modal-img');
+            const flagModalClose = document.getElementById('flag-modal-close');
+            // Nouvel élément DOM pour le son
+            const soundToggle = document.getElementById('sound-toggle');
+            const soundIcon = document.getElementById('sound-icon');
+
+            // Variables du jeu
+            let flags = [];
+            let currentFlag = null;
+            let score = 0;
+            let questionCount = 0;
+            let correctAnswers = 0;
+            let questionTotal = 10;
+            let gameActive = false;
+            let difficulty = 'easy';
+            let currentOptions = [];
+            // Nouvelles variables
+            let streak = 0;
+            let maxStreak = 0;
+            let lastResults = [];
+            let bonusPoints = 0;
+            let timeLeft = 0;
+            let timer = null;
+            let hintUsed = false;
+            let normalizedAnswer = "";
+            let soundEnabled = true; // Variable pour suivre l'état du son
+
+            // Sons
+            const correctSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
+            const incorrectSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3');
+            const victorySound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-gaming-lock-sound-2854.mp3');
+            const clickSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3');
+
+            // Base de données des drapeaux par région
+            const flagDatabase = {
+                // Drapeaux facilement reconnaissables
+                easy: [
+                    { country: "France", code: "fr" },
+                    { country: "États-Unis", code: "us" },
+                    { country: "Royaume-Uni", code: "gb" },
+                    { country: "Japon", code: "jp" },
+                    { country: "Italie", code: "it" },
+                    { country: "Allemagne", code: "de" },
+                    { country: "Brésil", code: "br" },
+                    { country: "Canada", code: "ca" },
+                    { country: "Australie", code: "au" },
+                    { country: "Espagne", code: "es" },
+                    { country: "Chine", code: "cn" },
+                    { country: "Russie", code: "ru" },
+                    { country: "Mexique", code: "mx" },
+                    { country: "Inde", code: "in" },
+                    { country: "Afrique du Sud", code: "za" }
+                ],
+                // Drapeaux de difficulté moyenne
+                medium: [
+                    { country: "Suède", code: "se" },
+                    { country: "Norvège", code: "no" },
+                    { country: "Finlande", code: "fi" },
+                    { country: "Danemark", code: "dk" },
+                    { country: "Portugal", code: "pt" },
+                    { country: "Irlande", code: "ie" },
+                    { country: "Suisse", code: "ch" },
+                    { country: "Autriche", code: "at" },
+                    { country: "Grèce", code: "gr" },
+                    { country: "Turquie", code: "tr" },
+                    { country: "Argentine", code: "ar" },
+                    { country: "Colombie", code: "co" },
+                    { country: "Corée du Sud", code: "kr" },
+                    { country: "Nouvelle-Zélande", code: "nz" },
+                    { country: "Égypte", code: "eg" },
+                    { country: "Thaïlande", code: "th" },
+                    { country: "Belgique", code: "be" },
+                    { country: "Pays-Bas", code: "nl" },
+                    { country: "Pologne", code: "pl" },
+                    { country: "Ukraine", code: "ua" }
+                ],
+                // Drapeaux difficiles
+                hard: [
+                    { country: "Maroc", code: "ma" },
+                    { country: "Tunisie", code: "tn" },
+                    { country: "Croatie", code: "hr" },
+                    { country: "Islande", code: "is" },
+                    { country: "République tchèque", code: "cz" },
+                    { country: "Hongrie", code: "hu" },
+                    { country: "Roumanie", code: "ro" },
+                    { country: "Slovaquie", code: "sk" },
+                    { country: "Estonie", code: "ee" },
+                    { country: "Lettonie", code: "lv" },
+                    { country: "Lituanie", code: "lt" },
+                    { country: "Vietnam", code: "vn" },
+                    { country: "Philippines", code: "ph" },
+                    { country: "Malaisie", code: "my" },
+                    { country: "Indonésie", code: "id" },
+                    { country: "Singapour", code: "sg" },
+                    { country: "Pérou", code: "pe" },
+                    { country: "Chili", code: "cl" },
+                    { country: "Nigeria", code: "ng" },
+                    { country: "Kenya", code: "ke" }
+                ],
+                // Drapeaux très difficiles
+                expert: [
+                    { country: "Paraguay", code: "py" },
+                    { country: "Uruguay", code: "uy" },
+                    { country: "Bolivie", code: "bo" },
+                    { country: "Équateur", code: "ec" },
+                    { country: "Cambodge", code: "kh" },
+                    { country: "Myanmar", code: "mm" },
+                    { country: "Laos", code: "la" },
+                    { country: "Mongolie", code: "mn" },
+                    { country: "Sri Lanka", code: "lk" },
+                    { country: "Népal", code: "np" },
+                    { country: "Bangladesh", code: "bd" },
+                    { country: "Pakistan", code: "pk" },
+                    { country: "Kazakhstan", code: "kz" },
+                    { country: "Ouzbékistan", code: "uz" },
+                    { country: "Azerbaïdjan", code: "az" },
+                    { country: "Géorgie", code: "ge" },
+                    { country: "Arménie", code: "am" },
+                    { country: "Slovénie", code: "si" },
+                    { country: "Albanie", code: "al" },
+                    { country: "Bulgarie", code: "bg" },
+                    { country: "Serbie", code: "rs" },
+                    { country: "Macédoine du Nord", code: "mk" },
+                    { country: "Monténégro", code: "me" },
+                    { country: "Oman", code: "om" },
+                    { country: "Qatar", code: "qa" },
+                    { country: "Koweït", code: "kw" },
+                    { country: "Bahreïn", code: "bh" },
+                    { country: "Ghana", code: "gh" },
+                    { country: "Côte d'Ivoire", code: "ci" },
+                    { country: "Sénégal", code: "sn" }
+                ]
+            };
+
+            // Tableau des pays alternatifs (pour la vérification de la saisie manuelle)
+            const alternativeNames = {
+                "us": ["etats-unis", "etats unis", "usa", "états-unis d'amérique", "etats-unis d'amerique", "amérique", "amerique"],
+                "gb": ["royaume-uni", "angleterre", "grande-bretagne", "grande bretagne", "uk"],
+                "kr": ["corée du sud", "coree du sud"],
+                "cn": ["chine", "republique populaire de chine", "république populaire de chine"],
+                "ru": ["russie", "federation de russie", "fédération de russie"],
+                "za": ["afrique du sud", "republique d'afrique du sud", "république d'afrique du sud"],
+                "cz": ["republique tcheque", "république tchèque"],
+                "ch": ["suisse", "confederation suisse", "confédération suisse"],
+                "th": ["thailande", "thaïlande", "royaume de thaïlande", "royaume de thailande"],
+                "my": ["malaisie", "malaysie", "malaysia"]
+                // Ajoutez d'autres alternatives selon vos besoins
+            };
+
+            // Mélange un tableau
+            function shuffleArray(array) {
+                const newArray = [...array];
+                for (let i = newArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                }
+                return newArray;
+            }
+
+            // Normaliser un texte pour la comparaison (enlever accents, majuscules, etc.)
+            function normalizeText(text) {
+                return text.toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Enlever les accents
+                    .replace(/[^\w\s]/g, '') // Enlever la ponctuation
+                    .trim();
+            }
+
+            // Vérifier si une réponse entrée manuellement est correcte
+            function checkManualAnswer(input, correctCountry, countryCode) {
+                const normalizedInput = normalizeText(input);
+                const normalizedCorrect = normalizeText(correctCountry);
+                
+                if (normalizedInput === normalizedCorrect) {
+                    return true;
+                }
+                
+                // Vérifier les noms alternatifs
+                if (alternativeNames[countryCode]) {
+                    return alternativeNames[countryCode].some(name => normalizeText(name) === normalizedInput);
+                }
+                
+                return false;
+            }
+
+            // Mettre à jour les indicateurs de série
+            function updateStreakIndicator() {
+                flagStreakIndicator.innerHTML = '';
+                
+                const maxIndicators = 10;
+                const resultsToShow = lastResults.slice(-maxIndicators);
+                
+                resultsToShow.forEach(result => {
+                    const indicator = document.createElement('div');
+                    indicator.classList.add('streak-icon');
+                    if (result === true) {
+                        indicator.classList.add('correct');
+                    } else if (result === false) {
+                        indicator.classList.add('incorrect');
+                    }
+                    flagStreakIndicator.appendChild(indicator);
+                });
+            }
+
+            // Afficher un indice
+            function showHint() {
+                if (!currentFlag || hintUsed) return;
+                
+                hintUsed = true;
+                const country = currentFlag.country;
+                const firstLetter = country.charAt(0);
+                const length = country.length;
+                
+                document.getElementById('flag-hint').innerHTML = 
+                    `Indice: Commence par "${firstLetter}" et contient ${length} caractères.`;
+            }
+
+            // Initialiser le jeu
+            function initGame() {
+                // Réinitialiser les variables
+                score = 0;
+                questionCount = 0;
+                correctAnswers = 0;
+                gameActive = true;
+                streak = 0;
+                lastResults = [];
+                
+                // Afficher l'interface selon la difficulté
+                const isExpertMode = difficulty === 'expert';
+                flagOptions.style.display = isExpertMode ? 'none' : 'grid';
+                flagInputContainer.style.display = isExpertMode ? 'block' : 'none';
+
+                // Ajuster le nombre de questions selon la difficulté
+                if (difficulty === 'easy') {
+                    questionTotal = 10;
+                } else if (difficulty === 'medium') {
+                    questionTotal = 15;
+                } else {
+                    questionTotal = 20;
+                }
+
+                // Mélanger les drapeaux selon la difficulté
+                let allFlags = [...flagDatabase[difficulty]];
+                flags = shuffleArray(allFlags).slice(0, questionTotal);
+                
+                // Mettre à jour l'interface
+                flagScore.textContent = score;
+                flagQuestionCounter.textContent = `0/${questionTotal}`;
+                flagAccuracy.textContent = '0%';
+                flagProgress.style.width = '0%';
+                flagStreak.textContent = '0';
+                updateStreakIndicator();
+                
+                // Charger la première question
+                loadNextFlag();
+                
+                // Afficher le bouton suivant
+                flagStartBtn.style.display = 'none';
+                flagNextBtn.style.display = 'inline-block';
+                flagMessage.textContent = 'Quel est ce drapeau?';
+
+                // Jouer le son de clic
+                playSound(clickSound);
+            }
+
+            // Charger le drapeau suivant
+            function loadNextFlag() {
+                // Activer les options
+                flagOptions.querySelectorAll('.flag-option').forEach(option => {
+                    option.classList.remove('correct', 'incorrect', 'disabled');
+                });
+                
+                // Réinitialiser le champ de saisie et l'indice
+                if (difficulty === 'expert') {
+                    flagCountryInput.value = '';
+                    flagCountryInput.disabled = false;
+                    document.getElementById('flag-hint').innerHTML = 'Besoin d\'aide? <button class="flag-hint-btn" id="flag-hint-btn">Indice</button>';
+                    document.getElementById('flag-hint-btn').addEventListener('click', showHint);
+                    hintUsed = false;
+                }
+                
+                // Vérifier si le jeu est terminé
+                if (questionCount >= questionTotal) {
+                    endGame();
+                    return;
+                }
+                
+                // Sélectionner le drapeau actuel
+                currentFlag = flags[questionCount];
+                
+                // Mettre à jour l'affichage du drapeau
+                flagDisplay.style.backgroundImage = `url(https://flagcdn.com/w640/${currentFlag.code}.png)`;
+                
+                // Mettre à jour le modal de zoom
+                flagModalImg.src = `https://flagcdn.com/w1280/${currentFlag.code}.png`;
+                
+                // Générer les options si ce n'est pas le mode expert
+                if (difficulty !== 'expert') {
+                    generateOptions();
+                }
+                
+                // Mettre à jour les compteurs
+                questionCount++;
+                flagQuestionCounter.textContent = `${questionCount}/${questionTotal}`;
+                flagProgress.style.width = `${(questionCount / questionTotal) * 100}%`;
+                
+                // Jouer le son de clic
+                playSound(clickSound);
+            }
+
+            // Générer les options
+            function generateOptions() {
+                // Vider les options
+                flagOptions.innerHTML = '';
+                
+                // Créer un tableau de tous les drapeaux disponibles pour cette difficulté
+                const allFlags = [...flagDatabase[difficulty]];
+                
+                // Filtrer le drapeau actuel
+                const otherFlags = allFlags.filter(flag => flag.code !== currentFlag.code);
+                
+                // Sélectionner 3 drapeaux aléatoires
+                const randomFlags = shuffleArray(otherFlags).slice(0, 3);
+                
+                // Ajouter le drapeau actuel
+                const options = [...randomFlags, currentFlag];
+                
+                // Mélanger les options
+                currentOptions = shuffleArray(options);
+                
+                // Créer les boutons d'options
+                currentOptions.forEach(flag => {
+                    const button = document.createElement('button');
+                    button.classList.add('flag-option');
+                    button.textContent = flag.country;
+                    button.dataset.code = flag.code;
+                    button.addEventListener('click', checkAnswer);
+                    flagOptions.appendChild(button);
+                });
+            }
+
+            // Vérifier la réponse (pour les boutons)
+            function checkAnswer(e) {
+                if (!gameActive) return;
+                
+                const selectedCode = e.target.dataset.code;
+                const correct = selectedCode === currentFlag.code;
+                
+                processAnswer(correct);
+                
+                // Désactiver les options
+                flagOptions.querySelectorAll('.flag-option').forEach(option => {
+                    option.classList.add('disabled');
+                    
+                    // Marquer la bonne réponse
+                    if (option.dataset.code === currentFlag.code) {
+                        option.classList.add('correct');
+                    }
+                    
+                    // Marquer la mauvaise réponse sélectionnée
+                    if (option.dataset.code === selectedCode && selectedCode !== currentFlag.code) {
+                        option.classList.add('incorrect');
+                    }
+                });
+            }
+
+            // Vérifier la réponse saisie manuellement
+            function checkInputAnswer() {
+                if (!gameActive) return;
+                
+                const input = flagCountryInput.value;
+                if (!input.trim()) return;
+                
+                const correct = checkManualAnswer(input, currentFlag.country, currentFlag.code);
+                
+                processAnswer(correct);
+                
+                // Désactiver le champ de saisie
+                flagCountryInput.disabled = true;
+                
+                // Afficher la réponse correcte
+                if (!correct) {
+                    flagCountryInput.value = currentFlag.country;
+                }
+            }
+
+            // Traiter le résultat de la réponse
+            function processAnswer(correct) {
+                // Calculer les points bonus en fonction de la difficulté
+                let pointValue = 10;
+                if (difficulty === 'medium') pointValue = 15;
+                if (difficulty === 'hard') pointValue = 20;
+                if (difficulty === 'expert') pointValue = 25;
+                
+                // Réduire les points si indice utilisé
+                if (hintUsed) pointValue = Math.floor(pointValue / 2);
+                
+                // Bonus pour les séries
+                let streakBonus = 0;
+                if (streak >= 3) {
+                    streakBonus = Math.floor(pointValue * (streak * 0.1));
+                }
+                
+                // Mettre à jour le score et les statistiques
+                if (correct) {
+                    playSound(correctSound);
+                    
+                    score += pointValue + streakBonus;
+                    correctAnswers++;
+                    streak++;
+                    
+                    let message = `Correct! +${pointValue} points`;
+                    if (streakBonus > 0) {
+                        message += ` (+${streakBonus} bonus de série)`;
+                    }
+                    
+                    flagMessage.textContent = message;
+                    lastResults.push(true);
+                } else {
+                    playSound(incorrectSound);
+                    
+                    streak = 0;
+                    flagMessage.textContent = `Incorrect. C'était ${currentFlag.country}`;
+                    lastResults.push(false);
+                }
+                
+                if (streak > maxStreak) {
+                    maxStreak = streak;
+                }
+                
+                // Mise à jour de l'interface
+                flagScore.textContent = score;
+                flagAccuracy.textContent = `${Math.round((correctAnswers / questionCount) * 100)}%`;
+                flagStreak.textContent = streak;
+                updateStreakIndicator();
+            }
+
+            // Terminer le jeu
+            function endGame() {
+                gameActive = false;
+                flagNextBtn.style.display = 'none';
+                flagStartBtn.style.display = 'inline-block';
+                flagStartBtn.textContent = 'Rejouer';
+                flagOptions.innerHTML = '';
+                flagDisplay.style.backgroundImage = 'none';
+                flagInputContainer.style.display = 'none';
+                
+                // Afficher le résultat final
+                const accuracy = Math.round((correctAnswers / questionTotal) * 100);
+                let message = `Quiz terminé! Score: ${score}, Précision: ${accuracy}%, Série Max: ${maxStreak}<br>`;
+                
+                if (accuracy === 100) {
+                    message += 'Parfait! Vous êtes un expert des drapeaux!';
+                    playSound(victorySound);
+                } else if (accuracy >= 80) {
+                    message += 'Excellent! Vous connaissez bien vos drapeaux!';
+                } else if (accuracy >= 60) {
+                    message += 'Bien joué! Continuez à apprendre!';
+                } else if (accuracy >= 40) {
+                    message += 'Pas mal, mais vous pouvez faire mieux!';
+                } else {
+                    message += 'Essayez encore, la pratique rend parfait!';
+                }
+                
+                flagMessage.innerHTML = message;
+            }
+
+            // Écouteurs d'événements
+            flagStartBtn.addEventListener('click', initGame);
+            flagNextBtn.addEventListener('click', loadNextFlag);
+            
+            // Gestion de la saisie
+            flagSubmitBtn.addEventListener('click', checkInputAnswer);
+            flagCountryInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkInputAnswer();
+                }
+            });
+            
+            // Gestion de la difficulté
+            difficultyBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    difficultyBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    difficulty = btn.dataset.difficulty;
+                    
+                    // Afficher/masquer les interfaces selon la difficulté
+                    const isExpertMode = difficulty === 'expert';
+                    flagStartBtn.textContent = isExpertMode ? 'Commencer (Mode Écriture)' : 'Commencer';
+                    playSound(clickSound);
+                });
+            });
+            
+            // Gestion du zoom
+            flagZoomBtn.addEventListener('click', () => {
+                flagModal.style.display = 'flex';
+                playSound(clickSound);
+            });
+            
+            flagModalClose.addEventListener('click', () => {
+                flagModal.style.display = 'none';
+                playSound(clickSound);
+            });
+            
+            // Gestion du son
+            soundToggle.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                if (soundEnabled) {
+                    soundIcon.className = 'fas fa-volume-up';
+                } else {
+                    soundIcon.className = 'fas fa-volume-mute';
+                }
+                playSound(clickSound);
+            });
+            
+            // Fermer le modal en cliquant à l'extérieur
+            flagModal.addEventListener('click', (e) => {
+                if (e.target === flagModal) {
+                    flagModal.style.display = 'none';
+                }
+            });
+
+            // Fonction pour jouer un son si le son est activé
+            function playSound(sound) {
+                if (soundEnabled) {
+                    sound.play();
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
