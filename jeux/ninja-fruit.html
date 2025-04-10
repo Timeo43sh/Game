@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninja Fruit - Niveaux</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%);
+            font-family: 'Poppins', sans-serif;
+            user-select: none;
+            touch-action: none;
+            height: 100vh;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 28px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+        
+        #level {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            font-size: 18px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            background: rgba(0,0,0,0.3);
+            padding: 8px 15px;
+            border-radius: 15px;
+        }
+        
+        #objective {
+            position: absolute;
+            top: 110px;
+            left: 20px;
+            font-size: 18px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            background: rgba(0,0,0,0.3);
+            padding: 8px 15px;
+            border-radius: 15px;
+        }
+        
+        #time {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 28px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+        
+        .fruit {
+            position: absolute;
+            font-size: 60px;
+            pointer-events: none;
+            z-index: 10;
+            transition: transform 0.1s;
+            text-shadow: 0 5px 10px rgba(0,0,0,0.3);
+            user-select: none;
+        }
+        
+        .fruit-cut {
+            transform: scale(1.2);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        
+        #start-button {
+            padding: 15px 40px;
+            font-size: 28px;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #FF416C, #FF4B2B);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        #start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        #game-title {
+            color: white;
+            font-size: 72px;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #FF416C, #FF4B2B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 3px;
+        }
+        
+        #level-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        
+        #level-title {
+            color: white;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+        
+        #level-objective {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        #level-start {
+            padding: 15px 40px;
+            font-size: 28px;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        #level-start:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        
+        #game-over-text {
+            color: white;
+            font-size: 72px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #FF416C, #FF4B2B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        #final-score {
+            color: white;
+            font-size: 48px;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        #restart-button {
+            padding: 15px 40px;
+            font-size: 28px;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        #restart-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        #level-complete {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        
+        #level-complete-text {
+            color: white;
+            font-size: 72px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        #next-level-button {
+            padding: 15px 40px;
+            font-size: 28px;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #FF9800, #FFC107);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        #next-level-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .slice {
+            position: absolute;
+            font-size: 60px;
+            pointer-events: none;
+            z-index: 5;
+            text-shadow: 0 5px 5px rgba(0,0,0,0.3);
+            user-select: none;
+        }
+        
+        .trail {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            pointer-events: none;
+            z-index: 15;
+            transform: translate(-50%, -50%);
+        }
+        
+        #sword {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFFFFF"><path d="M6.92 5H5l9 9 1-.94m4.96 6.06l-.84.84c-.39.39-1.04.39-1.43 0l-6.01-6.01c-.39-.39-.39-1.04 0-1.43l.84-.84 7.44 7.44z"/></svg>');
+            background-size: contain;
+            pointer-events: none;
+            z-index: 20;
+            display: none;
+            filter: drop-shadow(0 0 10px rgba(255,215,0,0.7));
+            transform-origin: center center;
+        }
+        
+        .juice {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 4;
+        }
+        
+        .score-popup {
+            position: absolute;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 30;
+            animation: floatUp 1s forwards;
+            user-select: none;
+        }
+        
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+        
+        .combo {
+            position: absolute;
+            top: 150px;
+            left: 20px;
+            font-size: 24px;
+            color: gold;
+            text-shadow: 0 0 10px rgba(255,215,0,0.7);
+            z-index: 100;
+            background: rgba(0,0,0,0.3);
+            padding: 8px 15px;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        .bomb {
+            animation: shake 0.5s infinite;
+        }
+        
+        @keyframes shake {
+            0% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+            100% { transform: rotate(-5deg); }
+        }
+        
+        /* Bouton retour */
+        #back-button {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            z-index: 300;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #back-button:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="score">Score: 0</div>
+        <div id="level">Niveau: 1</div>
+        <div id="objective">Objectif: 200 points</div>
+        <div id="time">Temps: 60</div>
+        <div id="combo" class="combo"></div>
+        <div id="sword"></div>
+        
+        <button id="back-button" onclick="window.location.href='../home.html'">
+            <i class="fas fa-arrow-left"></i> Retour
+        </button>
+        
+        <div id="start-screen">
+            <h1 id="game-title">Ninja Fruit</h1>
+            <button id="start-button">Commencer</button>
+        </div>
+        
+        <div id="level-screen">
+            <h1 id="level-title">Niveau 1</h1>
+            <div id="level-objective">Coupez les fruits pour atteindre 200 points en 60 secondes !</div>
+            <button id="level-start">Jouer</button>
+        </div>
+        
+        <div id="game-over">
+            <h1 id="game-over-text">Game Over!</h1>
+            <div id="final-score">Score: 0</div>
+            <button id="restart-button">Rejouer</button>
+        </div>
+        
+        <div id="level-complete">
+            <h1 id="level-complete-text">Niveau Réussi!</h1>
+            <div id="final-score">Score: 0</div>
+            <button id="next-level-button">Niveau Suivant</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        // Configuration des niveaux
+        const levels = [
+            { // Niveau 1
+                number: 1,
+                objective: 200,
+                time: 60,
+                spawnRate: 1500,
+                minSpeed: 2,
+                maxSpeed: 4,
+                description: "Coupez les fruits pour atteindre 200 points en 60 secondes !"
+            },
+            { // Niveau 2
+                number: 2,
+                objective: 300,
+                time: 50,
+                spawnRate: 1300,
+                minSpeed: 2.5,
+                maxSpeed: 4.5,
+                description: "Atteignez 300 points en 50 secondes ! Les fruits sont un peu plus rapides."
+            },
+            { // Niveau 3
+                number: 3,
+                objective: 400,
+                time: 45,
+                spawnRate: 1100,
+                minSpeed: 3,
+                maxSpeed: 5,
+                description: "400 points en 45 secondes ! Attention aux fruits plus rapides."
+            },
+            { // Niveau 4
+                number: 4,
+                objective: 500,
+                time: 40,
+                spawnRate: 900,
+                minSpeed: 3.5,
+                maxSpeed: 5.5,
+                description: "500 points en 40 secondes ! Les fruits apparaissent plus rapidement."
+            },
+            { // Niveau 5
+                number: 5,
+                objective: 600,
+                time: 35,
+                spawnRate: 800,
+                minSpeed: 4,
+                maxSpeed: 6,
+                description: "Dernier niveau : 600 points en 35 secondes ! Défi ultime !"
+            }
+        ];
+
+        // Fruits et bombes
+        const gameFruitsConfig = [
+            { emoji: '🍎', color: '#FF5252', juiceColor: 'rgba(255, 82, 82, 0.7)', points: 10 }, // Pomme
+            { emoji: '🍌', color: '#FFD740', juiceColor: 'rgba(255, 215, 64, 0.7)', points: 15 }, // Banane
+            { emoji: '🍊', color: '#FFA000', juiceColor: 'rgba(255, 160, 0, 0.7)', points: 10 }, // Orange
+            { emoji: '🍉', color: '#4CAF50', juiceColor: 'rgba(244, 67, 54, 0.7)', points: 20 }, // Pastèque
+            { emoji: '🍍', color: '#FFC107', juiceColor: 'rgba(255, 193, 7, 0.7)', points: 15 }, // Ananas
+            { emoji: '🍓', color: '#E91E63', juiceColor: 'rgba(233, 30, 99, 0.7)', points: 10 }, // Fraise
+            { emoji: '🍑', color: '#FF8A65', juiceColor: 'rgba(255, 138, 101, 0.7)', points: 15 }, // Pêche
+            { emoji: '🍒', color: '#E53935', juiceColor: 'rgba(229, 57, 53, 0.7)', points: 10 }, // Cerises
+            { emoji: '🥝', color: '#7CB342', juiceColor: 'rgba(124, 179, 66, 0.7)', points: 15 }, // Kiwi
+            { emoji: '🍋', color: '#FDD835', juiceColor: 'rgba(253, 216, 53, 0.7)', points: 10 }, // Citron
+            { emoji: '💣', color: '#212121', juiceColor: 'rgba(0, 0, 0, 0.7)', points: -30, isBomb: true } // Bombe
+        ];
+        
+        // Éléments du DOM
+        const gameContainer = document.getElementById('game-container');
+        const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level');
+        const objectiveElement = document.getElementById('objective');
+        const timeElement = document.getElementById('time');
+        const comboElement = document.getElementById('combo');
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const levelScreen = document.getElementById('level-screen');
+        const levelTitle = document.getElementById('level-title');
+        const levelObjective = document.getElementById('level-objective');
+        const levelStartButton = document.getElementById('level-start');
+        const gameOverScreen = document.getElementById('game-over');
+        const gameOverText = document.getElementById('game-over-text');
+        const finalScoreElement = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-button');
+        const levelCompleteScreen = document.getElementById('level-complete');
+        const levelCompleteText = document.getElementById('level-complete-text');
+        const nextLevelButton = document.getElementById('next-level-button');
+        const swordElement = document.getElementById('sword');
+        
+        // Variables du jeu
+        let score = 0;
+        let currentLevel = 0;
+        let timeLeft = 0;
+        let gameInterval;
+        let spawnInterval;
+        let isGameRunning = false;
+        let activeFruits = [];
+        let trail = [];
+        let mouseX = 0;
+        let mouseY = 0;
+        let isMouseDown = false;
+        let comboCount = 0;
+        let lastCutTime = 0;
+        let comboTimeout;
+        
+        // Initialiser le niveau
+        function initLevel(levelIndex) {
+            currentLevel = levelIndex;
+            const level = levels[levelIndex];
+            
+            // Mettre à jour l'interface
+            levelElement.textContent = `Niveau: ${level.number}`;
+            objectiveElement.textContent = `Objectif: ${level.objective} points`;
+            timeLeft = level.time;
+            timeElement.textContent = `Temps: ${timeLeft}`;
+            
+            // Afficher l'écran du niveau
+            levelTitle.textContent = `Niveau ${level.number}`;
+            levelObjective.textContent = level.description;
+            levelScreen.style.display = 'flex';
+        }
+        
+        // Démarrer le niveau
+        function startLevel() {
+            if (isGameRunning) return;
+            
+            const level = levels[currentLevel];
+            
+            // Réinitialiser les variables du jeu
+            score = 0;
+            timeLeft = level.time;
+            clearActiveFruits();
+            comboCount = 0;
+            comboElement.style.display = 'none';
+            
+            // Mettre à jour l'interface
+            scoreElement.textContent = `Score: ${score}`;
+            timeElement.textContent = `Temps: ${timeLeft}`;
+            levelScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            levelCompleteScreen.style.display = 'none';
+            
+            // Démarrer les intervalles
+            isGameRunning = true;
+            spawnInterval = setInterval(spawnFruit, level.spawnRate);
+            gameInterval = setInterval(updateGame, 1000);
+        }
+        
+        // Nettoyer les fruits actifs
+        function clearActiveFruits() {
+            activeFruits.forEach(fruit => {
+                if (fruit.element && fruit.element.parentNode) {
+                    gameContainer.removeChild(fruit.element);
+                }
+            });
+            activeFruits = [];
+        }
+        
+        // Terminer le jeu (échec)
+        function endGame() {
+            isGameRunning = false;
+            clearInterval(spawnInterval);
+            clearInterval(gameInterval);
+            clearTimeout(comboTimeout);
+            
+            // Afficher l'écran de fin
+            finalScoreElement.textContent = `Score: ${score}`;
+            gameOverScreen.style.display = 'flex';
+        }
+        
+        // Terminer le niveau (succès)
+        function completeLevel() {
+            isGameRunning = false;
+            clearInterval(spawnInterval);
+            clearInterval(gameInterval);
+            clearTimeout(comboTimeout);
+            
+            // Afficher l'écran de niveau réussi
+            document.querySelector('#level-complete #final-score').textContent = `Score: ${score}`;
+            levelCompleteScreen.style.display = 'flex';
+        }
+        
+        // Passer au niveau suivant
+        function nextLevel() {
+            if (currentLevel < levels.length - 1) {
+                initLevel(currentLevel + 1);
+            } else {
+                // Tous les niveaux sont terminés
+                levelCompleteText.textContent = "Félicitations !";
+                document.querySelector('#level-complete #final-score').textContent = "Vous avez terminé tous les niveaux !";
+                nextLevelButton.textContent = "Rejouer";
+                nextLevelButton.onclick = () => {
+                    initLevel(0);
+                };
+                levelCompleteScreen.style.display = 'flex';
+            }
+        }
+        
+        // Mettre à jour le jeu
+        function updateGame() {
+            timeLeft--;
+            timeElement.textContent = `Temps: ${timeLeft}`;
+            
+            if (timeLeft <= 0) {
+                if (score >= levels[currentLevel].objective) {
+                    completeLevel();
+                } else {
+                    endGame();
+                }
+            }
+            
+            // Vérifier si l'objectif est atteint
+            if (score >= levels[currentLevel].objective) {
+                completeLevel();
+            }
+        }
+        
+        // Faire apparaître un fruit
+        function spawnFruit() {
+            if (!isGameRunning) return;
+            
+            const level = levels[currentLevel];
+            
+            // 10% de chance de faire apparaître une bombe à partir du niveau 2
+            let fruitConfig;
+            if (currentLevel > 0 && Math.random() < 0.1) {
+                fruitConfig = gameFruitsConfig.find(f => f.isBomb);
+            } else {
+                const availableFruits = gameFruitsConfig.filter(f => !f.isBomb);
+                fruitConfig = availableFruits[Math.floor(Math.random() * availableFruits.length)];
+            }
+            
+            const size = 60 + Math.floor(Math.random() * 4) * 10; // 60, 70, 80 ou 90px
+            const speed = Math.random() * (level.maxSpeed - level.minSpeed) + level.minSpeed;
+            
+            const fruitElement = document.createElement('div');
+            fruitElement.className = 'fruit';
+            if (fruitConfig.isBomb) fruitElement.classList.add('bomb');
+            fruitElement.style.fontSize = `${size}px`;
+            fruitElement.textContent = fruitConfig.emoji;
+            fruitElement.style.color = fruitConfig.color;
+            
+            // Position de départ aléatoire en bas de l'écran
+            const startX = Math.random() * (window.innerWidth - size);
+            fruitElement.style.left = `${startX}px`;
+            fruitElement.style.bottom = `-${size}px`;
+            
+            gameContainer.appendChild(fruitElement);
+            
+            // Animation du fruit
+            let positionY = -size;
+            let positionX = startX;
+            let angle = 0;
+            let rotationSpeed = (Math.random() - 0.5) * 10;
+            
+            const fruit = {
+                element: fruitElement,
+                config: fruitConfig,
+                size: size,
+                speed: speed,
+                isCut: false,
+                update: function() {
+                    if (this.isCut) return;
+                    
+                    positionY += this.speed;
+                    positionX += Math.sin(angle) * 2;
+                    angle += rotationSpeed * 0.01;
+                    
+                    this.element.style.bottom = `${positionY}px`;
+                    this.element.style.left = `${positionX}px`;
+                    this.element.style.transform = `rotate(${angle}deg)`;
+                    
+                    // Si le fruit sort de l'écran, le supprimer
+                    if (positionY > window.innerHeight) {
+                        cancelAnimationFrame(this.animationId);
+                        gameContainer.removeChild(this.element);
+                        activeFruits = activeFruits.filter(f => f !== this);
+                    } else {
+                        this.animationId = requestAnimationFrame(this.update.bind(this));
+                    }
+                }
+            };
+            
+            activeFruits.push(fruit);
+            fruit.animationId = requestAnimationFrame(fruit.update.bind(fruit));
+        }
+        
+        // Couper un fruit
+        function cutFruit(fruit) {
+            if (fruit.isCut || !isGameRunning) return;
+            
+            fruit.isCut = true;
+            
+            // Gestion du combo (sauf pour les bombes)
+            if (!fruit.config.isBomb) {
+                const now = Date.now();
+                if (now - lastCutTime < 1500) { // 1.5s pour le combo
+                    comboCount++;
+                    updateCombo();
+                } else {
+                    comboCount = 1;
+                }
+                lastCutTime = now;
+                
+                clearTimeout(comboTimeout);
+                comboTimeout = setTimeout(() => {
+                    comboCount = 0;
+                    comboElement.style.display = 'none';
+                }, 1500);
+            }
+            
+            // Calculer les points avec bonus de combo
+            let points = fruit.config.points;
+            if (!fruit.config.isBomb && comboCount > 1) {
+                const comboBonus = Math.min(comboCount * 2, 10);
+                points += comboBonus;
+            }
+            
+            // Appliquer les points
+            score += points;
+            scoreElement.textContent = `Score: ${score}`;
+            
+            // Afficher le popup de score
+            if (!fruit.config.isBomb) {
+                showScorePopup(fruit, points);
+            }
+            
+            // Animation de coupe
+            fruit.element.classList.add('fruit-cut');
+            
+            // Créer des morceaux de fruit coupé (sauf pour les bombes)
+            if (!fruit.config.isBomb) {
+                createSlices(fruit);
+                createJuice(fruit);
+            } else {
+                // Effet spécial pour les bombes
+                fruit.element.textContent = '💥';
+                fruit.element.style.fontSize = '80px';
+                fruit.element.style.color = '#FF5722';
+            }
+            
+            // Supprimer le fruit après l'animation
+            setTimeout(() => {
+                if (fruit.element && fruit.element.parentNode) {
+                    gameContainer.removeChild(fruit.element);
+                }
+                activeFruits = activeFruits.filter(f => f !== fruit);
+            }, fruit.config.isBomb ? 500 : 300);
+        }
+        
+        // Mettre à jour l'affichage du combo
+        function updateCombo() {
+            if (comboCount > 1) {
+                comboElement.textContent = `Combo x${comboCount}!`;
+                comboElement.style.display = 'block';
+            }
+        }
+        
+        // Afficher le popup de score
+        function showScorePopup(fruit, points) {
+            const popup = document.createElement('div');
+            popup.className = 'score-popup';
+            popup.textContent = `+${points}`;
+            popup.style.left = `${parseInt(fruit.element.style.left) + fruit.size/2}px`;
+            popup.style.bottom = `${parseInt(fruit.element.style.bottom) + fruit.size/2}px`;
+            
+            if (comboCount > 3) {
+                popup.style.color = 'gold';
+                popup.style.fontSize = '28px';
+            }
+            
+            gameContainer.appendChild(popup);
+            
+            // Supprimer après l'animation
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    gameContainer.removeChild(popup);
+                }
+            }, 1000);
+        }
+        
+        // Créer des morceaux de fruit coupé
+        function createSlices(fruit) {
+            const slice1 = document.createElement('div');
+            slice1.className = 'slice';
+            slice1.style.fontSize = `${fruit.size}px`;
+            slice1.textContent = fruit.config.emoji;
+            slice1.style.color = fruit.config.color;
+            slice1.style.left = fruit.element.style.left;
+            slice1.style.bottom = fruit.element.style.bottom;
+            slice1.style.clipPath = 'polygon(0 0, 100% 0, 0 100%)';
+            
+            const slice2 = document.createElement('div');
+            slice2.className = 'slice';
+            slice2.style.fontSize = `${fruit.size}px`;
+            slice2.textContent = fruit.config.emoji;
+            slice2.style.color = fruit.config.color;
+            slice2.style.left = fruit.element.style.left;
+            slice2.style.bottom = fruit.element.style.bottom;
+            slice2.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%)';
+            
+            gameContainer.appendChild(slice1);
+            gameContainer.appendChild(slice2);
+            
+            // Animation des morceaux
+            animateSlice(slice1, -10, 15);
+            animateSlice(slice2, 10, 15);
+            
+            // Supprimer les morceaux après l'animation
+            setTimeout(() => {
+                if (slice1.parentNode) gameContainer.removeChild(slice1);
+                if (slice2.parentNode) gameContainer.removeChild(slice2);
+            }, 1000);
+        }
+        
+        // Créer des effets de jus
+        function createJuice(fruit) {
+            for (let i = 0; i < 5; i++) {
+                const juice = document.createElement('div');
+                juice.className = 'juice';
+                juice.style.backgroundColor = fruit.config.juiceColor;
+                juice.style.left = `${parseInt(fruit.element.style.left) + fruit.size/2}px`;
+                juice.style.bottom = `${parseInt(fruit.element.style.bottom) + fruit.size/2}px`;
+                juice.style.width = `${Math.random() * 15 + 10}px`;
+                juice.style.height = juice.style.width;
+                
+                gameContainer.appendChild(juice);
+                
+                // Animation aléatoire des gouttes de jus
+                animateJuice(juice, (Math.random() - 0.5) * 20, Math.random() * 15 + 10);
+                
+                // Supprimer après l'animation
+                setTimeout(() => {
+                    if (juice.parentNode) {
+                        gameContainer.removeChild(juice);
+                    }
+                }, 1000);
+            }
+        }
+        
+        // Animer un morceau de fruit
+        function animateSlice(slice, xSpeed, ySpeed) {
+            let x = parseInt(slice.style.left);
+            let y = parseInt(slice.style.bottom);
+            let opacity = 1;
+            let rotation = 0;
+            
+            const animate = () => {
+                x += xSpeed;
+                y += ySpeed;
+                opacity -= 0.01;
+                ySpeed -= 0.3; // Gravité
+                rotation += 5;
+                
+                slice.style.left = `${x}px`;
+                slice.style.bottom = `${y}px`;
+                slice.style.opacity = opacity;
+                slice.style.transform = `rotate(${rotation}deg)`;
+                
+                if (opacity > 0) {
+                    requestAnimationFrame(animate);
+                }
+            };
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Animer une goutte de jus
+        function animateJuice(juice, xSpeed, ySpeed) {
+            let x = parseInt(juice.style.left);
+            let y = parseInt(juice.style.bottom);
+            let opacity = 1;
+            
+            const animate = () => {
+                x += xSpeed;
+                y += ySpeed;
+                opacity -= 0.02;
+                ySpeed -= 0.2; // Gravité
+                
+                juice.style.left = `${x}px`;
+                juice.style.bottom = `${y}px`;
+                juice.style.opacity = opacity;
+                
+                if (opacity > 0) {
+                    requestAnimationFrame(animate);
+                }
+            };
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Vérifier la collision avec les fruits
+        function checkFruitCollision() {
+            if (!isMouseDown || !isGameRunning) return;
+            
+            // Créer une zone de détection autour du curseur
+            const cursorSize = 40;
+            const cursorRect = {
+                left: mouseX - cursorSize/2,
+                right: mouseX + cursorSize/2,
+                top: mouseY - cursorSize/2,
+                bottom: mouseY + cursorSize/2
+            };
+            
+            activeFruits.forEach(fruit => {
+                if (fruit.isCut) return;
+                
+                const fruitRect = fruit.element.getBoundingClientRect();
+                
+                // Vérifier la collision entre le curseur et le fruit
+                if (cursorRect.right > fruitRect.left && 
+                    cursorRect.left < fruitRect.right && 
+                    cursorRect.bottom > fruitRect.top && 
+                    cursorRect.top < fruitRect.bottom) {
+                    cutFruit(fruit);
+                }
+            });
+        }
+        
+        // Créer une traînée de souris
+        function createTrail() {
+            if (!isMouseDown || !isGameRunning) return;
+            
+            // Ajouter un point à la traînée
+            const trailDot = document.createElement('div');
+            trailDot.className = 'trail';
+            trailDot.style.left = `${mouseX}px`;
+            trailDot.style.top = `${mouseY}px`;
+            gameContainer.appendChild(trailDot);
+            
+            trail.push(trailDot);
+            
+            // Limiter la longueur de la traînée
+            if (trail.length > 15) {
+                const oldDot = trail.shift();
+                if (oldDot.parentNode) {
+                    gameContainer.removeChild(oldDot);
+                }
+            }
+            
+            // Vérifier la collision avec les fruits
+            checkFruitCollision();
+        }
+        
+        // Événements
+        startButton.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            initLevel(0);
+        });
+        
+        levelStartButton.addEventListener('click', startLevel);
+        restartButton.addEventListener('click', () => {
+            gameOverScreen.style.display = 'none';
+            startLevel();
+        });
+        nextLevelButton.addEventListener('click', nextLevel);
+        
+        // Gestion de la souris
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Mettre à jour la position de l'épée
+            swordElement.style.left = `${mouseX - 40}px`;
+            swordElement.style.top = `${mouseY - 40}px`;
+            
+            // Animation de l'épée
+            if (isMouseDown) {
+                swordElement.style.transform = `rotate(${Date.now() % 360}deg)`;
+            }
+            
+            createTrail();
+        });
+        
+        document.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            swordElement.style.display = 'block';
+            swordElement.style.transform = 'rotate(45deg)';
+            // Vérifier la collision immédiatement
+            checkFruitCollision();
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            swordElement.style.display = 'none';
+            
+            // Supprimer la traînée
+            trail.forEach(dot => {
+                if (dot.parentNode) {
+                    gameContainer.removeChild(dot);
+                }
+            });
+            trail = [];
+        });
+        
+        // Gestion du tactile
+        gameContainer.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isMouseDown = true;
+            swordElement.style.display = 'block';
+            
+            const touch = e.touches[0];
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+            swordElement.style.left = `${mouseX - 40}px`;
+            swordElement.style.top = `${mouseY - 40}px`;
+            
+            // Vérifier la collision immédiatement
+            checkFruitCollision();
+            createTrail();
+        }, { passive: false });
+        
+        gameContainer.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!isMouseDown) return;
+            
+            const touch = e.touches[0];
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+            swordElement.style.left = `${mouseX - 40}px`;
+            swordElement.style.top = `${mouseY - 40}px`;
+            
+            // Vérifier la collision pendant le mouvement
+            checkFruitCollision();
+            createTrail();
+        }, { passive: false });
+        
+        gameContainer.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isMouseDown = false;
+            swordElement.style.display = 'none';
+            
+            // Supprimer la traînée
+            trail.forEach(dot => {
+                if (dot.parentNode) {
+                    gameContainer.removeChild(dot);
+                }
+            });
+            trail = [];
+        }, { passive: false });
+    </script>
+</body>
+</html> 
