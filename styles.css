@@ -256,4 +256,74 @@ footer {
 .main-nav a.active {
     color: var(--light);
     background: var(--primary);
+}
+
+/* Bannière de cookies */
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(43, 43, 54, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
+    padding: 15px 30px;
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    border-top: 2px solid var(--primary);
+}
+
+.cookie-banner p {
+    margin-right: 20px;
+    color: var(--text);
+}
+
+#cookie-accept, #cookie-decline {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 10px;
+}
+
+#cookie-accept {
+    background: var(--accent);
+    color: var(--dark);
+}
+
+#cookie-accept:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+#cookie-decline {
+    background: var(--secondary);
+    color: var(--text);
+}
+
+#cookie-decline:hover {
+    background: var(--card-bg);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .cookie-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+    
+    .cookie-banner p {
+        margin-bottom: 15px;
+        margin-right: 0;
+    }
+    
+    #cookie-accept, #cookie-decline {
+        margin: 5px;
+    }
 } 
