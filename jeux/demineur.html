@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démineur - Arcade Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .demineur-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            background: var(--primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 8px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: var(--secondary);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .difficulty-btn.active {
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .difficulty-btn:hover {
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .game-board {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .board {
+            display: grid;
+            gap: 2px;
+            background: var(--secondary);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cell:hover {
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .cell.revealed {
+            background: var(--light);
+            color: var(--dark);
+            cursor: default;
+        }
+
+        .cell.revealed:hover {
+            transform: none;
+        }
+
+        .cell.flagged {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .cell.mine {
+            background: var(--danger);
+            color: white;
+        }
+
+        .cell.mine-exploded {
+            background: var(--danger);
+            color: white;
+            animation: explode 0.5s ease;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .game-message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .game-message.win {
+            background: var(--success);
+            color: white;
+            display: block;
+        }
+
+        .game-message.lose {
+            background: var(--danger);
+            color: white;
+            display: block;
+        }
+
+        .number-1 { color: #2196F3; }
+        .number-2 { color: #4CAF50; }
+        .number-3 { color: #FF5722; }
+        .number-4 { color: #9C27B0; }
+        .number-5 { color: #FF9800; }
+        .number-6 { color: #00BCD4; }
+        .number-7 { color: #795548; }
+        .number-8 { color: #607D8B; }
+
+        @media (max-width: 768px) {
+            .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+            
+            .game-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .difficulty-selector {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demineur-container">
+        <div class="game-header">
+            <h1 class="game-title">Démineur</h1>
+            <p>Révélez toutes les cases sans exploser les mines !</p>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat-item">
+                <i class="fas fa-clock"></i>
+                <span>Temps: <span class="stat-value" id="timer">0</span></span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-flag"></i>
+                <span>Mines: <span class="stat-value" id="mine-count">0</span></span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-trophy"></i>
+                <span>Meilleur: <span class="stat-value" id="best-time">-</span></span>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" data-difficulty="easy">Facile (9x9, 10 mines)</button>
+            <button class="difficulty-btn" data-difficulty="medium">Moyen (16x16, 40 mines)</button>
+            <button class="difficulty-btn" data-difficulty="hard">Difficile (16x30, 99 mines)</button>
+        </div>
+
+        <div class="game-controls">
+            <button class="control-btn" id="new-game">
+                <i class="fas fa-plus"></i>
+                Nouvelle Partie
+            </button>
+            <button class="control-btn" id="toggle-flag">
+                <i class="fas fa-flag"></i>
+                Mode Drapeau
+            </button>
+        </div>
+
+        <div class="game-message" id="game-message"></div>
+
+        <div class="game-board">
+            <div class="board" id="board"></div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="back-button" onclick="window.location.href='../home.html'">
+                <i class="fas fa-arrow-left"></i>
+                Retour à l'accueil
+            </button>
+        </div>
+    </div>
+
+    <script>
+        class Demineur {
+            constructor() {
+                this.board = [];
+                this.gameOver = false;
+                this.gameWon = false;
+                this.timer = 0;
+                this.timerInterval = null;
+                this.flagMode = false;
+                this.difficulty = 'easy';
+                this.difficulties = {
+                    easy: { rows: 9, cols: 9, mines: 10 },
+                    medium: { rows: 16, cols: 16, mines: 40 },
+                    hard: { rows: 16, cols: 30, mines: 99 }
+                };
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadBestTime();
+                this.newGame();
+            }
+
+            setupEventListeners() {
+                document.getElementById('new-game').addEventListener('click', () => this.newGame());
+                document.getElementById('toggle-flag').addEventListener('click', () => this.toggleFlagMode());
+                
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.difficulty = e.target.dataset.difficulty;
+                        this.newGame();
+                    });
+                });
+            }
+
+            newGame() {
+                this.stopTimer();
+                this.gameOver = false;
+                this.gameWon = false;
+                this.timer = 0;
+                this.updateTimer();
+                this.updateMineCount();
+                this.hideMessage();
+                
+                const config = this.difficulties[this.difficulty];
+                this.createBoard(config.rows, config.cols, config.mines);
+                this.renderBoard();
+                this.startTimer();
+            }
+
+            createBoard(rows, cols, mines) {
+                this.rows = rows;
+                this.cols = cols;
+                this.mines = mines;
+                this.board = [];
+
+                // Créer le tableau vide
+                for (let i = 0; i < rows; i++) {
+                    this.board[i] = [];
+                    for (let j = 0; j < cols; j++) {
+                        this.board[i][j] = {
+                            isMine: false,
+                            isRevealed: false,
+                            isFlagged: false,
+                            neighborMines: 0
+                        };
+                    }
+                }
+
+                // Placer les mines aléatoirement
+                let minesPlaced = 0;
+                while (minesPlaced < mines) {
+                    const row = Math.floor(Math.random() * rows);
+                    const col = Math.floor(Math.random() * cols);
+                    
+                    if (!this.board[row][col].isMine) {
+                        this.board[row][col].isMine = true;
+                        minesPlaced++;
+                    }
+                }
+
+                // Calculer le nombre de mines voisines
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        if (!this.board[i][j].isMine) {
+                            this.board[i][j].neighborMines = this.countNeighborMines(i, j);
+                        }
+                    }
+                }
+            }
+
+            countNeighborMines(row, col) {
+                let count = 0;
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const newRow = row + i;
+                        const newCol = col + j;
+                        if (newRow >= 0 && newRow < this.rows && 
+                            newCol >= 0 && newCol < this.cols && 
+                            this.board[newRow][newCol].isMine) {
+                            count++;
+                        }
+                    }
+                }
+                return count;
+            }
+
+            renderBoard() {
+                const boardElement = document.getElementById('board');
+                boardElement.style.gridTemplateColumns = `repeat(${this.cols}, 35px)`;
+                
+                boardElement.innerHTML = '';
+                
+                for (let i = 0; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols; j++) {
+                        const cell = document.createElement('button');
+                        cell.className = 'cell';
+                        cell.dataset.row = i;
+                        cell.dataset.col = j;
+                        
+                        if (this.board[i][j].isRevealed) {
+                            cell.classList.add('revealed');
+                            if (this.board[i][j].isMine) {
+                                cell.classList.add('mine');
+                                cell.innerHTML = '<i class="fas fa-bomb"></i>';
+                            } else if (this.board[i][j].neighborMines > 0) {
+                                cell.textContent = this.board[i][j].neighborMines;
+                                cell.classList.add(`number-${this.board[i][j].neighborMines}`);
+                            }
+                        } else if (this.board[i][j].isFlagged) {
+                            cell.classList.add('flagged');
+                            cell.innerHTML = '<i class="fas fa-flag"></i>';
+                        }
+                        
+                        cell.addEventListener('click', (e) => this.handleCellClick(i, j, e));
+                        cell.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            this.handleRightClick(i, j);
+                        });
+                        
+                        boardElement.appendChild(cell);
+                    }
+                }
+            }
+
+            handleCellClick(row, col, event) {
+                if (this.gameOver || this.board[row][col].isRevealed || this.board[row][col].isFlagged) {
+                    return;
+                }
+
+                if (this.flagMode) {
+                    this.toggleFlag(row, col);
+                } else {
+                    this.revealCell(row, col);
+                }
+            }
+
+            handleRightClick(row, col) {
+                if (this.gameOver || this.board[row][col].isRevealed) {
+                    return;
+                }
+                this.toggleFlag(row, col);
+            }
+
+            toggleFlag(row, col) {
+                if (this.board[row][col].isFlagged) {
+                    this.board[row][col].isFlagged = false;
+                } else {
+                    this.board[row][col].isFlagged = true;
+                }
+                this.renderBoard();
+                this.updateMineCount();
+            }
+
+            revealCell(row, col) {
+                if (this.board[row][col].isMine) {
+                    this.gameOver = true;
+                    this.revealAllMines();
+                    this.showMessage('Game Over! Vous avez explosé une mine!', 'lose');
+                    this.stopTimer();
+                    return;
+                }
+
+                this.board[row][col].isRevealed = true;
+                
+                if (this.board[row][col].neighborMines === 0) {
+                    this.revealNeighbors(row, col);
+                }
+
+                this.renderBoard();
+                
+                if (this.checkWin()) {
+                    this.gameWon = true;
+                    this.gameOver = true;
+                    this.showMessage('Félicitations! Vous avez gagné!', 'win');
+                    this.stopTimer();
+                    this.saveBestTime();
+                }
+            }
+
+            revealNeighbors(row, col) {
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        const newRow = row + i;
+                        const newCol = col + j;
+                        if (newRow >= 0 && newRow < this.rows && 
+                            newCol >= 0 && newCol < this.cols && 
+                            !this.board[newRow][newCol].isRevealed && 
+                            !this.board[newRow][newCol].isFlagged) {
+                            this.revealCell(newRow, newCol);
+                        }
+                    }
+                }
+            }
+
+            revealAllMines() {
+                for (let i = 0; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols; j++) {
+                        if (this.board[i][j].isMine) {
+                            this.board[i][j].isRevealed = true;
+                        }
+                    }
+                }
+                this.renderBoard();
+            }
+
+            checkWin() {
+                for (let i = 0; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols; j++) {
+                        if (!this.board[i][j].isMine && !this.board[i][j].isRevealed) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            toggleFlagMode() {
+                this.flagMode = !this.flagMode;
+                const btn = document.getElementById('toggle-flag');
+                if (this.flagMode) {
+                    btn.style.background = 'var(--accent)';
+                    btn.innerHTML = '<i class="fas fa-mouse-pointer"></i> Mode Clic';
+                } else {
+                    btn.style.background = 'var(--primary)';
+                    btn.innerHTML = '<i class="fas fa-flag"></i> Mode Drapeau';
+                }
+            }
+
+            startTimer() {
+                this.timerInterval = setInterval(() => {
+                    this.timer++;
+                    this.updateTimer();
+                }, 1000);
+            }
+
+            stopTimer() {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            }
+
+            updateTimer() {
+                document.getElementById('timer').textContent = this.timer;
+            }
+
+            updateMineCount() {
+                let flaggedCount = 0;
+                for (let i = 0; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols; j++) {
+                        if (this.board[i][j].isFlagged) {
+                            flaggedCount++;
+                        }
+                    }
+                }
+                document.getElementById('mine-count').textContent = this.mines - flaggedCount;
+            }
+
+            showMessage(message, type) {
+                const messageElement = document.getElementById('game-message');
+                messageElement.textContent = message;
+                messageElement.className = `game-message ${type}`;
+            }
+
+            hideMessage() {
+                const messageElement = document.getElementById('game-message');
+                messageElement.className = 'game-message';
+            }
+
+            saveBestTime() {
+                const key = `demineur_best_${this.difficulty}`;
+                const currentBest = localStorage.getItem(key);
+                if (!currentBest || this.timer < parseInt(currentBest)) {
+                    localStorage.setItem(key, this.timer.toString());
+                    this.loadBestTime();
+                }
+            }
+
+            loadBestTime() {
+                const key = `demineur_best_${this.difficulty}`;
+                const bestTime = localStorage.getItem(key);
+                document.getElementById('best-time').textContent = bestTime || '-';
+            }
+        }
+
+        // Initialiser le jeu
+        document.addEventListener('DOMContentLoaded', () => {
+            new Demineur();
+        });
+    </script>
+</body>
+</html> 
