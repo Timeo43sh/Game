@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puissance 4 - Jeu de Stratégie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .connect4-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            padding: 40px 30px 30px 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .back-home-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .back-home-btn:hover {
+            background: var(--accent);
+        }
+        
+        .connect4-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .connect4-desc {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .game-mode {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .mode-btn {
+            background: var(--secondary);
+            color: var(--text);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .mode-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        .mode-btn:hover {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--secondary), var(--dark));
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .current-player {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .score {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .game-board {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .connect4-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            padding: 15px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .connect4-cell {
+            width: 70px;
+            height: 70px;
+            background: var(--card-bg);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            position: relative;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .connect4-cell:hover:not(.filled) {
+            background: var(--accent);
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .connect4-cell.player1 {
+            background: linear-gradient(135deg, #FF6B6B, #ee5a52);
+            color: white;
+            animation: dropIn 0.6s ease-out;
+        }
+        
+        .connect4-cell.player2 {
+            background: linear-gradient(135deg, #4ECDC4, #44a08d);
+            color: white;
+            animation: dropIn 0.6s ease-out;
+        }
+        
+        .connect4-cell.winning {
+            animation: winnerPulse 1s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+        
+        .connect4-cell.preview {
+            opacity: 0.6;
+            background: var(--accent);
+            transform: scale(0.9);
+        }
+        
+        @keyframes dropIn {
+            0% {
+                transform: translateY(-200px) scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(-50px) scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes winnerPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+            }
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .connect4-btn {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 28px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .connect4-btn:hover {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .connect4-btn.secondary {
+            background: var(--secondary);
+            color: var(--text);
+        }
+        
+        .connect4-btn.secondary:hover {
+            background: var(--dark);
+        }
+        
+        .connect4-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .connect4-message {
+            margin-top: 20px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            min-height: 40px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .connect4-message.success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        .connect4-message.info {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+        
+        .connect4-message.warning {
+            background: linear-gradient(135deg, #FF9800, #f57c00);
+            color: white;
+        }
+        
+        .connect4-message.error {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+        
+        .stats-panel {
+            background: linear-gradient(135deg, var(--secondary), var(--dark));
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .stats-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .player-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .player-token {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .player-token.active {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .player-token.player1 {
+            background: linear-gradient(135deg, #FF6B6B, #ee5a52);
+            color: white;
+        }
+        
+        .player-token.player2 {
+            background: linear-gradient(135deg, #4ECDC4, #44a08d);
+            color: white;
+        }
+        
+        .token-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .difficulty-btn {
+            background: var(--secondary);
+            color: var(--text);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .difficulty-btn:hover {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+        }
+        
+        .game-status {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--secondary);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .status-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+        
+        .status-icon.moves {
+            background: var(--primary);
+        }
+        
+        .status-icon.time {
+            background: var(--accent);
+        }
+        
+        @media (max-width: 1200px) {
+            .connect4-container {
+                max-width: 95%;
+                padding: 30px 20px;
+            }
+            .connect4-cell {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            .connect4-grid {
+                gap: 6px;
+                padding: 12px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .connect4-container { 
+                padding: 20px; 
+                margin: 20px auto;
+            }
+            .connect4-cell {
+                width: 45px;
+                height: 45px;
+                font-size: 1.2rem;
+            }
+            .connect4-grid {
+                gap: 4px;
+                padding: 10px;
+            }
+            .game-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .score {
+                gap: 20px;
+            }
+            .game-mode {
+                flex-direction: column;
+                align-items: center;
+            }
+            .difficulty-selector {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="connect4-container">
+            <a href="../home.html" class="back-home-btn">
+                <i class="fas fa-home"></i> Accueil
+            </a>
+            
+            <div class="connect4-title">Puissance 4</div>
+            <div class="connect4-desc">Alignez 4 jetons pour gagner !</div>
+            
+            <div class="game-mode">
+                <button class="mode-btn active" id="mode-2players">2 Joueurs</button>
+                <button class="mode-btn" id="mode-computer">vs Ordinateur</button>
+            </div>
+            
+            <div class="difficulty-selector" id="difficulty-selector" style="display: none;">
+                <button class="difficulty-btn active" id="difficulty-easy">Facile</button>
+                <button class="difficulty-btn" id="difficulty-medium">Moyen</button>
+                <button class="difficulty-btn" id="difficulty-hard">Difficile</button>
+            </div>
+            
+            <div class="player-indicator">
+                <div class="player-token player1 active" id="player1-indicator">
+                    <div class="token-icon"></div>
+                    <span>Joueur 1</span>
+                </div>
+                <div class="player-token player2" id="player2-indicator">
+                    <div class="token-icon"></div>
+                    <span>Joueur 2</span>
+                </div>
+            </div>
+            
+            <div class="game-status">
+                <div class="status-item">
+                    <div class="status-icon moves"></div>
+                    <span>Coups: <span id="moves-count">0</span></span>
+                </div>
+                <div class="status-item">
+                    <div class="status-icon time"></div>
+                    <span>Temps: <span id="game-time">00:00</span></span>
+                </div>
+            </div>
+            
+            <div class="game-info">
+                <div class="current-player" id="current-player">Tour du Joueur 1</div>
+                <div class="score">
+                    <div class="score-item">
+                        <div class="score-label">Joueur 1</div>
+                        <div class="score-value" id="score-player1">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Joueur 2</div>
+                        <div class="score-value" id="score-player2">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-panel" id="stats-panel">
+                <div class="stats-title">Statistiques</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Parties jouées</div>
+                        <div class="stat-value" id="games-played">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Victoires J1</div>
+                        <div class="stat-value" id="wins-player1">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Victoires J2</div>
+                        <div class="stat-value" id="wins-player2">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Matchs nuls</div>
+                        <div class="stat-value" id="draws">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-board">
+                <div class="connect4-grid" id="connect4-grid"></div>
+            </div>
+            
+            <div class="game-controls">
+                <button class="connect4-btn" id="new-game-btn">Nouvelle Partie</button>
+                <button class="connect4-btn secondary" id="reset-score-btn">Reset Score</button>
+                <button class="connect4-btn secondary" id="undo-btn" disabled>Annuler</button>
+                <button class="connect4-btn secondary" id="hint-btn" disabled>Indice</button>
+            </div>
+            
+            <div class="connect4-message" id="connect4-message"></div>
+        </div>
+    </div>
+
+    <script>
+        class Connect4Game {
+            constructor() {
+                this.rows = 6;
+                this.cols = 7;
+                this.board = this.createEmptyBoard();
+                this.currentPlayer = 1;
+                this.gameMode = '2players';
+                this.difficulty = 'easy';
+                this.gameActive = true;
+                this.scores = { player1: 0, player2: 0 };
+                this.gameStats = {
+                    gamesPlayed: 0,
+                    winsPlayer1: 0,
+                    winsPlayer2: 0,
+                    draws: 0
+                };
+                this.moveHistory = [];
+                this.movesCount = 0;
+                this.gameStartTime = Date.now();
+                this.gameTimer = null;
+                
+                this.initializeGame();
+            }
+            
+            createEmptyBoard() {
+                return Array(this.rows).fill().map(() => Array(this.cols).fill(0));
+            }
+            
+            initializeGame() {
+                this.grid = document.getElementById('connect4-grid');
+                this.message = document.getElementById('connect4-message');
+                this.currentPlayerDisplay = document.getElementById('current-player');
+                this.scorePlayer1 = document.getElementById('score-player1');
+                this.scorePlayer2 = document.getElementById('score-player2');
+                this.gamesPlayed = document.getElementById('games-played');
+                this.winsPlayer1 = document.getElementById('wins-player1');
+                this.winsPlayer2 = document.getElementById('wins-player2');
+                this.draws = document.getElementById('draws');
+                this.newGameBtn = document.getElementById('new-game-btn');
+                this.resetScoreBtn = document.getElementById('reset-score-btn');
+                this.undoBtn = document.getElementById('undo-btn');
+                this.hintBtn = document.getElementById('hint-btn');
+                this.mode2Players = document.getElementById('mode-2players');
+                this.modeComputer = document.getElementById('mode-computer');
+                this.player1Indicator = document.getElementById('player1-indicator');
+                this.player2Indicator = document.getElementById('player2-indicator');
+                this.difficultySelector = document.getElementById('difficulty-selector');
+                this.difficultyEasy = document.getElementById('difficulty-easy');
+                this.difficultyMedium = document.getElementById('difficulty-medium');
+                this.difficultyHard = document.getElementById('difficulty-hard');
+                this.movesCountElement = document.getElementById('moves-count');
+                this.gameTime = document.getElementById('game-time');
+                
+                this.setupEventListeners();
+                this.renderBoard();
+                this.updateDisplay();
+                this.startGameTimer();
+            }
+            
+            setupEventListeners() {
+                // Boutons
+                this.newGameBtn.addEventListener('click', () => this.newGame());
+                this.resetScoreBtn.addEventListener('click', () => this.resetScore());
+                this.undoBtn.addEventListener('click', () => this.undoMove());
+                this.hintBtn.addEventListener('click', () => this.showHint());
+                
+                // Modes de jeu
+                this.mode2Players.addEventListener('click', () => this.setGameMode('2players'));
+                this.modeComputer.addEventListener('click', () => this.setGameMode('computer'));
+                
+                // Difficulté
+                this.difficultyEasy.addEventListener('click', () => this.setDifficulty('easy'));
+                this.difficultyMedium.addEventListener('click', () => this.setDifficulty('medium'));
+                this.difficultyHard.addEventListener('click', () => this.setDifficulty('hard'));
+                
+                // Grille
+                this.setupGridEventListeners();
+            }
+            
+            setupGridEventListeners() {
+                this.grid.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('connect4-cell')) {
+                        const col = parseInt(e.target.dataset.col);
+                        this.makeMove(col);
+                    }
+                });
+                
+                // Prévisualisation au survol
+                this.grid.addEventListener('mouseover', (e) => {
+                    if (e.target.classList.contains('connect4-cell') && this.gameActive) {
+                        const col = parseInt(e.target.dataset.col);
+                        this.showPreview(col);
+                    }
+                });
+                
+                this.grid.addEventListener('mouseout', () => {
+                    this.hidePreview();
+                });
+            }
+            
+            setGameMode(mode) {
+                this.gameMode = mode;
+                
+                // Mise à jour des boutons
+                this.mode2Players.classList.toggle('active', mode === '2players');
+                this.modeComputer.classList.toggle('active', mode === 'computer');
+                
+                // Afficher/masquer le sélecteur de difficulté
+                this.difficultySelector.style.display = mode === 'computer' ? 'flex' : 'none';
+                
+                this.newGame();
+                this.showMessage(`Mode ${mode === '2players' ? '2 Joueurs' : 'vs Ordinateur'} activé`, 'info');
+            }
+            
+            setDifficulty(difficulty) {
+                this.difficulty = difficulty;
+                
+                // Mise à jour des boutons
+                this.difficultyEasy.classList.toggle('active', difficulty === 'easy');
+                this.difficultyMedium.classList.toggle('active', difficulty === 'medium');
+                this.difficultyHard.classList.toggle('active', difficulty === 'hard');
+                
+                this.showMessage(`Difficulté ${difficulty} activée`, 'info');
+            }
+            
+            showPreview(col) {
+                const row = this.getLowestEmptyRow(col);
+                if (row !== -1) {
+                    const cell = this.grid.children[row * this.cols + col];
+                    cell.classList.add('preview');
+                    cell.textContent = this.currentPlayer === 1 ? '🔴' : '🟡';
+                }
+            }
+            
+            hidePreview() {
+                const previewCells = this.grid.querySelectorAll('.preview');
+                previewCells.forEach(cell => {
+                    cell.classList.remove('preview');
+                    cell.textContent = '';
+                });
+            }
+            
+            makeMove(col) {
+                if (!this.gameActive) return;
+                
+                // Vérifier que c'est bien le tour du joueur humain
+                if (this.gameMode === 'computer' && this.currentPlayer === 2) {
+                    return;
+                }
+                
+                const row = this.getLowestEmptyRow(col);
+                if (row === -1) {
+                    this.showMessage('Cette colonne est pleine !', 'error');
+                    return;
+                }
+                
+                // Jouer le coup
+                this.board[row][col] = this.currentPlayer;
+                this.moveHistory.push({ row, col, player: this.currentPlayer });
+                this.movesCount++;
+                
+                this.renderBoard();
+                
+                // Vérifier la victoire
+                if (this.checkWin(row, col)) {
+                    this.handleWin();
+                    return;
+                }
+                
+                // Vérifier le match nul
+                if (this.checkDraw()) {
+                    this.handleDraw();
+                    return;
+                }
+                
+                // Changer de joueur
+                this.switchPlayer();
+                
+                // Tour de l'IA
+                if (this.gameMode === 'computer' && this.currentPlayer === 2) {
+                    setTimeout(() => {
+                        this.makeAiMove();
+                    }, 500);
+                }
+            }
+            
+            makeAiMove() {
+                if (!this.gameActive || this.currentPlayer !== 2) return;
+                
+                const bestMove = this.findBestMove();
+                if (bestMove !== -1) {
+                    // Simuler le coup de l'IA directement
+                    const row = this.getLowestEmptyRow(bestMove);
+                    if (row !== -1) {
+                        this.board[row][bestMove] = this.currentPlayer;
+                        this.moveHistory.push({ row, col: bestMove, player: this.currentPlayer });
+                        this.movesCount++;
+                        
+                        this.renderBoard();
+                        
+                        // Vérifier la victoire
+                        if (this.checkWin(row, bestMove)) {
+                            this.handleWin();
+                            return;
+                        }
+                        
+                        // Vérifier le match nul
+                        if (this.checkDraw()) {
+                            this.handleDraw();
+                            return;
+                        }
+                        
+                        // Changer de joueur
+                        this.switchPlayer();
+                    }
+                }
+            }
+            
+            findBestMove() {
+                switch (this.difficulty) {
+                    case 'easy':
+                        return this.findRandomMove();
+                    case 'medium':
+                        return this.findMediumMove();
+                    case 'hard':
+                        return this.findHardMove();
+                    default:
+                        return this.findRandomMove();
+                }
+            }
+            
+            findRandomMove() {
+                const availableMoves = [];
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.getLowestEmptyRow(col) !== -1) {
+                        availableMoves.push(col);
+                    }
+                }
+                return availableMoves.length > 0 ? availableMoves[Math.floor(Math.random() * availableMoves.length)] : -1;
+            }
+            
+            findMediumMove() {
+                // Chercher une victoire pour l'IA
+                for (let col = 0; col < this.cols; col++) {
+                    const row = this.getLowestEmptyRow(col);
+                    if (row !== -1) {
+                        this.board[row][col] = 2;
+                        if (this.checkWin(row, col)) {
+                            this.board[row][col] = 0;
+                            return col;
+                        }
+                        this.board[row][col] = 0;
+                    }
+                }
+                
+                // Bloquer le joueur
+                for (let col = 0; col < this.cols; col++) {
+                    const row = this.getLowestEmptyRow(col);
+                    if (row !== -1) {
+                        this.board[row][col] = 1;
+                        if (this.checkWin(row, col)) {
+                            this.board[row][col] = 0;
+                            return col;
+                        }
+                        this.board[row][col] = 0;
+                    }
+                }
+                
+                // Prendre le centre si disponible
+                if (this.getLowestEmptyRow(3) !== -1) return 3;
+                
+                // Prendre n'importe quelle colonne libre
+                return this.findRandomMove();
+            }
+            
+            findHardMove() {
+                // Algorithme minimax simplifié pour la difficulté difficile
+                let bestScore = -Infinity;
+                let bestMove = -1;
+                
+                for (let col = 0; col < this.cols; col++) {
+                    const row = this.getLowestEmptyRow(col);
+                    if (row !== -1) {
+                        this.board[row][col] = 2;
+                        const score = this.minimax(this.board, 4, false, -Infinity, Infinity);
+                        this.board[row][col] = 0;
+                        
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMove = col;
+                        }
+                    }
+                }
+                
+                return bestMove;
+            }
+            
+            minimax(board, depth, isMaximizing, alpha, beta) {
+                // Vérifier les conditions de fin
+                if (this.checkWinForBoard(board, 2)) return 1000;
+                if (this.checkWinForBoard(board, 1)) return -1000;
+                if (this.checkDrawForBoard(board) || depth === 0) return 0;
+                
+                if (isMaximizing) {
+                    let maxScore = -Infinity;
+                    for (let col = 0; col < this.cols; col++) {
+                        const row = this.getLowestEmptyRowForBoard(board, col);
+                        if (row !== -1) {
+                            board[row][col] = 2;
+                            const score = this.minimax(board, depth - 1, false, alpha, beta);
+                            board[row][col] = 0;
+                            maxScore = Math.max(maxScore, score);
+                            alpha = Math.max(alpha, score);
+                            if (beta <= alpha) break;
+                        }
+                    }
+                    return maxScore;
+                } else {
+                    let minScore = Infinity;
+                    for (let col = 0; col < this.cols; col++) {
+                        const row = this.getLowestEmptyRowForBoard(board, col);
+                        if (row !== -1) {
+                            board[row][col] = 1;
+                            const score = this.minimax(board, depth - 1, true, alpha, beta);
+                            board[row][col] = 0;
+                            minScore = Math.min(minScore, score);
+                            beta = Math.min(beta, score);
+                            if (beta <= alpha) break;
+                        }
+                    }
+                    return minScore;
+                }
+            }
+            
+            checkWinForBoard(board, player) {
+                // Vérifier toutes les positions pour le joueur donné
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        if (board[row][col] === player) {
+                            if (this.checkWinAtPosition(board, row, col, player)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            
+            checkWinAtPosition(board, row, col, player) {
+                const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+                
+                for (let [dr, dc] of directions) {
+                    let count = 1;
+                    
+                    // Compter dans une direction
+                    for (let i = 1; i < 4; i++) {
+                        const newRow = row + dr * i;
+                        const newCol = col + dc * i;
+                        if (this.isValidPosition(newRow, newCol) && board[newRow][newCol] === player) {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    // Compter dans la direction opposée
+                    for (let i = 1; i < 4; i++) {
+                        const newRow = row - dr * i;
+                        const newCol = col - dc * i;
+                        if (this.isValidPosition(newRow, newCol) && board[newRow][newCol] === player) {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    if (count >= 4) return true;
+                }
+                return false;
+            }
+            
+            checkDrawForBoard(board) {
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.getLowestEmptyRowForBoard(board, col) !== -1) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
+            getLowestEmptyRowForBoard(board, col) {
+                for (let row = this.rows - 1; row >= 0; row--) {
+                    if (board[row][col] === 0) {
+                        return row;
+                    }
+                }
+                return -1;
+            }
+            
+            showHint() {
+                if (!this.gameActive || this.gameMode === '2players') return;
+                
+                const hintMove = this.findBestMove();
+                if (hintMove !== -1) {
+                    this.showMessage(`Indice : Essayez la colonne ${hintMove + 1}`, 'info');
+                    
+                    // Mettre en surbrillance la colonne suggérée
+                    for (let row = 0; row < this.rows; row++) {
+                        const cell = this.grid.children[row * this.cols + hintMove];
+                        cell.style.boxShadow = '0 0 15px rgba(255, 255, 0, 0.8)';
+                    }
+                    
+                    setTimeout(() => {
+                        for (let row = 0; row < this.rows; row++) {
+                            const cell = this.grid.children[row * this.cols + hintMove];
+                            cell.style.boxShadow = '';
+                        }
+                    }, 2000);
+                }
+            }
+            
+            getLowestEmptyRow(col) {
+                for (let row = this.rows - 1; row >= 0; row--) {
+                    if (this.board[row][col] === 0) {
+                        return row;
+                    }
+                }
+                return -1;
+            }
+            
+            checkWin(row, col) {
+                const player = this.board[row][col];
+                const directions = [
+                    [0, 1],   // Horizontal
+                    [1, 0],   // Vertical
+                    [1, 1],   // Diagonal droite
+                    [1, -1]   // Diagonal gauche
+                ];
+                
+                for (let [dr, dc] of directions) {
+                    let count = 1;
+                    
+                    // Compter dans une direction
+                    for (let i = 1; i < 4; i++) {
+                        const newRow = row + dr * i;
+                        const newCol = col + dc * i;
+                        if (this.isValidPosition(newRow, newCol) && this.board[newRow][newCol] === player) {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    // Compter dans la direction opposée
+                    for (let i = 1; i < 4; i++) {
+                        const newRow = row - dr * i;
+                        const newCol = col - dc * i;
+                        if (this.isValidPosition(newRow, newCol) && this.board[newRow][newCol] === player) {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    if (count >= 4) {
+                        this.markWinningCells(row, col, dr, dc);
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            isValidPosition(row, col) {
+                return row >= 0 && row < this.rows && col >= 0 && col < this.cols;
+            }
+            
+            markWinningCells(row, col, dr, dc) {
+                const player = this.board[row][col];
+                
+                // Marquer les cellules gagnantes
+                for (let i = -3; i <= 3; i++) {
+                    const newRow = row + dr * i;
+                    const newCol = col + dc * i;
+                    if (this.isValidPosition(newRow, newCol) && this.board[newRow][newCol] === player) {
+                        const cell = this.grid.children[newRow * this.cols + newCol];
+                        cell.classList.add('winning');
+                    }
+                }
+            }
+            
+            checkDraw() {
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.getLowestEmptyRow(col) !== -1) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
+            handleWin() {
+                this.gameActive = false;
+                this.stopGameTimer();
+                const winner = this.currentPlayer === 1 ? 'player1' : 'player2';
+                this.scores[winner]++;
+                this.gameStats[winner === 'player1' ? 'winsPlayer1' : 'winsPlayer2']++;
+                this.gameStats.gamesPlayed++;
+                
+                const playerName = this.currentPlayer === 1 ? 'Joueur 1' : 
+                                 (this.gameMode === 'computer' ? 'L\'IA' : 'Joueur 2');
+                this.showMessage(`${playerName} a gagné !`, 'success');
+                this.updateDisplay();
+            }
+            
+            handleDraw() {
+                this.gameActive = false;
+                this.stopGameTimer();
+                this.gameStats.draws++;
+                this.gameStats.gamesPlayed++;
+                this.showMessage('Match nul !', 'warning');
+                this.updateDisplay();
+            }
+            
+            switchPlayer() {
+                this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+                this.updateDisplay();
+            }
+            
+            undoMove() {
+                if (this.moveHistory.length === 0 || !this.gameActive) return;
+                
+                const lastMove = this.moveHistory.pop();
+                this.board[lastMove.row][lastMove.col] = 0;
+                this.currentPlayer = lastMove.player;
+                this.movesCount--;
+                
+                this.renderBoard();
+                this.updateDisplay();
+                this.showMessage('Coup annulé', 'info');
+            }
+            
+            startGameTimer() {
+                this.gameStartTime = Date.now();
+                this.gameTimer = setInterval(() => {
+                    const elapsed = Date.now() - this.gameStartTime;
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+                    this.gameTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+            
+            stopGameTimer() {
+                if (this.gameTimer) {
+                    clearInterval(this.gameTimer);
+                    this.gameTimer = null;
+                }
+            }
+            
+            renderBoard() {
+                this.grid.innerHTML = '';
+                
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'connect4-cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        
+                        const cellValue = this.board[row][col];
+                        
+                        if (cellValue === 1) {
+                            cell.classList.add('player1');
+                            cell.textContent = '🔴';
+                        } else if (cellValue === 2) {
+                            cell.classList.add('player2');
+                            cell.textContent = '🟡';
+                        }
+                        
+                        this.grid.appendChild(cell);
+                    }
+                }
+            }
+            
+            updateDisplay() {
+                const playerName = this.currentPlayer === 1 ? 'Joueur 1' : 
+                                 (this.gameMode === 'computer' ? 'L\'IA' : 'Joueur 2');
+                this.currentPlayerDisplay.textContent = `Tour de ${playerName}`;
+                
+                this.scorePlayer1.textContent = this.scores.player1;
+                this.scorePlayer2.textContent = this.scores.player2;
+                this.movesCountElement.textContent = this.movesCount;
+                
+                // Mettre à jour les indicateurs de joueur
+                this.player1Indicator.classList.toggle('active', this.currentPlayer === 1);
+                this.player2Indicator.classList.toggle('active', this.currentPlayer === 2);
+                
+                // Mettre à jour les statistiques
+                this.gamesPlayed.textContent = this.gameStats.gamesPlayed;
+                this.winsPlayer1.textContent = this.gameStats.winsPlayer1;
+                this.winsPlayer2.textContent = this.gameStats.winsPlayer2;
+                this.draws.textContent = this.gameStats.draws;
+                
+                // Activer/désactiver les boutons
+                this.undoBtn.disabled = this.moveHistory.length === 0 || !this.gameActive;
+                this.hintBtn.disabled = this.gameMode === '2players' || !this.gameActive;
+            }
+            
+            showMessage(text, type = 'info') {
+                this.message.textContent = text;
+                this.message.className = `connect4-message ${type}`;
+                
+                setTimeout(() => {
+                    if (this.message.textContent === text) {
+                        this.message.textContent = '';
+                        this.message.className = 'connect4-message';
+                    }
+                }, 3000);
+            }
+            
+            newGame() {
+                this.board = this.createEmptyBoard();
+                this.currentPlayer = 1;
+                this.gameActive = true;
+                this.moveHistory = [];
+                this.movesCount = 0;
+                
+                this.stopGameTimer();
+                this.startGameTimer();
+                
+                this.renderBoard();
+                this.updateDisplay();
+                this.showMessage('Nouvelle partie !', 'info');
+            }
+            
+            resetScore() {
+                this.scores = { player1: 0, player2: 0 };
+                this.gameStats = {
+                    gamesPlayed: 0,
+                    winsPlayer1: 0,
+                    winsPlayer2: 0,
+                    draws: 0
+                };
+                this.updateDisplay();
+                this.showMessage('Score et statistiques réinitialisés', 'info');
+            }
+        }
+        
+        // Initialiser le jeu
+        const game = new Connect4Game();
+    </script>
+</body>
+</html> 
