@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morpion - Jeu de Tic-Tac-Toe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .morpion-container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            padding: 32px 24px 24px 24px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .back-home-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .back-home-btn:hover {
+            background: var(--accent);
+        }
+        
+        .morpion-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .morpion-desc {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--secondary);
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        
+        .current-player {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        .score {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .score-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .morpion-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 300px;
+            margin: 0 auto 20px auto;
+            background: var(--dark);
+            padding: 8px;
+            border-radius: 12px;
+        }
+        
+        .morpion-cell {
+            aspect-ratio: 1;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+        }
+        
+        .morpion-cell:hover:not(.played) {
+            background: var(--accent);
+            transform: scale(1.05);
+        }
+        
+        .morpion-cell.played {
+            cursor: not-allowed;
+        }
+        
+        .morpion-cell.x {
+            color: #FF6B6B;
+        }
+        
+        .morpion-cell.o {
+            color: #4ECDC4;
+        }
+        
+        .morpion-cell.winning {
+            background: #4CAF50;
+            color: white;
+            animation: winner 0.6s ease-in-out;
+        }
+        
+        @keyframes winner {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .morpion-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .morpion-btn:hover {
+            background: var(--accent);
+        }
+        
+        .morpion-btn.secondary {
+            background: var(--secondary);
+            color: var(--text);
+        }
+        
+        .morpion-btn.secondary:hover {
+            background: var(--dark);
+        }
+        
+        .game-mode {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .mode-btn {
+            background: var(--secondary);
+            color: var(--text);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .mode-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .morpion-message {
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            min-height: 30px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .morpion-message.success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .morpion-message.info {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .morpion-message.draw {
+            background: #FF9800;
+            color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .morpion-container { 
+                padding: 20px; 
+                margin: 20px auto;
+                max-width: 95%;
+            }
+            .morpion-grid {
+                max-width: 250px;
+            }
+            .morpion-cell {
+                font-size: 2rem;
+            }
+            .game-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .score {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="morpion-container">
+            <a href="../home.html" class="back-home-btn">
+                <i class="fas fa-home"></i> Accueil
+            </a>
+            
+            <div class="morpion-title">Morpion</div>
+            <div class="morpion-desc">Alignez 3 symboles pour gagner !</div>
+            
+            <div class="game-mode">
+                <button class="mode-btn active" id="mode-2players">2 Joueurs</button>
+                <button class="mode-btn" id="mode-computer">vs Ordinateur</button>
+            </div>
+            
+            <div class="game-info">
+                <div class="current-player" id="current-player">Tour de X</div>
+                <div class="score">
+                    <div class="score-item">
+                        <div class="score-label">X</div>
+                        <div class="score-value" id="score-x">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">O</div>
+                        <div class="score-value" id="score-o">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="morpion-grid" id="morpion-grid">
+                <button class="morpion-cell" data-index="0"></button>
+                <button class="morpion-cell" data-index="1"></button>
+                <button class="morpion-cell" data-index="2"></button>
+                <button class="morpion-cell" data-index="3"></button>
+                <button class="morpion-cell" data-index="4"></button>
+                <button class="morpion-cell" data-index="5"></button>
+                <button class="morpion-cell" data-index="6"></button>
+                <button class="morpion-cell" data-index="7"></button>
+                <button class="morpion-cell" data-index="8"></button>
+            </div>
+            
+            <div class="game-controls">
+                <button class="morpion-btn" id="new-game-btn">Nouvelle Partie</button>
+                <button class="morpion-btn secondary" id="reset-score-btn">Reset Score</button>
+            </div>
+            
+            <div class="morpion-message" id="morpion-message"></div>
+        </div>
+    </div>
+
+    <script>
+        class MorpionGame {
+            constructor() {
+                this.board = Array(9).fill('');
+                this.currentPlayer = 'X';
+                this.gameMode = '2players'; // '2players' ou 'computer'
+                this.gameActive = true;
+                this.scores = { X: 0, O: 0 };
+                this.winningCombinations = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Lignes
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Colonnes
+                    [0, 4, 8], [2, 4, 6] // Diagonales
+                ];
+                
+                this.initializeGame();
+            }
+            
+            initializeGame() {
+                this.grid = document.getElementById('morpion-grid');
+                this.message = document.getElementById('morpion-message');
+                this.currentPlayerDisplay = document.getElementById('current-player');
+                this.scoreX = document.getElementById('score-x');
+                this.scoreO = document.getElementById('score-o');
+                this.newGameBtn = document.getElementById('new-game-btn');
+                this.resetScoreBtn = document.getElementById('reset-score-btn');
+                this.mode2Players = document.getElementById('mode-2players');
+                this.modeComputer = document.getElementById('mode-computer');
+                
+                this.setupEventListeners();
+                this.updateDisplay();
+            }
+            
+            setupEventListeners() {
+                // Grille
+                this.grid.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('morpion-cell')) {
+                        const index = parseInt(e.target.dataset.index);
+                        this.makeMove(index);
+                    }
+                });
+                
+                // Boutons
+                this.newGameBtn.addEventListener('click', () => this.newGame());
+                this.resetScoreBtn.addEventListener('click', () => this.resetScore());
+                
+                // Modes de jeu
+                this.mode2Players.addEventListener('click', () => this.setGameMode('2players'));
+                this.modeComputer.addEventListener('click', () => this.setGameMode('computer'));
+            }
+            
+            setGameMode(mode) {
+                this.gameMode = mode;
+                
+                // Mise à jour des boutons
+                this.mode2Players.classList.toggle('active', mode === '2players');
+                this.modeComputer.classList.toggle('active', mode === 'computer');
+                
+                this.newGame();
+                this.showMessage(`Mode ${mode === '2players' ? '2 Joueurs' : 'vs Ordinateur'} activé`, 'info');
+                
+                // Mettre à jour l'affichage du joueur actuel
+                this.updateDisplay();
+            }
+            
+            makeMove(index) {
+                if (!this.gameActive || this.board[index] !== '') {
+                    return;
+                }
+                
+                // Vérifier que c'est bien le tour du joueur humain
+                if (this.gameMode === 'computer' && this.currentPlayer === 'O') {
+                    return; // Ce n'est pas le tour du joueur humain
+                }
+                
+                // Joueur humain
+                this.board[index] = this.currentPlayer;
+                this.updateCell(index);
+                
+                if (this.checkWin()) {
+                    this.handleWin();
+                    return;
+                }
+                
+                if (this.checkDraw()) {
+                    this.handleDraw();
+                    return;
+                }
+                
+                this.switchPlayer();
+                
+                // Tour de l'ordinateur
+                if (this.gameMode === 'computer' && this.currentPlayer === 'O') {
+                    setTimeout(() => {
+                        this.computerMove();
+                    }, 500);
+                }
+            }
+            
+            computerMove() {
+                if (!this.gameActive || this.currentPlayer !== 'O') return;
+                
+                // IA simple : cherche une case libre
+                const availableMoves = this.board
+                    .map((cell, index) => cell === '' ? index : -1)
+                    .filter(index => index !== -1);
+                
+                if (availableMoves.length > 0) {
+                    // Priorité : bloquer le joueur ou gagner
+                    let bestMove = this.findBestMove();
+                    if (bestMove === -1) {
+                        bestMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+                    }
+                    
+                    // Vérification supplémentaire que la case est libre
+                    if (bestMove >= 0 && this.board[bestMove] === '') {
+                        this.board[bestMove] = this.currentPlayer;
+                        this.updateCell(bestMove);
+                        
+                        if (this.checkWin()) {
+                            this.handleWin();
+                            return;
+                        }
+                        
+                        if (this.checkDraw()) {
+                            this.handleDraw();
+                            return;
+                        }
+                        
+                        this.switchPlayer();
+                    }
+                }
+            }
+            
+            findBestMove() {
+                // Chercher une victoire pour l'IA
+                for (let i = 0; i < this.board.length; i++) {
+                    if (this.board[i] === '') {
+                        this.board[i] = this.currentPlayer;
+                        if (this.checkWinForBoard(this.board)) {
+                            this.board[i] = '';
+                            return i;
+                        }
+                        this.board[i] = '';
+                    }
+                }
+                
+                // Bloquer le joueur humain
+                const opponent = this.currentPlayer === 'X' ? 'O' : 'X';
+                for (let i = 0; i < this.board.length; i++) {
+                    if (this.board[i] === '') {
+                        this.board[i] = opponent;
+                        if (this.checkWinForBoard(this.board)) {
+                            this.board[i] = '';
+                            return i;
+                        }
+                        this.board[i] = '';
+                    }
+                }
+                
+                // Prendre le centre si disponible
+                if (this.board[4] === '') return 4;
+                
+                // Prendre un coin
+                const corners = [0, 2, 6, 8];
+                const availableCorners = corners.filter(i => this.board[i] === '');
+                if (availableCorners.length > 0) {
+                    return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+                }
+                
+                // Prendre n'importe quelle case libre
+                const availableMoves = this.board
+                    .map((cell, index) => cell === '' ? index : -1)
+                    .filter(index => index !== -1);
+                
+                if (availableMoves.length > 0) {
+                    return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+                }
+                
+                return -1; // Aucun coup possible
+            }
+            
+            updateCell(index) {
+                const cell = this.grid.children[index];
+                cell.textContent = this.board[index];
+                cell.classList.add('played', this.board[index].toLowerCase());
+            }
+            
+            checkWin() {
+                for (let combo of this.winningCombinations) {
+                    const [a, b, c] = combo;
+                    if (this.board[a] && 
+                        this.board[a] === this.board[b] && 
+                        this.board[a] === this.board[c]) {
+                        
+                        // Marquer les cases gagnantes
+                        combo.forEach(index => {
+                            this.grid.children[index].classList.add('winning');
+                        });
+                        
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            checkWinForBoard(board) {
+                for (let combo of this.winningCombinations) {
+                    const [a, b, c] = combo;
+                    if (board[a] && 
+                        board[a] === board[b] && 
+                        board[a] === board[c]) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            checkDraw() {
+                return this.board.every(cell => cell !== '');
+            }
+            
+            handleWin() {
+                this.gameActive = false;
+                this.scores[this.currentPlayer]++;
+                this.updateScores();
+                this.showMessage(`${this.currentPlayer} a gagné !`, 'success');
+            }
+            
+            handleDraw() {
+                this.gameActive = false;
+                this.showMessage('Match nul !', 'draw');
+            }
+            
+            switchPlayer() {
+                this.currentPlayer = this.currentPlayer === 'X' ? 'O' : 'X';
+                this.updateDisplay();
+            }
+            
+            updateDisplay() {
+                if (this.gameMode === 'computer') {
+                    if (this.currentPlayer === 'X') {
+                        this.currentPlayerDisplay.textContent = 'Votre tour';
+                    } else {
+                        this.currentPlayerDisplay.textContent = 'Tour de l\'ordinateur';
+                    }
+                } else {
+                    this.currentPlayerDisplay.textContent = `Tour de ${this.currentPlayer}`;
+                }
+                this.updateScores();
+            }
+            
+            updateScores() {
+                this.scoreX.textContent = this.scores.X;
+                this.scoreO.textContent = this.scores.O;
+            }
+            
+            showMessage(text, type = 'info') {
+                this.message.textContent = text;
+                this.message.className = `morpion-message ${type}`;
+                
+                // Effacer le message après 3 secondes
+                setTimeout(() => {
+                    if (this.message.textContent === text) {
+                        this.message.textContent = '';
+                        this.message.className = 'morpion-message';
+                    }
+                }, 3000);
+            }
+            
+            newGame() {
+                this.board = Array(9).fill('');
+                this.currentPlayer = 'X';
+                this.gameActive = true;
+                
+                // Réinitialiser l'affichage
+                Array.from(this.grid.children).forEach(cell => {
+                    cell.textContent = '';
+                    cell.className = 'morpion-cell';
+                });
+                
+                this.updateDisplay();
+                this.message.textContent = '';
+                this.message.className = 'morpion-message';
+            }
+            
+            resetScore() {
+                this.scores = { X: 0, O: 0 };
+                this.updateScores();
+                this.showMessage('Score réinitialisé', 'info');
+            }
+        }
+        
+        // Initialiser le jeu
+        const game = new MorpionGame();
+    </script>
+</body>
+</html> 
