@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motus - Le jeu du mot du jour</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .motus-container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            padding: 32px 24px 24px 24px;
+            text-align: center;
+            position: relative;
+        }
+        .back-home-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .back-home-btn:hover {
+            background: var(--accent);
+        }
+        .motus-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        .motus-desc {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        .motus-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 40px);
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        .motus-row {
+            display: contents;
+        }
+        .motus-cell {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: var(--secondary);
+            color: var(--text);
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--dark);
+            transition: background 0.2s, color 0.2s;
+        }
+        .motus-cell.green {
+            background: #6aaa64;
+            color: #fff;
+        }
+        .motus-cell.yellow {
+            background: #c9b458;
+            color: #fff;
+        }
+        .motus-cell.gray {
+            background: #787c7e;
+            color: #fff;
+        }
+        .motus-input {
+            width: 100%;
+            max-width: 320px;
+            padding: 10px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--secondary);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .motus-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background 0.2s;
+        }
+        .motus-btn:hover {
+            background: var(--accent);
+        }
+        .motus-message {
+            margin-top: 10px;
+            font-weight: 600;
+            color: var(--success);
+        }
+        @media (max-width: 600px) {
+            .motus-container { padding: 10px; }
+            .motus-grid { grid-template-columns: repeat(5, 32px); }
+            .motus-cell { width: 32px; height: 32px; font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="motus-container">
+            <a href="../home.html" class="back-home-btn">
+                <i class="fas fa-home"></i> Accueil
+            </a>
+            <div class="motus-title">Wordle</div>
+            <div class="motus-desc">Devinez le mot de 5 lettres en 6 essais.<br>Vert = bien placé, Jaune = mal placé, Gris = absent.</div>
+            <div id="motus-grid" class="motus-grid"></div>
+            <div id="motus-keyboard" style="margin: 20px 0 10px 0;"></div>
+            <button id="motus-replay" class="motus-btn" style="margin-bottom:20px;display:none;">Rejouer</button>
+            <input id="motus-input" class="motus-input" type="text" maxlength="8" autocomplete="off" placeholder="Votre proposition...">
+            <button id="motus-btn" class="motus-btn">Valider</button>
+            <div id="motus-message" class="motus-message"></div>
+        </div>
+    </div>
+    <script>
+// Liste de mots français de 5 lettres (exemple, à compléter si besoin)
+const mots = [
+"ARBRE","BANDE","CARTE","DANSE","ECRAN","FABLE","GALET","HABIT","IMAGE","JOUER","KARMA","LAPIN","MAGIE","NAPPE","OASIS","PAGNE","QUART","RADAR","SABLE","TABLE","UNION","VAGUE","WAGON","XENON","YACHT","ZEBRE",
+"AVION","BONUS","CABLE","DOUZE","EMAIL","FICHE","GRAND","HOTEL","ILETS","JOLIE","KOALA","LIVRE","MONDE","NAGER","ORAGE","POMME","QUETE","ROUGE","SAUTE","TIGRE","URGEN","VOTER","WATTS","XYLOL","YOGUR","ZONES"
+];
+
+// Liste exhaustive de mots valides (plus de 3000 mots français de 5 lettres)
+const motsValides = [
+"ABATS","ABBES","ABCES","ABDOS","ABEES","ABELE","ABIES","ABLES","ABOIE","ABOIS","ABORD","ABOUT","ABRIS","ABUSE","ACCES","ACIDE","ACIER","ACMES","ACRES","ACTES","ACTIF","ADAGE","ADAPT","ADENT","ADIEU","ADMET","ADMIS","ADMIT","ADOBE","ADOPT","ADORE","ADRET","ADULE","ADVEN","AERER","AERIE","AFFIN","AFFUT","AGACE","AGAME","AGAPE","AGATE","AGAVE","AGENT","AGILE","AGIOS","AGITE","AGNAT","AGNEL","AGORA","AGREE","AIDER","AIEUL","AIGLE","AIGRE","AIGRI","AIMER","AINEE","AINES","AIOLI","AIREL","AIRES","AISLE","AJOUR","ALBUM","ALENE","ALEPH","ALFAS","ALGAL","ALGIE","ALIAS","ALIBI","ALIEN","ALIGN","ALIOS","ALISE","ALITE","ALIZE","ALLEE","ALLIE","ALOIN","ALOSE","ALPES","ALPIN","ALTER","ALTES","ALUDE","ALUNI","AMANT","AMATI","AMBLE","AMBRA","AMBRE","AMENE","AMIBE","AMIES","AMONT","AMOUR","AMURE","ANALE","ANALY","ANARS","ANCRE","ANDIN","ANEES","ANETH","ANGES","ANGIE","ANGLE","ANGON","ANGOR","ANIER","ANIME","ANION","ANISE","ANODE","ANONS","ANSEE","ANTAN","ANTES","ANTRE","ANURE","AORTE","APERO","APLAT","APNEE","APODE","APPEL","APRES","APTES","ARABE","ARACH","ARASE","ARBRE","ARCON","ARDEN","ARDUE","ARDUS","ARENE","ARGON","ARGOT","ARGUE","ARIEN","ARION","ARISE","ARLES","ARMEZ","AROME","ARQUE","ARRET","ARROI","ARROS","ARSIN","ARSON","ARTEL","ARZEL","ASILE","ASPIC","ASPIS","ASPRE","ASQUE","ASSAI","ASSIS","ASTRE","ATELI","ATOME","ATONE","ATOUR","ATOUT","ATRES","AUBES","AUBIN","AUCUN","AUDIT","AUGES","AULNE","AUMON","AUNES","AURAI","AURAS","AUREZ","AURIE","AURIS","AURON","AUSSI","AUTAN","AUTEL","AUTOS","AUTRE","AVALS","AVANT","AVARE","AVENS","AVENT","AVERE","AVERS","AVERT","AVIDE","AVIEN","AVION","AVISE","AVOIR","AVONS","AVORT","AVOUA","AVOUE","AVRIL","AXANT","AXEES","AXELS","AXIAL","AXILE","AXONE","AYANT","AYONS","AZOTE","AZURE","BABAS","BABIL","BABYS","BACON","BADGE","BADIN","BAFFE","BAGNE","BAGUE","BAHUT","BAIES","BAINS","BAISE","BALAI","BALLE","BANAL","BANCO","BANDE","BANGS","BANJO","BARBE","BARDA","BARDE","BARGE","BARIL","BARON","BARRE","BASAL","BASER","BASES","BASIC","BASIN","BATIR","BATON","BATTE","BAUGE","BAUME","BAVES","BAYER","BEANT","BEAUX","BECHE","BEGUE","BEIGE","BELGE","BELLE","BENIN","BENIR","BERCE","BERGE","BERNE","BERYL","BESEF","BETEL","BETON","BETTE","BEUVE","BIBLE","BICHE","BIEFS","BIENS","BIERE","BIFFE","BIGLE","BIGOT","BIJOU","BILAN","BILER","BINER","BISES","BLAME","BLANC","BLASE","BLEME","BLESS","BLEUE","BLEUS","BLOND","BLUES","BLUFF","BLUTA","BOBOS","BOCAL","BOGIE","BOIRE","BOITE","BOMBE","BONDE","BONNE","BONTE","BORAX","BORDE","BORDS","BORNE","BOSSE","BOSSU","BOTTE","BOUCS","BOUEE","BOUGE","BOULE","BOURG","BOUSE","BOUTS","BOXER","BRAVE","BREAK","BREME","BRIDE","BRIEF","BRISE","BROCS","BRODE","BROIE","BROME","BRONZ","BROUE","BROYE","BRUIT","BRULE","BRUME","BRUNE","BRUNS","BRUTE","BRUTS","BUCHA","BUCHE","BUDGE","BUFFE","BUFFO","BULLE","BURIN","BURON","BUSES","CABAS","CABOT","CACHE","CADET","CADRE","CAFES","CAGES","CAHOT","CAIDS","CAJOU","CALER","CALME","CAMPE","CANAL","CANNE","CANON","CANOT","CAPES","CARGO","CARNE","CARRE","CASSE","CAUSE","CAVES","CEDRE","CELLE","CENTS","CERNE","CESSE","CHAIN","CHAIR","CHAMP","CHANT","CHAOS","CHARS","CHATS","CHAUX","CHEFS","CHIEN","CHIFF","CHIPS","CHOIX","CHOSE","CHUTE","CIMES","CIRES","CITES","CIVIL","CLAME","CLART","CLASH","CLEFS","CLERC","CLICS","CLINS","CLIPS","CLOSE","CLOUS","CLOWN","COCHE","CODES","COEUR","COINS","COLIS","COLON","COMAS","COMBI","COMBO","CONGE","CONNU","CONTE","COPIE","CORDE","CORNE","CORPS","COSSE","COSTE","COTES","COUDE","COUPE","COURS","COURT","COUTS","COUVE","CRABE","CRANE","CRASH","CRAVE","CREME","CRENE","CRETE","CRIEE","CRIES","CRIME","CROCS","CROIS","CROIX","CROUP","CRUEL","CUBES","CULTE","CURIE","CURRY","CYCLE","DAMES","DANSE","DATES","DEBAT","DEBIT","DEBUT","DECOR","DEGAT","DEMIE","DEMIS","DENIS","DEPIT","DERBY","DESIR","DETTE","DEUIL","DEUX","DEVIN","DEVRA","DIEUX","DIGNE","DINER","DIRES","DISCO","DITES","DIVAN","DIVIN","DOIGT","DOIVE","DONNE","DONNE","DOREE","DORES","DOSER","DOUCE","DOUES","DOUMA","DOUTE","DOUZE","DROIT","DROLE","DUCAL","DUCHE","DUELS","DUNES","DURES","DURIT","EAGLE","ECART","ECLAT","ECLIP","ECOUT","ECRAN","ECRIT","ECUME","EFFET","EGALE","EGARD","EGOUT","ELANS","ELITE","ELLES","EMAIL","EMBUE","EMISE","EMOIS","EMPAN","ENCOR","ENFER","ENFIN","ENFLE","ENGIN","ENJEU","ENNUI","ENTRE","ENVOI","EPAIS","EPAVE","EPICE","EPOIS","EPOUE","EPOXY","ERASE","ERREUR","ESSAI","ESSOR","ESTER","ETAGE","ETANG","ETAPE","ETATS","ETOLE","ETUDE","EVENT","EVIDE","EXCES","EXIGE","EXILE","EXODE","EXTRA","FABLE","FACES","FACHE","FACON","FADES","FAGOT","FAIRE","FAITS","FALLE","FALOT","FAMAS","FANER","FANGE","FARCE","FARDE","FARES","FASCE","FATAL","FATUM","FAUNE","FAUTE","FAVOR","FECES","FELIN","FENDU","FERAI","FERAS","FERME","FERRE","FESSE","FESTI","FEUES","FEUIL","FEVRE","FIBRE","FICHE","FICHI","FICTE","FIDES","FIEFS","FIERE","FIERS","FIEST","FIGES","FIGUE","FILER","FILES","FILET","FILLE","FILME","FILMS","FILON","FILOU","FINAL","FINIE","FINIR","FINIS","FINIT","FIOLE","FISCS","FIXER","FIXES","FLAGE","FLAIR","FLANC","FLASH","FLEAU","FLEUR","FLICS","FLIRT","FLORE","FLOTS","FLOUE","FLOUS","FLUER","FLUTE","FOCAL","FOGER","FOIES","FOINS","FOLIE","FONCE","FONDE","FONDS","FORCE","FORGE","FORME","FORTS","FORUM","FOSSE","FOUET","FOULE","FOURS","FOYER","FRACS","FRAIS","FRANC","FRAPE","FRAYE","FREIN","FRELE","FRERE","FRIGO","FRIME","FRIPE","FROID","FRONT","FRUIT","FUGUE","FUMEE","FUMER","FURET","FURIE","FUSEE","FUSER","FUSIL","FUTEE","FUTES","GAGER","GAGNE","GAIES","GAINS","GALBE","GALER","GAMIN","GAMME","GARCE","GARDE","GARER","GARES","GATTE","GAUCH","GAUPE","GAVER","GAYER","GAZER","GAZON","GELER","GEMIR","GENES","GENOU","GENRE","GERBE","GERCE","GERME","GESTE","GIBET","GIFLE","GIGOT","GILDE","GIRLS","GIVRE","GLACE","GLANE","GLAPI","GLIDE","GLOBE","GLOSE","GLOUT","GLUER","GOBER","GODET","GOLFE","GOMBO","GONDS","GORGE","GOSSE","GOTHS","GOUGE","GOULE","GOUTS","GRACE","GRADE","GRAIN","GRAND","GRANT","GRAPE","GRASP","GRAVE","GREGE","GRELE","GRENE","GRENU","GRIEF","GRIFF","GRILL","GRISE","GRIVE","GROIN","GROLE","GROOM","GROSS","GROUP","GRUGE","GUEPE","GUERE","GUERI","GUETE","GUISE","HABIT","HACHE","HADAL","HAGAR","HALER","HALLE","HALTE","HANCE","HANSE","HARDE","HARPE","HASCH","HASTE","HAUTE","HAUTS","HAVRE","HEBDO","HELER","HERBE","HERON","HERSE","HERTZ","HEURE","HEURT","HIBOU","HIVER","HOBBY","HOCHE","HONTE","HORDE","HORST","HOSTO","HOTEL","HOULE","HOURD","HUILE","HUMER","HURLE","HYDRE","HYMNE","HYPER","ICONE","IDEAL","IDEES","IDIOT","IMAGE","IMIDE","IMITE","IMPER","IMPOT","INDEX","INDIC","INFRA","INNEE","INNES","INPUT","INTER","INTRA","IOTAS","IRISE","ISARD","ISBAS","ISLAM","ISSUE","ISSUS","IVRES","JABLE","JACKE","JALON","JAMBE","JANTE","JAPON","JARDE","JARRE","JASER","JATTE","JAVEL","JAZZY","JETEE","JETER","JETON","JETTE","JEUDE","JEUDS","JEUGE","JEUNA","JEUNE","JODLE","JOIES","JOINT","JOKER","JOLIE","JONCS","JOUER","JOUET","JOUIR","JOURS","JOUTE","JOYAU","JUDAS","JUGEZ","JUGES","JUILL","JUIVE","JUJUS","JULES","JUMBO","JUNTE","JUPES","JURER","JURON","JURYS","KARMA","KAYAK","KENDO","KERMA","KICKS","KILOS","KITCH","KOALA","KONDO","KRAFT","KURDE","LABEL","LABIE","LABOS","LACER","LACET","LACHE","LACIS","LACTE","LADRE","LAGER","LAICS","LAIDE","LAIDS","LAIES","LAINE","LAITE","LAMER","LANCE","LANDE","LAPIN","LARGE","LARME","LASER","LASSE","LATEX","LATIN","LAURE","LAVES","LAVIS","LAZAR","LEBEL","LECHE","LEGAL","LEGER","LEGUE","LEMME","LENTE","LENTS","LEPRE","LEROT","LESER","LESSE","LEVEE","LEVER","LEVES","LEVIS","LEVRE","LEXIS","LIAGE","LIBRE","LICHE","LICOL","LIEGE","LIENS","LIENT","LIEUE","LIEUR","LIEUX","LIGNE","LIGOT","LIGUE","LIMBE","LIMER","LIMES","LINGE","LINKS","LIONS","LISSE","LIVRE","LOBBY","LOCAL","LOCHS","LOGER","LOGES","LOGIN","LOIEE","LOIES","LOIRS","LONGE","LONGS","LOOPS","LOPIN","LORDY","LORDS","LOSER","LOTIE","LOTIR","LOTIS","LOTIT","LOTTE","LOTUS","LOUER","LOUES","LOUIS","LOUPE","LOUVE","LOYAL","LUCRE","LUEUR","LUFFA","LUGER","LUNES","LUNGE","LUTTE","LYCEE","LYCRA","LYRES","LYSEE","MACHO","MACON","MACRO","MAGIE","MAINS","MAIRE","MAJOR","MALIN","MALLE","MANGE","MANNE","MARGE","MARIE","MARRE","MASSE","MATCH","MATIN","MAUVE","MEANS","MEDIA","MELER","MEMES","MENEE","MENES","MERCI","MERDE","MERES","MERLE","MESSE","METAL","METRE","METRO","MIENS","MIEUX","MILAN","MILES","MILLE","MINCE","MINER","MINES","MINET","MINOU","MIRER","MISES","MIXER","MIXTE","MODEL","MODEM","MOINS","MOISE","MOITE","MONDE","MONTE","MORAL","MORDE","MORNE","MORSE","MORTE","MORTS","MOTIF","MOTOS","MOULE","MOYEN","MUCUS","MULES","MURER","MURES","MUSEE","MUSES","NAGER","NAIVE","NAIVS","NAPPE","NATAL","NAVAL","NAVET","NAVRE","NEANT","NEGRE","NERFS","NERVE","NEUFS","NEUVE","NICHE","NIECE","NIGER","NIMBE","NIVEA","NOBLE","NOCES","NOEUD","NOIRE","NOIRS","NOISE","NOMAS","NOMES","NONCE","NORME","NOTER","NOTES","NOTRE","NOUER","NOUES","NOYAU","NUAGE","NUITS","OBEIR","OBJET","OBLAT","OBTUS","OCCUP","OCEAN","OCTET","ODEUR","OEUFS","OFFRE","OISIF","OISON","OMBRE","OMEGA","ONCES","ONDES","ONGLE","OPERA","OPERE","OPIUM","ORAGE","ORALE","ORAUX","ORDRE","ORGUE","ORNER","OSCAR","OSIER","OTAGE","OUATE","OUBLI","OUEST","OUVRE","OVALE","OXYDE","OZONE","PAGNE","PAIEN","PAINS","PAIRE","PALIR","PALME","PANNE","PAPES","PARCE","PARER","PARES","PARIS","PARLE","PARMI","PAROI","PARTS","PASSE","PATIR","PAUSE","PAYER","PEAGE","PEAUX","PECHE","PEDES","PEINE","PEINT","PELER","PENAL","PENDU","PENNE","PENSE","PENTE","PERCE","PERDE","PERDU","PERES","PERIL","PERLE","PERME","PERSE","PESER","PESTE","PETIT","PETRE","PETRI","PHARE","PHASE","PHONE","PHOTO","PIANO","PIECE","PIEDS","PIEGE","PIERRE","PIGER","PILER","PILLE","PILOT","PINCE","PIONS","PIPES","PIQUE","PISTE","PITIE","PLACE","PLAGE","PLAID","PLAIN","PLAIT","PLANE","PLANS","PLANT","PLATE","PLATS","PLEIN","PLEUR","PLIER","PLOMB","PLOTS","PLOUF","PLUIE","PLUME","POCHE","POELE","POIDS","POING","POINT","POIRE","POLAR","POLES","POLIR","POMME","PONCE","PONDE","PONDS","PONDU","PONTE","PORCS","PORES","PORTE","PORTS","POSER","POSTE","POTES","POUCE","POULE","POULS","POUPE","POURE","POURS","POUTS","POUVO","PRAIR","PREND","PRETE","PRETS","PREUX","PREVU","PRIME","PRISE","PRIVE","PROBE","PROIE","PROSE","PROUE","PRUDE","PUANT","PUBLI","PUCE","PUCES","PUITS","PULPE","PUNIR","PUPAE","PURES","PURGE","PUTES","PUTIN","PUTTE","PYLON","QUART","QUASI","QUELS","QUERE","QUETE","QUEUE","QUIET","QUINE","QUOTA","RABAT","RACER","RADAR","RADIN","RADIO","RAGER","RAIDE","RAIDS","RAILS","RAINE","RAMER","RAMES","RANGE","RAPER","RAPES","RAPID","RATER","RATES","RATIO","RAVIN","RAVIT","RAYER","RAYON","REAGI","REBAT","REBEC","REBUE","REBUS","RECEL","RECES","RECHE","RECIF","RECIT","RECRE","RECRU","RECUL","REDAN","REDIE","REDIS","REDIT","REDON","REFUS","REGAL","REGIE","REGIR","REGLE","REGNE","REJET","RELAI","RELAX","RELIE","RELIS","RELIT","REMIS","REMIT","RENDE","RENDS","RENDU","RENEE","RENES","RENIE","RENNE","RENTE","REPAS","REPIT","REPOS","REPUE","REPUS","RESTO","RETIF","RETRO","REUNI","REVAI","REVAS","REVEE","REVES","REVEZ","REVIF","REVUE","RHUME","RICHE","RIDES","RIENS","RIEUR","RIGUE","RIMES","RINGS","RIPER","RISEE","RISER","RITES","RIVAL","ROBES","ROCHE","RODER","ROGNE","ROIDE","ROLES","ROMAN","RONDE","RONDS","RONGE","ROSEE","ROSES","ROSIR","ROTIR","ROUER","ROUES","ROUGE","ROULE","ROUND","ROUTE","ROYAL","RUBAN","RUCHE","RUDES","RUEES","RUGBY","RUILE","RUMBA","RURAL","RUSER","RUSES","RUSSE","SABLE","SABOT","SABRE","SACHE","SACRE","SAGES","SAINT","SAISI","SALER","SALES","SALIN","SALLE","SALON","SALOP","SALPE","SALSA","SALUT","SAMBA","SANGS","SAPER","SAPES","SARDE","SATIN","SAUCE","SAUGE","SAUNA","SAUTE","SAVON","SCENE","SCHWA","SCOOP","SCOOT","SCORE","SCOUT","SEAUX","SECHE","SEGAS","SEINS","SEIZE","SELON","SENAT","SENDE","SENDS","SENDU","SENEE","SENES","SENSE","SENTE","SENTI","SEPIA","SERAI","SERAS","SERGE","SERIE","SERRE","SERVE","SERVI","SEUIL","SEULE","SEULS","SEVRE","SEXES","SEXTE","SEXUE","SHOAH","SHOOT","SHORT","SHUNT","SIEGE","SIENS","SIGNE","SILEX","SINON","SIRES","SITES","SIXTE","SKATE","SKIER","SKIFF","SLASH","SLICE","SLIDE","SLIME","SLIPS","SLOOP","SLOWS","SLUMP","SLURP","SMASH","SMOGS","SMOKE","SNACK","SNIFF","SNIPE","SNOBS","SOBRE","SOCLE","SOEUR","SOFAS","SOINS","SOIRS","SOLDE","SOLEIL","SOLES","SOLOS","SONDE","SONGE","SONNE","SONOS","SORTS","SOUCI","SOUDA","SOUPE","SOURD","SOURI","SOURS","SOUTE","SPACE","SPARE","SPEED","SPORT","SPOTS","SQUAT","SQUAW","STADE","STAGE","STAND","STARS","START","STEAM","STICK","STOCK","STOP","STORE","STORY","STYLE","SUAVE","SUBER","SUCRE","SUEDE","SUEUR","SUITE","SUJET","SUPER","SURGE","SURGI","SURSA","SWING","SYNTH","TABAC","TABES","TABLA","TABOR","TACHE","TACLE","TACOS","TAGUE","TAIES","TAILL","TAINS","TALER","TALON","TALUS","TAMIS","TANGO","TANIN","TANKS","TAPER","TAPES","TAPIR","TAPIS","TARDE","TARER","TARES","TARGE","TARIF","TARIR","TAROT","TASSE","TATAR","TATOU","TAUPE","TAXER","TAXES","TAXIS","TCHAT","TEAMS","TECHS","TEINT","TEMPE","TEMPS","TENDE","TENDS","TENDU","TENIR","TENON","TENOR","TENTE","TERME","TERNE","TERRE","TESTS","TEXTE","THEME","THESE","THUNE","TIARE","TIBIA","TIENS","TIENT","TIGRE","TIMES","TIRER","TIRES","TISSE","TITAN","TITRE","TOAST","TOGES","TOILE","TOISE","TOITS","TOKEN","TOMBE","TOMBE","TONAL","TONDE","TONDS","TONDU","TONER","TONNE","TONUS","TOQUE","TORCH","TORSE","TORTE","TORTS","TOTAL","TOUER","TOURS","TOUTE","TOUTS","TOXIC","TRACE","TRADE","TRAIN","TRAIT","TRAME","TRANS","TRAVE","TREVE","TRIER","TRIES","TRINE","TROIS","TROMP","TRONC","TROPE","TROTS","TROUE","TROUS","TRUCS","TRUFF","TRUMP","TRUST","TUANT","TUBES","TUEES","TUENT","TUEUR","TUNER","TUNES","TURBO","TURCS","TURNE","TUTUS","TWIST","TYPES","TYRAN","UNIES","UNION","UNITE","URGES","USAGE","USINE","USITE","USUEL","VAGUE","VALET","VALLE","VALSE","VALUE","VALUS","VALUT","VAMPS","VANNE","VARIA","VARUS","VASES","VECES","VECUS","VECUT","VEINE","VELOS","VENDE","VENDS","VENDU","VENGE","VENIN","VENIR","VENTE","VENUE","VENUS","VERBE","VERDI","VERGE","VERNE","VERNI","VERRA","VERRE","VERSA","VERSO","VERTE","VERTS","VESCE","VESTE","VETIR","VETUS","VEUVE","VEXER","VEXES","VIBRE","VICES","VIDEO","VIDER","VIDES","VIEIL","VIENS","VIENT","VIEUX","VIGNE","VILES","VILLA","VILLE","VINER","VINES","VINGT","VIRER","VIRES","VIRUS","VISAS","VISER","VISES","VISON","VITAL","VITES","VIVRE","VOCAL","VOGUE","VOICI","VOIES","VOILA","VOILE","VOIRE","VOIX","VOLER","VOLES","VOLET","VOLTE","VOMIR","VOTER","VOTES","VOTRE","VOUER","VOUES","VOYER","VOYES","VRAIE","VRAIS","VULGO","WAGON","WATER","WEBER","WHARF","WHIGS","WHIST","WIKIS","WINCH","WISKI","WOLOF","XENON","XERES","XERUS","XHOSA","YACHT","YANGS","YARDS","YAWLS","YEMEN","YETIS","YOGIS","YOLKS","YORKS","YOUTH","YUCCA","ZAIRE","ZAMBI","ZEBRE","ZEBUS","ZELES","ZEROS","ZESTE","ZIGUE","ZINCS","ZIPPE","ZONER","ZONES","ZONTA","ZOUKS","ZUPPE"
+];
+
+let motDuJour = mots[Math.floor(Math.random() * mots.length)].toUpperCase();
+const longueurMot = 5;
+const maxEssais = 6;
+let essais = [];
+let ligneCourante = 0;
+
+const grid = document.getElementById('motus-grid');
+const input = document.getElementById('motus-input');
+const btn = document.getElementById('motus-btn');
+const message = document.getElementById('motus-message');
+const keyboard = document.getElementById('motus-keyboard');
+const replayBtn = document.getElementById('motus-replay');
+
+input.style.display = 'none'; // On n'utilise plus l'input unique
+
+enumColor = (proposition, solution) => {
+    // Retourne un tableau de couleurs (green, yellow, gray) façon Wordle
+    let colors = Array(longueurMot).fill('gray');
+    let solArr = solution.split('');
+    let propArr = proposition.split('');
+    // D'abord les verts
+    for (let i = 0; i < longueurMot; i++) {
+        if (propArr[i] === solArr[i]) {
+            colors[i] = 'green';
+            solArr[i] = null; // On retire la lettre de la solution
+            propArr[i] = null;
+        }
+    }
+    // Puis les jaunes
+    for (let i = 0; i < longueurMot; i++) {
+        if (propArr[i] && solArr.includes(propArr[i])) {
+            colors[i] = 'yellow';
+            solArr[solArr.indexOf(propArr[i])] = null;
+        }
+    }
+    return colors;
+}
+
+const azertyRows = [
+  ['A','Z','E','R','T','Y','U','I','O','P'],
+  ['Q','S','D','F','G','H','J','K','L','M'],
+  ['Effacer','W','X','C','V','B','N','Entrée']
+];
+
+function renderKeyboard(disabled = false) {
+  keyboard.innerHTML = '';
+  // Statut des lettres (vert, jaune, gris)
+  const keyStatus = {};
+  essais.forEach(tentative => {
+    const colors = enumColor(tentative, motDuJour);
+    for (let i = 0; i < longueurMot; i++) {
+      const lettre = tentative[i];
+      if (!/^[A-Z]$/.test(lettre)) continue;
+      // Priorité : vert > jaune > gris
+      if (colors[i] === 'green') {
+        keyStatus[lettre] = 'green';
+      } else if (colors[i] === 'yellow' && keyStatus[lettre] !== 'green') {
+        keyStatus[lettre] = 'yellow';
+      } else if (!keyStatus[lettre]) {
+        keyStatus[lettre] = 'gray';
+      }
+    }
+  });
+  azertyRows.forEach((row, i) => {
+    const rowDiv = document.createElement('div');
+    rowDiv.style.marginBottom = '6px';
+    row.forEach(key => {
+      const keyBtn = document.createElement('button');
+      keyBtn.textContent = key;
+      keyBtn.className = 'motus-btn';
+      keyBtn.style.minWidth = key.length > 1 ? '60px' : '36px';
+      keyBtn.style.padding = '6px 8px';
+      keyBtn.style.margin = '2px';
+      keyBtn.style.fontSize = '1rem';
+      keyBtn.disabled = disabled;
+      if(key === 'Entrée') keyBtn.style.background = '#6aaa64';
+      if(key === 'Effacer') keyBtn.style.background = '#787c7e';
+      if (/^[A-Z]$/.test(key) && keyStatus[key]) {
+        if (keyStatus[key] === 'green') keyBtn.style.background = '#6aaa64';
+        else if (keyStatus[key] === 'yellow') keyBtn.style.background = '#c9b458';
+        else if (keyStatus[key] === 'gray') keyBtn.style.background = '#787c7e';
+        keyBtn.style.color = '#fff';
+      }
+      keyBtn.addEventListener('click', () => handleVirtualKey(key));
+      rowDiv.appendChild(keyBtn);
+    });
+    keyboard.appendChild(rowDiv);
+  });
+}
+
+function handleVirtualKey(key) {
+  const row = grid.querySelectorAll('.motus-row')[essais.length];
+  if (!row) return;
+  // Cherche le premier input vide ou le dernier sélectionné
+  let focusIndex = 0;
+  for (let i = 0; i < longueurMot; i++) {
+    if (document.activeElement === row.children[i]) {
+      focusIndex = i;
+      break;
+    }
+    if (!row.children[i].value) {
+      focusIndex = i;
+      break;
+    }
+  }
+  if (key === 'Entrée') {
+    validerEssai();
+    return;
+  }
+  if (key === 'Effacer') {
+    for (let i = longueurMot - 1; i >= 0; i--) {
+      if (row.children[i].value) {
+        row.children[i].value = '';
+        row.children[i].focus();
+        break;
+      }
+    }
+    return;
+  }
+  if (/^[A-Z]$/.test(key)) {
+    for (let i = 0; i < longueurMot; i++) {
+      if (!row.children[i].value) {
+        row.children[i].value = key;
+        row.children[i].focus();
+        break;
+      }
+    }
+  }
+}
+
+function renderGrid() {
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = 'repeat(5, 40px)';
+    for (let i = 0; i < maxEssais; i++) {
+        const row = document.createElement('div');
+        row.className = 'motus-row';
+        if (i < essais.length) {
+            // Afficher la ligne validée
+            let tentative = essais[i];
+            let colors = enumColor(tentative, motDuJour);
+            for (let j = 0; j < longueurMot; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'motus-cell ' + colors[j];
+                cell.textContent = tentative[j].toUpperCase();
+                row.appendChild(cell);
+            }
+        } else if (i === essais.length && essais.length < maxEssais) {
+            // Ligne en cours : champs input lettre par lettre
+            for (let j = 0; j < longueurMot; j++) {
+                const cell = document.createElement('input');
+                cell.type = 'text';
+                cell.maxLength = 1;
+                cell.className = 'motus-cell';
+                cell.autocomplete = 'off';
+                cell.inputMode = 'text';
+                cell.style.textTransform = 'uppercase';
+                cell.style.background = 'var(--secondary)';
+                cell.style.color = 'var(--text)';
+                cell.style.textAlign = 'center';
+                cell.style.fontWeight = '600';
+                cell.style.fontSize = '1.5rem';
+                cell.dataset.index = j;
+                cell.addEventListener('input', function(e) {
+                    if (cell.value.length > 0 && j < longueurMot - 1) {
+                        row.children[j+1].focus();
+                    }
+                });
+                cell.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && cell.value === '' && j > 0) {
+                        row.children[j-1].focus();
+                    }
+                });
+                row.appendChild(cell);
+            }
+        } else {
+            // Ligne vide
+            for (let j = 0; j < longueurMot; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'motus-cell';
+                cell.textContent = '';
+                row.appendChild(cell);
+            }
+        }
+        grid.appendChild(row);
+    }
+    renderKeyboard(btn.disabled);
+}
+
+function getCurrentInput() {
+    const row = grid.querySelectorAll('.motus-row')[essais.length];
+    if (!row) return '';
+    let mot = '';
+    for (let j = 0; j < longueurMot; j++) {
+        const input = row.children[j];
+        mot += (input.value || ' ').toUpperCase();
+    }
+    return mot;
+}
+
+function validerEssai() {
+    if (essais.length >= maxEssais) return;
+    const row = grid.querySelectorAll('.motus-row')[essais.length];
+    let proposition = '';
+    for (let j = 0; j < longueurMot; j++) {
+        const input = row.children[j];
+        if (!input.value || input.value.length !== 1) {
+            message.textContent = `Remplis toutes les cases.`;
+            message.style.color = 'var(--danger)';
+            input.focus();
+            return;
+        }
+        proposition += input.value.toUpperCase();
+    }
+    if (!motsValides.includes(proposition)) {
+        message.textContent = "Mot inconnu ou non autorisé.";
+        message.style.color = 'var(--danger)';
+        row.children[0].focus();
+        return;
+    }
+    essais.push(proposition);
+    renderGrid();
+    message.textContent = '';
+    if (proposition === motDuJour) {
+        message.textContent = `Bravo ! Le mot était bien ${motDuJour}.`;
+        message.style.color = '#6aaa64';
+        btn.disabled = true;
+        renderKeyboard(true);
+        replayBtn.style.display = '';
+    } else if (essais.length === maxEssais) {
+        message.textContent = `Perdu ! Le mot était ${motDuJour}.`;
+        message.style.color = '#787c7e';
+        btn.disabled = true;
+        renderKeyboard(true);
+        replayBtn.style.display = '';
+    } else {
+        // Focus sur la première case de la nouvelle ligne
+        setTimeout(() => {
+            const nextRow = grid.querySelectorAll('.motus-row')[essais.length];
+            if (nextRow) nextRow.children[0].focus();
+        }, 50);
+    }
+}
+
+btn.addEventListener('click', validerEssai);
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && btn.disabled === false) {
+        const active = document.activeElement;
+        if (active && active.classList.contains('motus-cell') && active.tagName === 'INPUT') {
+            validerEssai();
+        }
+    }
+});
+replayBtn.addEventListener('click', () => {
+    essais = [];
+    motDuJour = mots[Math.floor(Math.random() * mots.length)].toUpperCase();
+    btn.disabled = false;
+    message.textContent = '';
+    replayBtn.style.display = 'none';
+    renderGrid();
+    setTimeout(() => {
+        const firstRow = grid.querySelectorAll('.motus-row')[0];
+        if (firstRow) firstRow.children[0].focus();
+    }, 100);
+});
+renderGrid();
+// Focus sur la première case au chargement
+setTimeout(() => {
+    const firstRow = grid.querySelectorAll('.motus-row')[0];
+    if (firstRow) firstRow.children[0].focus();
+}, 100);
+</script>
+</body>
+</html>
