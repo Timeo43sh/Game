@@ -59,7 +59,8 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
             padding: 8px;
             font-weight: 600;
             position: relative;
@@ -73,11 +74,33 @@
 
         .card-value {
             font-size: 1.5rem;
+            font-weight: 700;
+            color: #212121;
+        }
+
+        .card-value.top {
+            position: absolute;
+            top: 5px;
+            left: 8px;
+            z-index: 2;
+        }
+
+        .card-value.bottom {
+            position: absolute;
+            bottom: 5px;
+            right: 8px;
+            transform: rotate(180deg);
+            z-index: 2;
         }
 
         .card-suit {
-            font-size: 2rem;
+            font-size: 2.5rem;
             text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
         }
 
         .card-suit.red {
@@ -478,7 +501,7 @@
                 }
                 
                 const valueTop = document.createElement('div');
-                valueTop.className = 'card-value';
+                valueTop.className = 'card-value top';
                 valueTop.textContent = card.value;
                 
                 const suitElement = document.createElement('div');
@@ -486,7 +509,7 @@
                 suitElement.textContent = card.suit;
                 
                 const valueBottom = document.createElement('div');
-                valueBottom.className = 'card-value';
+                valueBottom.className = 'card-value bottom';
                 valueBottom.textContent = card.value;
                 
                 cardElement.appendChild(valueTop);

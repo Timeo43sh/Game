@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="../styles.css">
     <style>
         .battleship-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 40px auto;
             background: var(--card-bg);
             border-radius: 16px;
@@ -55,15 +55,24 @@
             font-size: 1.1rem;
         }
         
-        .game-phase {
+        .orientation-selector {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            align-items: center;
+            gap: 15px;
             margin-bottom: 20px;
+            padding: 15px;
+            background: var(--secondary);
+            border-radius: 12px;
         }
         
-        .phase-btn {
-            background: var(--secondary);
+        .orientation-label {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .orientation-btn {
+            background: var(--card-bg);
             color: var(--text);
             border: 2px solid transparent;
             border-radius: 8px;
@@ -71,18 +80,43 @@
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .phase-btn.active {
-            background: var(--primary);
+        .orientation-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
             border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
-        .phase-btn:hover {
-            background: var(--accent);
+        .orientation-btn:hover {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
             color: white;
+            transform: translateY(-2px);
+        }
+        
+        .orientation-selector.inline {
+            position: absolute;
+            top: 50%;
+            left: -120px;
+            transform: translateY(-50%);
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px;
+            background: var(--secondary);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        .orientation-selector.inline .orientation-btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
         }
         
         .game-info {
@@ -175,6 +209,7 @@
             text-align: center;
             flex: 1;
             min-width: 350px;
+            position: relative;
         }
         
         .board-title {
@@ -226,6 +261,20 @@
             background: var(--accent);
             transform: scale(1.1);
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .battleship-cell.preview {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        
+        .battleship-cell.preview-invalid {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
         
         .battleship-cell.ship {
@@ -376,7 +425,17 @@
             50% { opacity: 0.6; }
         }
         
-        @media (max-width: 1200px) {
+        .player-indicator {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        
+        @media (max-width: 1400px) {
             .battleship-container {
                 max-width: 95%;
                 padding: 30px 20px;
@@ -428,21 +487,16 @@
             <div class="battleship-title">Bataille Navale</div>
             <div class="battleship-desc">Placez vos bateaux et coulez la flotte ennemie !</div>
             
-            <div class="game-phase">
-                <button class="phase-btn active" id="phase-placement">Placement</button>
-                <button class="phase-btn" id="phase-battle">Combat</button>
-            </div>
-            
             <div class="game-info">
                 <div class="current-player" id="current-player">Placez vos bateaux</div>
                 <div class="score">
                     <div class="score-item">
-                        <div class="score-label">Vous</div>
-                        <div class="score-value" id="score-player">0</div>
+                        <div class="score-label">Joueur 1</div>
+                        <div class="score-value" id="score-player1">0</div>
                     </div>
                     <div class="score-item">
-                        <div class="score-label">IA</div>
-                        <div class="score-value" id="score-ai">0</div>
+                        <div class="score-label">Joueur 2</div>
+                        <div class="score-value" id="score-player2">0</div>
                     </div>
                 </div>
             </div>
@@ -455,12 +509,12 @@
                         <div class="stat-value" id="games-played">0</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Votre précision</div>
-                        <div class="stat-value" id="player-accuracy">0%</div>
+                        <div class="stat-label">Précision J1</div>
+                        <div class="stat-value" id="player1-accuracy">0%</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Précision IA</div>
-                        <div class="stat-value" id="ai-accuracy">0%</div>
+                        <div class="stat-label">Précision J2</div>
+                        <div class="stat-value" id="player2-accuracy">0%</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Tirs réussis</div>
@@ -490,21 +544,30 @@
             
             <div class="boards-container">
                 <div class="board-section">
-                    <div class="board-title">Votre Grille</div>
-                    <div class="battleship-grid" id="player-grid"></div>
+                    <div class="player-indicator" id="player1-indicator">Joueur 1</div>
+                    <div class="board-title">Grille du Joueur 1</div>
+                    <div class="battleship-grid" id="player1-grid"></div>
+                    <div class="orientation-selector inline" id="orientation-selector">
+                        <span class="orientation-label">Orientation :</span>
+                        <button class="orientation-btn active" id="orientation-horizontal">
+                            <i class="fas fa-arrows-alt-h"></i> H
+                        </button>
+                        <button class="orientation-btn" id="orientation-vertical">
+                            <i class="fas fa-arrows-alt-v"></i> V
+                        </button>
+                    </div>
                 </div>
                 <div class="board-section">
-                    <div class="board-title">Grille Ennemie</div>
-                    <div class="battleship-grid" id="ai-grid"></div>
+                    <div class="player-indicator" id="player2-indicator">Joueur 2</div>
+                    <div class="board-title">Grille du Joueur 2</div>
+                    <div class="battleship-grid" id="player2-grid"></div>
                 </div>
             </div>
             
             <div class="game-controls">
                 <button class="battleship-btn" id="auto-place-btn">Placement Auto</button>
-                <button class="battleship-btn" id="start-battle-btn" disabled>Commencer Combat</button>
                 <button class="battleship-btn secondary" id="new-game-btn">Nouvelle Partie</button>
                 <button class="battleship-btn secondary" id="reset-score-btn">Reset Score</button>
-                <button class="battleship-btn secondary" id="show-ships-btn">Voir Bateaux IA</button>
             </div>
             
             <div class="battleship-message" id="battleship-message"></div>
@@ -516,21 +579,20 @@
             constructor() {
                 this.boardSize = 10;
                 this.ships = [5, 4, 3, 2]; // Tailles des bateaux
-                this.playerBoard = this.createEmptyBoard();
-                this.aiBoard = this.createEmptyBoard();
-                this.aiShips = [];
+                this.player1Board = this.createEmptyBoard();
+                this.player2Board = this.createEmptyBoard();
+                this.player1Ships = [];
+                this.player2Ships = [];
                 this.gamePhase = 'placement'; // 'placement' ou 'battle'
-                this.currentPlayer = 'player';
-                this.scores = { player: 0, ai: 0 };
-                this.shipsPlaced = 0;
-                this.selectedShip = null;
+                this.currentPlayer = 'player1';
+                this.scores = { player1: 0, player2: 0 };
+                this.shipsPlaced = { player1: 0, player2: 0 };
                 this.selectedOrientation = 'horizontal';
-                this.showAiShips = false;
                 this.gameStats = {
-                    playerHits: 0,
-                    playerMisses: 0,
-                    aiHits: 0,
-                    aiMisses: 0,
+                    player1Hits: 0,
+                    player1Misses: 0,
+                    player2Hits: 0,
+                    player2Misses: 0,
                     gamesPlayed: 0
                 };
                 
@@ -542,23 +604,25 @@
             }
             
             initializeGame() {
-                this.playerGrid = document.getElementById('player-grid');
-                this.aiGrid = document.getElementById('ai-grid');
+                this.player1Grid = document.getElementById('player1-grid');
+                this.player2Grid = document.getElementById('player2-grid');
                 this.message = document.getElementById('battleship-message');
                 this.currentPlayerDisplay = document.getElementById('current-player');
-                this.scorePlayer = document.getElementById('score-player');
-                this.scoreAi = document.getElementById('score-ai');
+                this.scorePlayer1 = document.getElementById('score-player1');
+                this.scorePlayer2 = document.getElementById('score-player2');
                 this.gamesPlayed = document.getElementById('games-played');
-                this.playerAccuracy = document.getElementById('player-accuracy');
-                this.aiAccuracy = document.getElementById('ai-accuracy');
+                this.player1Accuracy = document.getElementById('player1-accuracy');
+                this.player2Accuracy = document.getElementById('player2-accuracy');
                 this.totalHits = document.getElementById('total-hits');
                 this.autoPlaceBtn = document.getElementById('auto-place-btn');
-                this.startBattleBtn = document.getElementById('start-battle-btn');
                 this.newGameBtn = document.getElementById('new-game-btn');
                 this.resetScoreBtn = document.getElementById('reset-score-btn');
-                this.showShipsBtn = document.getElementById('show-ships-btn');
-                this.phasePlacement = document.getElementById('phase-placement');
-                this.phaseBattle = document.getElementById('phase-battle');
+                this.player1Indicator = document.getElementById('player1-indicator');
+                this.player2Indicator = document.getElementById('player2-indicator');
+                
+                // Orientation
+                this.orientationHorizontal = document.getElementById('orientation-horizontal');
+                this.orientationVertical = document.getElementById('orientation-vertical');
                 
                 this.setupEventListeners();
                 this.renderBoards();
@@ -568,67 +632,103 @@
             setupEventListeners() {
                 // Boutons
                 this.autoPlaceBtn.addEventListener('click', () => this.autoPlaceShips());
-                this.startBattleBtn.addEventListener('click', () => this.startBattle());
                 this.newGameBtn.addEventListener('click', () => this.newGame());
                 this.resetScoreBtn.addEventListener('click', () => this.resetScore());
-                this.showShipsBtn.addEventListener('click', () => this.toggleShowShips());
                 
-                // Phases
-                this.phasePlacement.addEventListener('click', () => this.setPhase('placement'));
-                this.phaseBattle.addEventListener('click', () => this.setPhase('battle'));
+                // Orientation
+                this.orientationHorizontal.addEventListener('click', () => this.setOrientation('horizontal'));
+                this.orientationVertical.addEventListener('click', () => this.setOrientation('vertical'));
                 
                 // Grilles
                 this.setupGridEventListeners();
             }
             
             setupGridEventListeners() {
-                // Grille du joueur
-                this.playerGrid.addEventListener('click', (e) => {
+                // Grille du joueur 1
+                this.player1Grid.addEventListener('click', (e) => {
                     if (e.target.classList.contains('battleship-cell')) {
                         const row = parseInt(e.target.dataset.row);
                         const col = parseInt(e.target.dataset.col);
-                        this.handlePlayerGridClick(row, col);
+                        this.handlePlayer1GridClick(row, col);
                     }
                 });
                 
-                // Grille de l'IA
-                this.aiGrid.addEventListener('click', (e) => {
+                this.player1Grid.addEventListener('mouseover', (e) => {
+                    if (e.target.classList.contains('battleship-cell') && this.gamePhase === 'placement' && this.currentPlayer === 'player1') {
+                        const row = parseInt(e.target.dataset.row);
+                        const col = parseInt(e.target.dataset.col);
+                        this.showShipPreview(row, col, 'player1');
+                    }
+                });
+                
+                this.player1Grid.addEventListener('mouseout', (e) => {
+                    if (e.target.classList.contains('battleship-cell')) {
+                        this.hideShipPreview('player1');
+                    }
+                });
+                
+                // Grille du joueur 2
+                this.player2Grid.addEventListener('click', (e) => {
                     if (e.target.classList.contains('battleship-cell')) {
                         const row = parseInt(e.target.dataset.row);
                         const col = parseInt(e.target.dataset.col);
-                        this.handleAiGridClick(row, col);
+                        this.handlePlayer2GridClick(row, col);
+                    }
+                });
+                
+                this.player2Grid.addEventListener('mouseover', (e) => {
+                    if (e.target.classList.contains('battleship-cell') && this.gamePhase === 'placement' && this.currentPlayer === 'player2') {
+                        const row = parseInt(e.target.dataset.row);
+                        const col = parseInt(e.target.dataset.col);
+                        this.showShipPreview(row, col, 'player2');
+                    }
+                });
+                
+                this.player2Grid.addEventListener('mouseout', (e) => {
+                    if (e.target.classList.contains('battleship-cell')) {
+                        this.hideShipPreview('player2');
                     }
                 });
             }
             
-            handlePlayerGridClick(row, col) {
-                if (this.gamePhase === 'placement') {
-                    this.placeShip(row, col);
+            handlePlayer1GridClick(row, col) {
+                if (this.gamePhase === 'placement' && this.currentPlayer === 'player1') {
+                    this.placeShip(row, col, 'player1');
+                } else if (this.gamePhase === 'battle' && this.currentPlayer === 'player2') {
+                    this.makeMove(row, col, 'player2', 'player1');
                 }
             }
             
-            handleAiGridClick(row, col) {
-                if (this.gamePhase === 'battle' && this.currentPlayer === 'player') {
-                    this.makePlayerMove(row, col);
+            handlePlayer2GridClick(row, col) {
+                if (this.gamePhase === 'placement' && this.currentPlayer === 'player2') {
+                    this.placeShip(row, col, 'player2');
+                } else if (this.gamePhase === 'battle' && this.currentPlayer === 'player1') {
+                    this.makeMove(row, col, 'player1', 'player2');
                 }
             }
             
-            placeShip(row, col) {
-                if (this.shipsPlaced >= this.ships.length) return;
+            placeShip(row, col, player) {
+                if (this.shipsPlaced[player] >= this.ships.length) return;
                 
-                const shipSize = this.ships[this.shipsPlaced];
-                const canPlace = this.canPlaceShip(this.playerBoard, row, col, shipSize, this.selectedOrientation);
+                const shipSize = this.ships[this.shipsPlaced[player]];
+                const board = player === 'player1' ? this.player1Board : this.player2Board;
+                const canPlace = this.canPlaceShip(board, row, col, shipSize, this.selectedOrientation);
                 
                 if (canPlace) {
-                    this.placeShipOnBoard(this.playerBoard, row, col, shipSize, this.selectedOrientation);
-                    this.shipsPlaced++;
+                    this.placeShipOnBoard(board, row, col, shipSize, this.selectedOrientation);
+                    this.shipsPlaced[player]++;
                     this.renderBoards();
                     
-                    if (this.shipsPlaced >= this.ships.length) {
-                        this.startBattleBtn.disabled = false;
-                        this.showMessage('Tous les bateaux placés ! Cliquez sur "Commencer Combat"', 'success');
+                    if (this.shipsPlaced[player] >= this.ships.length) {
+                        if (player === 'player1') {
+                            this.currentPlayer = 'player2';
+                            this.showMessage('Joueur 1 a terminé ! Joueur 2, placez vos bateaux', 'success');
+                        } else {
+                            this.showMessage('Tous les bateaux placés ! La partie commence...', 'success');
+                            setTimeout(() => this.startBattle(), 1500);
+                        }
                     } else {
-                        this.showMessage(`Placez le ${this.getShipName(this.ships[this.shipsPlaced])} (${this.ships[this.shipsPlaced]} cases)`, 'info');
+                        this.showMessage(`Joueur ${player === 'player1' ? '1' : '2'}, placez le ${this.getShipName(this.ships[this.shipsPlaced[player]])} (${this.ships[this.shipsPlaced[player]]} cases)`, 'info');
                     }
                 } else {
                     this.showMessage('Impossible de placer le bateau ici', 'error');
@@ -663,96 +763,75 @@
             }
             
             autoPlaceShips() {
-                this.playerBoard = this.createEmptyBoard();
-                this.shipsPlaced = 0;
+                // Placement automatique pour les deux joueurs
+                this.player1Board = this.createEmptyBoard();
+                this.player2Board = this.createEmptyBoard();
+                this.shipsPlaced = { player1: 0, player2: 0 };
                 
-                for (let shipSize of this.ships) {
-                    let placed = false;
-                    let attempts = 0;
+                for (let player of ['player1', 'player2']) {
+                    const board = player === 'player1' ? this.player1Board : this.player2Board;
                     
-                    while (!placed && attempts < 100) {
-                        const row = Math.floor(Math.random() * this.boardSize);
-                        const col = Math.floor(Math.random() * this.boardSize);
-                        const orientation = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+                    for (let shipSize of this.ships) {
+                        let placed = false;
+                        let attempts = 0;
                         
-                        if (this.canPlaceShip(this.playerBoard, row, col, shipSize, orientation)) {
-                            this.placeShipOnBoard(this.playerBoard, row, col, shipSize, orientation);
-                            placed = true;
+                        while (!placed && attempts < 100) {
+                            const row = Math.floor(Math.random() * this.boardSize);
+                            const col = Math.floor(Math.random() * this.boardSize);
+                            const orientation = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+                            
+                            if (this.canPlaceShip(board, row, col, shipSize, orientation)) {
+                                this.placeShipOnBoard(board, row, col, shipSize, orientation);
+                                placed = true;
+                            }
+                            attempts++;
                         }
-                        attempts++;
+                        
+                        if (!placed) {
+                            this.showMessage('Erreur lors du placement automatique', 'error');
+                            return;
+                        }
                     }
                     
-                    if (!placed) {
-                        this.showMessage('Erreur lors du placement automatique', 'error');
-                        return;
-                    }
+                    this.shipsPlaced[player] = this.ships.length;
                 }
                 
-                this.shipsPlaced = this.ships.length;
                 this.renderBoards();
-                this.startBattleBtn.disabled = false;
-                this.showMessage('Bateaux placés automatiquement !', 'success');
+                this.showMessage('Bateaux placés automatiquement ! La partie commence...', 'success');
+                setTimeout(() => this.startBattle(), 1500);
             }
             
             startBattle() {
                 this.gamePhase = 'battle';
-                this.currentPlayer = 'player';
-                this.placeAiShips();
-                this.updateDisplay();
-                this.showMessage('Combat commencé ! Votre tour', 'info');
-            }
-            
-            placeAiShips() {
-                this.aiShips = [];
+                this.currentPlayer = 'player1';
                 
-                for (let shipSize of this.ships) {
-                    let placed = false;
-                    let attempts = 0;
-                    
-                    while (!placed && attempts < 100) {
-                        const row = Math.floor(Math.random() * this.boardSize);
-                        const col = Math.floor(Math.random() * this.boardSize);
-                        const orientation = Math.random() < 0.5 ? 'horizontal' : 'vertical';
-                        
-                        if (this.canPlaceShip(this.aiBoard, row, col, shipSize, orientation)) {
-                            this.placeShipOnBoard(this.aiBoard, row, col, shipSize, orientation);
-                            this.aiShips.push({ size: shipSize, positions: [] });
-                            
-                            // Enregistrer les positions du bateau
-                            if (orientation === 'horizontal') {
-                                for (let i = 0; i < shipSize; i++) {
-                                    this.aiShips[this.aiShips.length - 1].positions.push([row, col + i]);
-                                }
-                            } else {
-                                for (let i = 0; i < shipSize; i++) {
-                                    this.aiShips[this.aiShips.length - 1].positions.push([row + i, col]);
-                                }
-                            }
-                            
-                            placed = true;
-                        }
-                        attempts++;
-                    }
-                }
+                // Supprimer la prévisualisation
+                this.hideShipPreview('player1');
+                this.hideShipPreview('player2');
+                
+                this.updateDisplay();
+                this.showMessage('Combat commencé ! Joueur 1, votre tour', 'info');
             }
             
-            makePlayerMove(row, col) {
-                if (this.aiBoard[row][col] === 'hit' || this.aiBoard[row][col] === 'miss') {
+            makeMove(row, col, attackingPlayer, defendingPlayer) {
+                const defendingBoard = defendingPlayer === 'player1' ? this.player1Board : this.player2Board;
+                
+                if (defendingBoard[row][col] === 'hit' || defendingBoard[row][col] === 'miss') {
                     return; // Case déjà touchée
                 }
                 
-                if (this.aiBoard[row][col] === 'ship') {
-                    this.aiBoard[row][col] = 'hit';
-                    this.scores.player++;
-                    this.gameStats.playerHits++;
-                    this.showMessage('Touché !', 'success');
+                if (defendingBoard[row][col] === 'ship') {
+                    defendingBoard[row][col] = 'hit';
+                    this.scores[attackingPlayer]++;
+                    this.gameStats[`${attackingPlayer}Hits`]++;
+                    this.showMessage(`Joueur ${attackingPlayer === 'player1' ? '1' : '2'} a touché !`, 'success');
                     
                     // Vérifier si un bateau est coulé
-                    this.checkShipSunk(row, col);
+                    this.checkShipSunk(row, col, defendingPlayer);
                 } else {
-                    this.aiBoard[row][col] = 'miss';
-                    this.gameStats.playerMisses++;
-                    this.showMessage('Raté !', 'info');
+                    defendingBoard[row][col] = 'miss';
+                    this.gameStats[`${attackingPlayer}Misses`]++;
+                    this.showMessage(`Joueur ${attackingPlayer === 'player1' ? '1' : '2'} a raté !`, 'info');
                 }
                 
                 this.renderBoards();
@@ -761,88 +840,137 @@
                     return;
                 }
                 
-                // Tour de l'IA
-                this.currentPlayer = 'ai';
+                // Changer de joueur
+                this.currentPlayer = this.currentPlayer === 'player1' ? 'player2' : 'player1';
                 this.updateDisplay();
-                setTimeout(() => {
-                    this.makeAiMove();
-                }, 1000);
+                this.showMessage(`Joueur ${this.currentPlayer === 'player1' ? '1' : '2'}, votre tour`, 'info');
             }
             
-            makeAiMove() {
-                // IA simple : tir aléatoire
-                let row, col;
-                do {
-                    row = Math.floor(Math.random() * this.boardSize);
-                    col = Math.floor(Math.random() * this.boardSize);
-                } while (this.playerBoard[row][col] === 'hit' || this.playerBoard[row][col] === 'miss');
+            setOrientation(orientation) {
+                this.selectedOrientation = orientation;
                 
-                if (this.playerBoard[row][col] === 'ship') {
-                    this.playerBoard[row][col] = 'hit';
-                    this.scores.ai++;
-                    this.gameStats.aiHits++;
-                    this.showMessage('L\'IA vous a touché !', 'warning');
-                } else {
-                    this.playerBoard[row][col] = 'miss';
-                    this.gameStats.aiMisses++;
-                    this.showMessage('L\'IA a raté !', 'info');
+                // Mise à jour des boutons
+                this.orientationHorizontal.classList.toggle('active', orientation === 'horizontal');
+                this.orientationVertical.classList.toggle('active', orientation === 'vertical');
+                
+                this.showMessage(`Orientation : ${orientation}`, 'info');
+                
+                // Mettre à jour la prévisualisation si on survole une cellule
+                const hoveredCell = this.player1Grid.querySelector(':hover');
+                if (hoveredCell && hoveredCell.classList.contains('battleship-cell') && this.currentPlayer === 'player1') {
+                    const row = parseInt(hoveredCell.dataset.row);
+                    const col = parseInt(hoveredCell.dataset.col);
+                    this.showShipPreview(row, col, 'player1');
                 }
                 
-                this.renderBoards();
-                
-                if (this.checkGameOver()) {
-                    return;
+                const hoveredCell2 = this.player2Grid.querySelector(':hover');
+                if (hoveredCell2 && hoveredCell2.classList.contains('battleship-cell') && this.currentPlayer === 'player2') {
+                    const row = parseInt(hoveredCell2.dataset.row);
+                    const col = parseInt(hoveredCell2.dataset.col);
+                    this.showShipPreview(row, col, 'player2');
                 }
-                
-                // Tour du joueur
-                this.currentPlayer = 'player';
-                this.updateDisplay();
             }
             
-            checkShipSunk(row, col) {
-                // Trouver le bateau touché
-                for (let ship of this.aiShips) {
-                    for (let [shipRow, shipCol] of ship.positions) {
-                        if (shipRow === row && shipCol === col) {
-                            // Vérifier si tout le bateau est touché
-                            let allHit = true;
-                            for (let [posRow, posCol] of ship.positions) {
-                                if (this.aiBoard[posRow][posCol] !== 'hit') {
-                                    allHit = false;
-                                    break;
-                                }
+            showShipPreview(row, col, player) {
+                if (this.shipsPlaced[player] >= this.ships.length) return;
+                
+                const shipSize = this.ships[this.shipsPlaced[player]];
+                const board = player === 'player1' ? this.player1Board : this.player2Board;
+                const grid = player === 'player1' ? this.player1Grid : this.player2Grid;
+                const canPlace = this.canPlaceShip(board, row, col, shipSize, this.selectedOrientation);
+                
+                // Supprimer les prévisualisations précédentes
+                this.hideShipPreview(player);
+                
+                // Ajouter la prévisualisation
+                if (this.selectedOrientation === 'horizontal') {
+                    for (let i = 0; i < shipSize; i++) {
+                        const newCol = col + i;
+                        if (newCol < this.boardSize) {
+                            const cell = grid.querySelector(`[data-row="${row}"][data-col="${newCol}"]`);
+                            if (cell) {
+                                cell.classList.add(canPlace ? 'preview' : 'preview-invalid');
                             }
-                            
-                            if (allHit) {
-                                // Marquer le bateau comme coulé
-                                for (let [posRow, posCol] of ship.positions) {
-                                    this.aiBoard[posRow][posCol] = 'sunk';
-                                }
-                                this.showMessage(`Bateau coulé ! (${ship.size} cases)`, 'success');
-                            }
-                            return;
                         }
                     }
+                } else {
+                    for (let i = 0; i < shipSize; i++) {
+                        const newRow = row + i;
+                        if (newRow < this.boardSize) {
+                            const cell = grid.querySelector(`[data-row="${newRow}"][data-col="${col}"]`);
+                            if (cell) {
+                                cell.classList.add(canPlace ? 'preview' : 'preview-invalid');
+                            }
+                        }
+                    }
+                }
+            }
+            
+            hideShipPreview(player) {
+                const grid = player === 'player1' ? this.player1Grid : this.player2Grid;
+                const previewCells = grid.querySelectorAll('.preview, .preview-invalid');
+                previewCells.forEach(cell => {
+                    cell.classList.remove('preview', 'preview-invalid');
+                });
+            }
+            
+            checkShipSunk(row, col, player) {
+                const board = player === 'player1' ? this.player1Board : this.player2Board;
+                
+                // Logique simplifiée pour détecter les bateaux coulés
+                // Chercher dans les cases adjacentes pour trouver le bateau complet
+                const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+                let shipPositions = [[row, col]];
+                
+                // Chercher les positions du bateau dans toutes les directions
+                for (let [dr, dc] of directions) {
+                    let r = row + dr;
+                    let c = col + dc;
+                    
+                    while (this.isValidPosition(r, c) && board[r][c] === 'hit') {
+                        shipPositions.push([r, c]);
+                        r += dr;
+                        c += dc;
+                    }
+                }
+                
+                // Vérifier si toutes les positions du bateau sont touchées
+                let allHit = true;
+                for (let [r, c] of shipPositions) {
+                    if (board[r][c] !== 'hit') {
+                        allHit = false;
+                        break;
+                    }
+                }
+                
+                if (allHit) {
+                    // Marquer le bateau comme coulé
+                    for (let [r, c] of shipPositions) {
+                        board[r][c] = 'sunk';
+                    }
+                    this.showMessage(`Bateau coulé ! (${shipPositions.length} cases)`, 'success');
                 }
             }
             
             checkGameOver() {
-                const playerShips = this.countRemainingShips(this.playerBoard);
-                const aiShips = this.countRemainingShips(this.aiBoard);
+                const player1Ships = this.countRemainingShips(this.player1Board);
+                const player2Ships = this.countRemainingShips(this.player2Board);
                 
-                if (playerShips === 0) {
-                    this.scores.ai++;
+                if (player1Ships === 0) {
+                    this.scores.player2++;
                     this.gameStats.gamesPlayed++;
-                    this.showMessage('L\'IA a gagné !', 'error');
+                    this.showMessage('Joueur 2 a gagné !', 'success');
                     this.gamePhase = 'placement';
                     this.updateDisplay();
+                    this.showReplayPrompt();
                     return true;
-                } else if (aiShips === 0) {
-                    this.scores.player++;
+                } else if (player2Ships === 0) {
+                    this.scores.player1++;
                     this.gameStats.gamesPlayed++;
-                    this.showMessage('Vous avez gagné !', 'success');
+                    this.showMessage('Joueur 1 a gagné !', 'success');
                     this.gamePhase = 'placement';
                     this.updateDisplay();
+                    this.showReplayPrompt();
                     return true;
                 }
                 
@@ -862,8 +990,8 @@
             }
             
             renderBoards() {
-                this.renderGrid(this.playerGrid, this.playerBoard, true);
-                this.renderGrid(this.aiGrid, this.aiBoard, false);
+                this.renderGrid(this.player1Grid, this.player1Board, true);
+                this.renderGrid(this.player2Grid, this.player2Board, true);
             }
             
             renderGrid(gridElement, board, showShips) {
@@ -882,7 +1010,7 @@
                         
                         const cellValue = board[row][col];
                         
-                        if (cellValue === 'ship' && (showShips || this.showAiShips)) {
+                        if (cellValue === 'ship' && showShips) {
                             cell.classList.add('ship');
                         } else if (cellValue === 'hit') {
                             cell.classList.add('hit');
@@ -900,32 +1028,33 @@
                 }
             }
             
-            setPhase(phase) {
-                this.gamePhase = phase;
-                this.phasePlacement.classList.toggle('active', phase === 'placement');
-                this.phaseBattle.classList.toggle('active', phase === 'battle');
-                this.updateDisplay();
-            }
-            
             updateDisplay() {
                 if (this.gamePhase === 'placement') {
-                    this.currentPlayerDisplay.textContent = 'Placez vos bateaux';
-                } else {
-                    if (this.currentPlayer === 'player') {
-                        this.currentPlayerDisplay.textContent = 'Votre tour';
+                    if (this.currentPlayer === 'player1') {
+                        this.currentPlayerDisplay.textContent = 'Joueur 1, placez vos bateaux';
                     } else {
-                        this.currentPlayerDisplay.textContent = 'Tour de l\'IA';
+                        this.currentPlayerDisplay.textContent = 'Joueur 2, placez vos bateaux';
                     }
+                } else {
+                    this.currentPlayerDisplay.textContent = `Tour du Joueur ${this.currentPlayer === 'player1' ? '1' : '2'}`;
                 }
                 
-                this.scorePlayer.textContent = this.scores.player;
-                this.scoreAi.textContent = this.scores.ai;
+                this.scorePlayer1.textContent = this.scores.player1;
+                this.scorePlayer2.textContent = this.scores.player2;
+                
+                // Mettre à jour les indicateurs de joueur
+                this.player1Indicator.style.background = this.currentPlayer === 'player1' ? 
+                    'linear-gradient(135deg, var(--primary), var(--accent))' : 
+                    'linear-gradient(135deg, var(--secondary), var(--dark))';
+                this.player2Indicator.style.background = this.currentPlayer === 'player2' ? 
+                    'linear-gradient(135deg, var(--primary), var(--accent))' : 
+                    'linear-gradient(135deg, var(--secondary), var(--dark))';
                 
                 // Mettre à jour les statistiques
                 this.gamesPlayed.textContent = this.gameStats.gamesPlayed;
-                this.playerAccuracy.textContent = this.getPlayerAccuracy() + '%';
-                this.aiAccuracy.textContent = this.getAiAccuracy() + '%';
-                this.totalHits.textContent = this.gameStats.playerHits + this.gameStats.aiHits;
+                this.player1Accuracy.textContent = this.getPlayerAccuracy('player1') + '%';
+                this.player2Accuracy.textContent = this.getPlayerAccuracy('player2') + '%';
+                this.totalHits.textContent = this.gameStats.player1Hits + this.gameStats.player2Hits;
             }
             
             getShipName(size) {
@@ -946,47 +1075,58 @@
             }
             
             newGame() {
-                this.playerBoard = this.createEmptyBoard();
-                this.aiBoard = this.createEmptyBoard();
-                this.aiShips = [];
+                this.player1Board = this.createEmptyBoard();
+                this.player2Board = this.createEmptyBoard();
+                this.player1Ships = [];
+                this.player2Ships = [];
                 this.gamePhase = 'placement';
-                this.currentPlayer = 'player';
-                this.shipsPlaced = 0;
-                this.startBattleBtn.disabled = true;
+                this.currentPlayer = 'player1';
+                this.shipsPlaced = { player1: 0, player2: 0 };
+                
+                // Réinitialiser l'orientation
+                this.selectedOrientation = 'horizontal';
+                this.orientationHorizontal.classList.add('active');
+                this.orientationVertical.classList.remove('active');
+                
+                // Supprimer la prévisualisation
+                this.hideShipPreview('player1');
+                this.hideShipPreview('player2');
                 
                 this.renderBoards();
                 this.updateDisplay();
-                this.showMessage('Nouvelle partie ! Placez vos bateaux', 'info');
-            }
-            
-            toggleShowShips() {
-                this.showAiShips = !this.showAiShips;
-                this.showShipsBtn.textContent = this.showAiShips ? 'Cacher Bateaux IA' : 'Voir Bateaux IA';
-                this.renderBoards();
-                this.showMessage(this.showAiShips ? 'Bateaux IA visibles' : 'Bateaux IA cachés', 'info');
+                this.showMessage('Nouvelle partie ! Joueur 1, placez vos bateaux', 'info');
             }
             
             resetScore() {
-                this.scores = { player: 0, ai: 0 };
+                this.scores = { player1: 0, player2: 0 };
                 this.gameStats = {
-                    playerHits: 0,
-                    playerMisses: 0,
-                    aiHits: 0,
-                    aiMisses: 0,
+                    player1Hits: 0,
+                    player1Misses: 0,
+                    player2Hits: 0,
+                    player2Misses: 0,
                     gamesPlayed: 0
                 };
                 this.updateDisplay();
                 this.showMessage('Score et statistiques réinitialisés', 'info');
             }
             
-            getPlayerAccuracy() {
-                const totalShots = this.gameStats.playerHits + this.gameStats.playerMisses;
-                return totalShots > 0 ? Math.round((this.gameStats.playerHits / totalShots) * 100) : 0;
+            getPlayerAccuracy(player) {
+                const hits = this.gameStats[`${player}Hits`];
+                const misses = this.gameStats[`${player}Misses`];
+                const totalShots = hits + misses;
+                return totalShots > 0 ? Math.round((hits / totalShots) * 100) : 0;
             }
             
-            getAiAccuracy() {
-                const totalShots = this.gameStats.aiHits + this.gameStats.aiMisses;
-                return totalShots > 0 ? Math.round((this.gameStats.aiHits / totalShots) * 100) : 0;
+            isValidPosition(row, col) {
+                return row >= 0 && row < this.boardSize && col >= 0 && col < this.boardSize;
+            }
+            
+            showReplayPrompt() {
+                setTimeout(() => {
+                    if (confirm('Voulez-vous rejouer une partie ?')) {
+                        this.newGame();
+                    }
+                }, 2000);
             }
         }
         

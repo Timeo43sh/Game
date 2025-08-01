@@ -617,23 +617,29 @@
                 
                 switch (e.key) {
                     case 'ArrowLeft':
+                        e.preventDefault();
                         movePiece(-1, 0);
                         break;
                     case 'ArrowRight':
+                        e.preventDefault();
                         movePiece(1, 0);
                         break;
                     case 'ArrowDown':
+                        e.preventDefault();
                         movePiece(0, 1);
                         dropCounter = 0;
                         break;
                     case 'ArrowUp':
+                        e.preventDefault();
                         rotatePiece();
                         break;
                     case ' ':
+                        e.preventDefault();
                         hardDrop();
                         break;
                     case 'p':
                     case 'P':
+                        e.preventDefault();
                         togglePause();
                         break;
                 }

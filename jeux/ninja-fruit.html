@@ -540,10 +540,12 @@
             timeLeft = level.time;
             timeElement.textContent = `Temps: ${timeLeft}`;
             
-            // Afficher l'écran du niveau
-            levelTitle.textContent = `Niveau ${level.number}`;
-            levelObjective.textContent = level.description;
-            levelScreen.style.display = 'flex';
+            // Afficher l'écran du niveau seulement si c'est le premier niveau
+            if (levelIndex === 0) {
+                levelTitle.textContent = `Niveau ${level.number}`;
+                levelObjective.textContent = level.description;
+                levelScreen.style.display = 'flex';
+            }
         }
         
         // Démarrer le niveau
@@ -570,6 +572,11 @@
             isGameRunning = true;
             spawnInterval = setInterval(spawnFruit, level.spawnRate);
             gameInterval = setInterval(updateGame, 1000);
+            
+            // Masquer l'épée au début
+            swordElement.style.display = 'none';
+            
+            console.log(`Démarrage du niveau ${currentLevel + 1}`); // Debug
         }
         
         // Nettoyer les fruits actifs
@@ -589,6 +596,9 @@
             clearInterval(gameInterval);
             clearTimeout(comboTimeout);
             
+            // Masquer l'épée
+            swordElement.style.display = 'none';
+            
             // Afficher l'écran de fin
             finalScoreElement.textContent = `Score: ${score}`;
             gameOverScreen.style.display = 'flex';
@@ -596,26 +606,51 @@
         
         // Terminer le niveau (succès)
         function completeLevel() {
+            if (!isGameRunning) return; // Éviter les appels multiples
+            
             isGameRunning = false;
             clearInterval(spawnInterval);
             clearInterval(gameInterval);
             clearTimeout(comboTimeout);
             
+            console.log(`Niveau ${currentLevel + 1} terminé`); // Debug
+            
             // Afficher l'écran de niveau réussi
             document.querySelector('#level-complete #final-score').textContent = `Score: ${score}`;
             levelCompleteScreen.style.display = 'flex';
+            
+            // Réinitialiser le bouton pour le niveau suivant
+            nextLevelButton.textContent = "Niveau Suivant";
+            nextLevelButton.onclick = nextLevel;
+            
+            // Lancer automatiquement le niveau suivant après 2 secondes
+            setTimeout(() => {
+                if (currentLevel < levels.length - 1) {
+                    console.log(`Passage au niveau ${currentLevel + 2}`); // Debug
+                    levelCompleteScreen.style.display = 'none';
+                    initLevel(currentLevel + 1);
+                    setTimeout(() => {
+                        startLevel();
+                    }, 1000);
+                }
+            }, 2000);
         }
         
         // Passer au niveau suivant
         function nextLevel() {
             if (currentLevel < levels.length - 1) {
+                levelCompleteScreen.style.display = 'none';
                 initLevel(currentLevel + 1);
+                setTimeout(() => {
+                    startLevel();
+                }, 1000);
             } else {
                 // Tous les niveaux sont terminés
                 levelCompleteText.textContent = "Félicitations !";
                 document.querySelector('#level-complete #final-score').textContent = "Vous avez terminé tous les niveaux !";
                 nextLevelButton.textContent = "Rejouer";
                 nextLevelButton.onclick = () => {
+                    levelCompleteScreen.style.display = 'none';
                     initLevel(0);
                 };
                 levelCompleteScreen.style.display = 'flex';
@@ -624,6 +659,8 @@
         
         // Mettre à jour le jeu
         function updateGame() {
+            if (!isGameRunning) return; // Éviter les mises à jour après fin de partie
+            
             timeLeft--;
             timeElement.textContent = `Temps: ${timeLeft}`;
             
@@ -633,6 +670,7 @@
                 } else {
                     endGame();
                 }
+                return;
             }
             
             // Vérifier si l'objectif est atteint
@@ -696,14 +734,16 @@
                     this.element.style.left = `${positionX}px`;
                     this.element.style.transform = `rotate(${angle}deg)`;
                     
-                    // Si le fruit sort de l'écran, le supprimer
-                    if (positionY > window.innerHeight) {
-                        cancelAnimationFrame(this.animationId);
-                        gameContainer.removeChild(this.element);
-                        activeFruits = activeFruits.filter(f => f !== this);
-                    } else {
-                        this.animationId = requestAnimationFrame(this.update.bind(this));
-                    }
+                                // Si le fruit sort de l'écran, le supprimer
+            if (positionY > window.innerHeight) {
+                cancelAnimationFrame(this.animationId);
+                if (this.element && this.element.parentNode) {
+                    gameContainer.removeChild(this.element);
+                }
+                activeFruits = activeFruits.filter(f => f !== this);
+            } else {
+                this.animationId = requestAnimationFrame(this.update.bind(this));
+            }
                 }
             };
             
