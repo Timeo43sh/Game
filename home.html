@@ -207,7 +207,7 @@
             </div>
             
             <!-- Carte Bataille Navale -->
-            <div class="game-card" onclick="window.location.href='jeux/bataille-navale.html'">
+            <div class="game-card" onclick="checkNavalPassword()">
                 <div class="game-card-image" style="background-image: url('image/naval.png'); background-size: cover; background-position: center;">
                     <div class="game-card-overlay">
                         <button class="play-button">
@@ -297,10 +297,18 @@
         });
         
         // Fonctions pour la modal de mot de passe
+        let currentPasswordCheck = '';
+        
         function checkBananaPassword() {
+            currentPasswordCheck = 'banana';
             const modal = document.getElementById('password-modal');
             const input = document.getElementById('password-input');
             const error = document.getElementById('password-error');
+            const title = document.querySelector('.password-title');
+            const description = document.querySelector('.password-content p');
+            
+            title.textContent = 'Mot de passe requis';
+            description.textContent = 'Entrez le mot de passe pour accéder à Banana Clicker';
             
             modal.style.display = 'flex';
             input.focus();
@@ -308,14 +316,53 @@
             input.value = '';
         }
         
-        function submitPassword() {
+        function checkNavalPassword() {
+            currentPasswordCheck = 'naval';
+            const modal = document.getElementById('password-modal');
+            const input = document.getElementById('password-input');
+            const error = document.getElementById('password-error');
+            const title = document.querySelector('.password-title');
+            const description = document.querySelector('.password-content p');
+            
+            title.textContent = 'Mot de passe requis';
+            description.textContent = 'Entrez le mot de passe pour accéder à la Bataille Navale';
+            
+            modal.style.display = 'flex';
+            input.focus();
+            error.style.display = 'none';
+            input.value = '';
+        }
+        
+        // Fonction pour hasher le mot de passe
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+        
+        async function submitPassword() {
             const input = document.getElementById('password-input');
             const error = document.getElementById('password-error');
             const modal = document.getElementById('password-modal');
             
-            if (input.value === 'BtsSio1') {
+            const inputHash = await hashPassword(input.value);
+            let correctPasswordHash = '';
+            let redirectUrl = '';
+            
+            if (currentPasswordCheck === 'banana') {
+                correctPasswordHash = 'f9e574b16bebc8e1271722d4b86d70ee431ab2653e68bf76d8af7a45c0a7fb4a'; /
+                redirectUrl = 'jeux/banana-clicker.html';
+            } else if (currentPasswordCheck === 'naval') {
+                correctPasswordHash = 'f9e574b16bebc8e1271722d4b86d70ee431ab2653e68bf76d8af7a45c0a7fb4a'; 
+                redirectUrl = 'jeux/bataille-navale.html';
+            }
+            
+            if (inputHash === correctPasswordHash) {
                 modal.style.display = 'none';
-                window.location.href = 'jeux/banana-clicker.html';
+                window.location.href = redirectUrl;
             } else {
                 error.style.display = 'block';
                 input.value = '';
